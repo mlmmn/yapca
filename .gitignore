@@ -1,6 +1,12 @@
-.claude/.10x-cli-manifest.json
-.claude/skills/10x-*
+.agents/.10x-cli-manifest.json
+.agents/skills/10x-*
+.agents/prompts
+.cursor/rules
+.cursor/skills
 .claude/prompts
+.claude/commands
+.claude/rules
+.claude/skills
 
 # from 10x-astro-starter
 dist/

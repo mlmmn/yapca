@@ -10,7 +10,8 @@
     "astro": "astro",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --max-warnings=0 --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "sync-agents": "./scripts/sync-agents.sh"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
