@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-19T00:00:00.000Z",
+  "title": "Design System: YAPCA",
+  "extensions": {
+    "colorMeta": {
+      "canopy": {
+        "role": "primary",
+        "displayName": "Canopy Green",
+        "canonical": "oklch(0.508 0.118 165.612)",
+        "tonalRamp": [
+          "oklch(0.24 0.08 165)",
+          "oklch(0.32 0.1 165)",
+          "oklch(0.4 0.115 165)",
+          "oklch(0.508 0.118 165)",
+          "oklch(0.6 0.11 165)",
+          "oklch(0.72 0.09 165)",
+          "oklch(0.86 0.05 165)",
+          "oklch(0.96 0.02 165)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.148 0.004 165)",
+        "tonalRamp": [
+          "oklch(0.148 0.004 165)",
+          "oklch(0.25 0.006 165)",
+          "oklch(0.38 0.01 165)",
+          "oklch(0.5 0.021 165)",
+          "oklch(0.63 0.015 165)",
+          "oklch(0.8 0.008 165)",
+          "oklch(0.925 0.005 165)",
+          "oklch(0.99 0.002 165)"
+        ]
+      },
+      "overdue-accent": {
+        "role": "warning",
+        "displayName": "Overdue Amber",
+        "canonical": "oklch(0.62 0.16 70)",
+        "tonalRamp": [
+          "oklch(0.3 0.08 75)",
+          "oklch(0.4 0.11 70)",
+          "oklch(0.5 0.14 72)",
+          "oklch(0.62 0.16 70)",
+          "oklch(0.72 0.15 75)",
+          "oklch(0.82 0.12 80)",
+          "oklch(0.9 0.09 85)",
+          "oklch(0.96 0.04 88)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The one big heading/number per screen — 'Today', the count of what's due." },
+      "title": { "displayName": "Title", "purpose": "Plant name in a task row and card headers." },
+      "body": { "displayName": "Body", "purpose": "Reading text, capped at 65–75ch." },
+      "label": { "displayName": "Label", "purpose": "Buttons, metadata, interval chips, journal timestamps. Sentence case." }
+    },
+    "shadows": [
+      { "name": "float", "value": "0 4px 16px oklch(0.148 0.004 165 / 0.10)", "purpose": "Only for genuinely floating, dismissible surfaces — dropdowns, pickers, the undo toast. Never on resting rows or cards." }
+    ],
+    "motion": [
+      { "name": "ease-out-quart", "value": "cubic-bezier(0.25, 1, 0.5, 1)", "purpose": "Default easing for state transitions and row exit." },
+      { "name": "duration-state", "value": "180ms", "purpose": "Most hover/focus/state transitions. Users are in flow — no choreography." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The affirmative act of care — 'Watered'. Canopy green fill.",
+      "html": "<button class=\"ds-btn-primary\">Watered</button>",
+      "css": ".ds-btn-primary { font-family: 'Figtree Variable', sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--color-primary-foreground, oklch(0.979 0.021 166)); background: var(--color-primary, oklch(0.508 0.118 165.6)); border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; transition: background 180ms cubic-bezier(0.25,1,0.5,1); } .ds-btn-primary:hover { background: oklch(0.46 0.118 165.6); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-ring, oklch(0.55 0.11 165)); outline-offset: 2px; } .ds-btn-primary:active { background: oklch(0.42 0.115 165.6); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action — 'Postpone 2 days'. Transparent with a hairline.",
+      "html": "<button class=\"ds-btn-ghost\">Postpone 2 days</button>",
+      "css": ".ds-btn-ghost { font-family: 'Figtree Variable', sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--color-foreground, oklch(0.148 0.004 165)); background: transparent; border: 1px solid var(--color-border, oklch(0.925 0.005 165)); border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; transition: background 180ms cubic-bezier(0.25,1,0.5,1); } .ds-btn-ghost:hover { background: var(--color-muted, oklch(0.963 0.002 165)); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--color-ring, oklch(0.55 0.11 165)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Paper field with hairline border and a green focus ring.",
+      "html": "<input class=\"ds-input\" placeholder=\"Plant name\" />",
+      "css": ".ds-input { font-family: 'Figtree Variable', sans-serif; font-size: 1rem; color: var(--color-foreground, oklch(0.148 0.004 165)); background: var(--color-background, oklch(1 0 0)); border: 1px solid var(--color-border, oklch(0.925 0.005 165)); border-radius: 0.5rem; padding: 0.5rem 0.75rem; width: 240px; } .ds-input::placeholder { color: var(--color-muted-foreground, oklch(0.5 0.021 165)); } .ds-input:focus-visible { outline: none; border-color: var(--color-ring, oklch(0.55 0.11 165)); box-shadow: 0 0 0 3px oklch(0.55 0.11 165 / 0.25); }"
+    },
+    {
+      "name": "Task Row",
+      "kind": "card",
+      "refersTo": "task-row",
+      "description": "The heart of the daily list — flat row with plant name, metadata, and the two actions.",
+      "html": "<div class=\"ds-task-row\"><div class=\"ds-task-main\"><span class=\"ds-task-name\">Monstera deliciosa</span><span class=\"ds-task-meta\">Every 5 days · last watered Jul 14</span></div><div class=\"ds-task-actions\"><button class=\"ds-btn-primary\">Watered</button></div></div>",
+      "css": ".ds-task-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: var(--color-background, oklch(1 0 0)); border: 1px solid var(--color-border, oklch(0.925 0.005 165)); border-radius: 0.625rem; padding: 0.875rem 1rem; } .ds-task-main { display: flex; flex-direction: column; gap: 0.125rem; } .ds-task-name { font-family: 'Figtree Variable', sans-serif; font-size: 1.125rem; font-weight: 600; color: var(--color-foreground, oklch(0.148 0.004 165)); } .ds-task-meta { font-family: 'Figtree Variable', sans-serif; font-size: 0.8125rem; color: var(--color-muted-foreground, oklch(0.5 0.021 165)); } .ds-task-actions { display: flex; gap: 0.5rem; } .ds-btn-primary { font-family: 'Figtree Variable', sans-serif; font-size: 0.8125rem; font-weight: 500; color: oklch(0.979 0.021 166); background: var(--color-primary, oklch(0.508 0.118 165.6)); border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; }"
+    },
+    {
+      "name": "Overdue Task Row",
+      "kind": "card",
+      "refersTo": "task-row",
+      "description": "Overdue variant — leading amber marker, 'Overdue' label, and amber-tinted surface. Icon + label + color, never color alone.",
+      "html": "<div class=\"ds-task-row ds-overdue\"><span class=\"ds-overdue-marker\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"><path d=\"M8 1.5 15 14H1L8 1.5Z\"/><path d=\"M8 6.5v3.5\"/><circle cx=\"8\" cy=\"12\" r=\"0.4\" fill=\"currentColor\"/></svg></span><div class=\"ds-task-main\"><span class=\"ds-task-name\">Calathea orbifolia</span><span class=\"ds-overdue-label\">Overdue · due Jul 16</span></div></div>",
+      "css": ".ds-task-row { display: flex; align-items: center; gap: 0.75rem; border: 1px solid var(--color-border, oklch(0.925 0.005 165)); border-radius: 0.625rem; padding: 0.875rem 1rem; } .ds-overdue { background: var(--color-warning, oklch(0.92 0.1 88)); border-color: oklch(0.85 0.11 82); } .ds-overdue-marker { color: var(--color-warning-foreground, oklch(0.4 0.11 62)); display: flex; } .ds-task-main { display: flex; flex-direction: column; gap: 0.125rem; } .ds-task-name { font-family: 'Figtree Variable', sans-serif; font-size: 1.125rem; font-weight: 600; color: var(--color-foreground, oklch(0.148 0.004 165)); } .ds-overdue-label { font-family: 'Figtree Variable', sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--color-warning-foreground, oklch(0.4 0.11 62)); }"
+    },
+    {
+      "name": "Overdue Badge",
+      "kind": "chip",
+      "refersTo": "overdue-badge",
+      "description": "Compact inline amber urgency cue with a warning glyph.",
+      "html": "<span class=\"ds-overdue-badge\"><svg viewBox=\"0 0 16 16\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M8 1.5 15 14H1L8 1.5Z\"/><path d=\"M8 6.5v3.5\"/><circle cx=\"8\" cy=\"12\" r=\"0.4\" fill=\"currentColor\"/></svg>Overdue</span>",
+      "css": ".ds-overdue-badge { display: inline-flex; align-items: center; gap: 0.25rem; font-family: 'Figtree Variable', sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--color-warning-foreground, oklch(0.4 0.11 62)); background: var(--color-warning, oklch(0.92 0.1 88)); border-radius: 0.375rem; padding: 0.125rem 0.5rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Field Notebook",
+    "overview": "YAPCA is a naturalist's seasonal record, not a garden-app toy. The whole system is written against the idea of a well-kept field notebook: precise, observational, quietly authoritative — a place where a careful person records what is living, what needs tending, and what was done. Life and season arrive through green as accent, through rhythm and legibility, never through illustration. The interface is mostly clean paper and confident ink; the canopy green appears exactly where the eye should go. Density is calm and generous — sessions are short and frequent, so the primary screen answers 'what today, and what did I miss?' in a single glance and then gets out of the way.",
+    "keyCharacteristics": [
+      "Editorial restraint: clean paper, confident ink, green as a deliberate accent — not a wash.",
+      "Type-led hierarchy over decoration; one family (Figtree) does all the work.",
+      "Urgency is unmissable but calm — the alarm is on the task, never on the whole app.",
+      "Deterministic and honest: the UI shows exact interval arithmetic, never a fuzzy 'soon.'",
+      "Botanical through color and rhythm, never through illustration."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Canopy green is the only saturated color on a normal screen, and it appears on ≤10% of it — primary action, selection, focus, living accent. If green is spreading into backgrounds or decoration, it has stopped being a voice and become noise.", "section": "colors" },
+      { "name": "The Amber-Not-Red Rule", "body": "Overdue is amber; destruction is red. An overdue task is a nudge, not a failure — never dress it in destructive red, and never let red and amber appear as if they mean the same thing.", "section": "colors" },
+      { "name": "The One Family Rule", "body": "Figtree does everything. Reaching for a second font is forbidden; hierarchy is weight and size, not typeface. A display font in a button or a data label is a defect.", "section": "typography" },
+      { "name": "The Sentence-Case Rule", "body": "Labels and buttons are sentence case. No tiny tracked-uppercase eyebrows — that scaffold is the SaaS-template tell, and it is banned here.", "section": "typography" },
+      { "name": "The Flat-Paper Rule", "body": "Task rows, cards, and panels are flat at rest — separated by tone and hairline, never by shadow. Shadow is a state (floating), not a style.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep canopy green to ≤10% of any screen — primary action, selection, focus, living accent. Its rarity is the point.",
+      "Do convey overdue with icon and label and amber together, so it survives color blindness and never depends on color alone.",
+      "Do use amber for urgency and red only for irreversible damage — keep the two meanings visually distinct.",
+      "Do darken secondary text to muted-ink (oklch(0.5 …)); verify any text on a tinted surface clears 4.5:1 before shipping.",
+      "Do carry hierarchy with Figtree weight and size alone.",
+      "Do keep surfaces flat at rest; reserve shadow for genuinely floating elements.",
+      "Do give every action a one-tap undo and pair it with the journal — fast, confident tapping is only safe because it is reversible."
+    ],
+    "donts": [
+      "Don't build a gamified consumer app: no streaks, XP, mascots, confetti, or badge-collecting.",
+      "Don't use skeuomorphic nature kitsch — no wood textures, watercolor leaves, terracotta/soil illustrations, or hand-drawn botanical clip-art.",
+      "Don't ship the generic SaaS-cream template: no warm off-white body, no tiny tracked-uppercase eyebrows, no identical icon-card grids.",
+      "Don't put muted-ink body text on the muted surface below 4.5:1, and never use a lighter gray 'for elegance.'",
+      "Don't round 'next due' into a vague 'soon' — show the exact date/interval.",
+      "Don't dress overdue in destructive red, and don't let green spread into decorative backgrounds.",
+      "Don't introduce a second font family or a display face in buttons, labels, or data.",
+      "Don't put a resting drop shadow on task rows, cards, or panels."
+    ]
+  }
+}

@@ -34,3 +34,11 @@ Local setup, env vars, and the "disable Confirm email" step live in `@README.md`
 - **API routes**: uppercase `GET`/`POST` exports; validate input with zod.
 - **Migrations**: `supabase/migrations/`, named `YYYYMMDDHHmmss_short_description.sql`. _(RLS requirement in Hard rules.)_
 - **React hooks** → `src/components/hooks/`. **Services/helpers** → `src/lib/` (or `src/lib/services/`). **Shared types** (entities, DTOs) → `src/types.ts`.
+
+## Design Context
+
+Full strategic design brief is in `@PRODUCT.md` (visual system spec in `DESIGN.md`). Read it before building UI. In short:
+
+- **Register**: product (design serves the task) · **Platform**: web · **A11y**: WCAG 2.2 AA plus extra care (overdue cue never color-alone; reduced-motion first-class).
+- **Personality**: alive & botanical with editorial restraint — a quiet tool for tending something living and seasonal; life carried through color, spacing, and rhythm, not illustration.
+- **NOT**: gamified consumer app (streaks/XP/confetti), skeuomorphic nature kitsch (wood/watercolor/leaf clip-art), or generic SaaS-cream template (warm off-white bg, tracked-uppercase eyebrows, identical icon-card grids).
