@@ -9,6 +9,7 @@ type Props = {
   required?: boolean;
   minlength?: number;
   describedById?: string;
+  autofocus?: boolean;
 };
 
 const { name, type, label, autocomplete, required = true, minlength, describedById } = Astro.props;
@@ -20,6 +21,7 @@ const { name, type, label, autocomplete, required = true, minlength, describedBy
   </label>
   <input
     id={name}
+    name={name}
     type={type}
     autocomplete={autocomplete}
     required={required}

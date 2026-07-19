@@ -1,0 +1,55 @@
+---
+import { mapAuthError } from "@/lib/auth-errors";
+import { buttonVariants } from "@/components/ui/button";
+import AuthLayout from "@/layouts/auth-layout.astro";
+import AuthField from "@/components/auth-field.astro";
+import AuthErrorBanner from "@/components/auth-error-banner.astro";
+
+const error = Astro.url.searchParams.get("error");
+const mappedError = mapAuthError(error);
+---
+
+<AuthLayout title="Sign in">
+  <div>
+    {mappedError && <AuthErrorBanner message={mappedError} />}
+    <form method="post" action="/api/auth/signin" class="space-y-4">
+      {/* eslint-disable-next-line astro/jsx-a11y/no-autofocus */}
+      <AuthField name="email" type="email" label="Email" autocomplete="email" autofocus required />
+      <AuthField name="password" type="password" label="Password" autocomplete="current-password" required />
+      <button type="submit" class:list={buttonVariants({ variant: "default" })} id="submit-button"> Sign in </button>
+    </form>
+  </div>
+  <div class="mt-6 text-center text-sm" slot="footer">
+    New here? <a href="/auth/signup" class="text-primary hover:underline"> Create an account </a>
+  </div>
+</AuthLayout>
+
+<script>
+  const form = document.querySelector("form");
+  const submitButton = document.getElementById("submit-button") as HTMLButtonElement | null;
+
+  if (form && submitButton) {
+    form.addEventListener("submit", () => {
+      submitButton.disabled = true;
+
+      const originalText = submitButton.textContent;
+
+      const supportsReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (supportsReducedMotion) {
+        submitButton.textContent = "Signing in…";
+      } else {
+        submitButton.innerHTML =
+          '<svg class="inline-block h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Signing in…';
+      }
+    });
+  }
+</script>
+
+<style is:global>
+  @media (prefers-reduced-motion: reduce) {
+    svg {
+      animation: none !important;
+    }
+  }
+</style>

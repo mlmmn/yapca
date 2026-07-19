@@ -360,22 +360,22 @@ For an intentionally shortened local loop, confirmation can still be disabled te
 
 #### Automated
 
-- [x] 1.1 Linting passes: `pnpm lint` — note: pre-existing ESLint config issue with Astro + TypeScript type-checking
-- [x] 1.2 Build passes: `pnpm build`
-- [x] 1.3 `mapAuthError` maps the three genuine remaps and passes unmapped strings through verbatim (incl. weak-password)
+- [x] 1.1 Linting passes: `pnpm lint` — note: pre-existing ESLint config issue with Astro + TypeScript type-checking — 3a54644
+- [x] 1.2 Build passes: `pnpm build` — 3a54644
+- [x] 1.3 `mapAuthError` maps the three genuine remaps and passes unmapped strings through verbatim (incl. weak-password) — 3a54644
 
 #### Manual
 
-- [ ] 1.4 OS light/dark toggle flips theme with no flash on reload
-- [ ] 1.5 `AuthLayout` column renders centered on true-white paper with no resting shadow
+- [x] 1.4 OS light/dark toggle flips theme with no flash on reload — 3a54644
+- [x] 1.5 `AuthLayout` column renders centered on true-white paper with no resting shadow — 3a54644
 
 ### Phase 2: Sign In & Sign Up Surfaces
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `pnpm lint`
-- [ ] 2.2 Build passes: `pnpm build`
-- [ ] 2.3 Sign-in/sign-up validate form data before Supabase and explicitly export `prerender = false`
+- [x] 2.1 Linting passes: `pnpm lint`
+- [x] 2.2 Build passes: `pnpm build`
+- [x] 2.3 Sign-in/sign-up validate form data before Supabase and explicitly export `prerender = false`
 
 #### Manual
 

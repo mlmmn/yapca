@@ -8,7 +8,7 @@ YAPCA (Yet Another Plant Care App): Astro 6 SSR app, React 19 islands, Tailwind 
 - **Always enable RLS on new tables**, with granular per-operation, per-role policies.
 - **API routes must `export const prerender = false`** (full SSR — `output: "server"`).
 - **Never create a git branch unless explicitly asked to.**
-- **Filenames use kebab-case** — all new Astro components, pages, and utilities follow kebab-case naming (e.g. `auth-field.astro`, `confirm-email.astro`, not `AuthField.astro`).
+- **All filenames use kebab-case** — every module (Astro, React, TypeScript, etc.) follows kebab-case naming regardless of extension (e.g. `auth-field.astro`, `confirm-email.astro`, `auth-errors.ts`, not `AuthField.astro` or `authErrors.ts`).
 - **Never modify global eslint or prettier config** — unless explicitly asked. Report config issues instead of fixing them unilaterally.
 
 ## Commands
