@@ -357,9 +357,9 @@ Greenfield data layer — `supabase/migrations/` is created by this slice. `pnpx
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm exec astro check`
-- [x] 2.2 Linting passes: `pnpm lint`
-- [x] 2.3 Production build passes: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm exec astro check` — 0461b49
+- [x] 2.2 Linting passes: `pnpm lint` — 0461b49
+- [x] 2.3 Production build passes: `pnpm build` — 0461b49
 
 #### Manual
 
@@ -373,19 +373,19 @@ Greenfield data layer — `supabase/migrations/` is created by this slice. `pnpx
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm exec astro check`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Production build passes: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm exec astro check`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Production build passes: `pnpm build`
 
 #### Manual
 
-- [ ] 3.4 Valid submit creates the plant and returns to `/`
-- [ ] 3.5 Invalid input shows specific inline errors after blur and on submit
-- [ ] 3.6 First-appearance radios default to Today, update their interval label, and control today-list appearance
-- [ ] 3.7 Photo picker supports preview, removal, invalid-file recovery, and omission
-- [ ] 3.8 Saving prevents duplicates and preserves form values after recoverable failure
-- [ ] 3.9 Mobile and desktop form layouts meet navigation, focus, and 44px-target requirements
-- [ ] 3.10 CSS-only system theme verified across authenticated and authentication surfaces
+- [x] 3.4 Valid submit creates the plant and returns to `/`
+- [x] 3.5 Invalid input shows specific inline errors after blur and on submit
+- [x] 3.6 First-appearance radios default to Today, update their interval label, and control today-list appearance
+- [x] 3.7 Photo picker supports preview, removal, invalid-file recovery, and omission
+- [x] 3.8 Saving prevents duplicates and preserves form values after recoverable failure
+- [x] 3.9 Mobile and desktop form layouts meet navigation, focus, and 44px-target requirements
+- [x] 3.10 CSS-only system theme verified across authenticated and authentication surfaces
 
 ### Phase 4: Today's-list island + optimistic Mark Watered
 

@@ -69,6 +69,7 @@ export const server = {
         if (photo_path) {
           const { error: cleanupError } = await supabase.storage.from("plant-photos").remove([photo_path]);
           if (cleanupError) {
+            // eslint-disable-next-line no-console -- best-effort cleanup failure must not mask the original insert error
             console.error("Failed to clean up uploaded photo after insert failure:", cleanupError);
           }
         }
