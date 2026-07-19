@@ -33,13 +33,21 @@ SUPABASE_KEY=<anon key from CLI output>
 
 For a hosted project instead, use its Project URL and `anon` public key (dashboard → Settings → API).
 
-To sign in immediately after sign-up during local dev, disable email confirmation in Studio (`http://localhost:54323`) → **Authentication → Email → Confirm email**.
+Email confirmation is enabled by default locally (production-parity). Confirmation links redirect to `/auth/signin`. To sign in immediately after sign-up during local dev, disable email confirmation temporarily in Studio (`http://localhost:54323`) → **Authentication → Email → Confirm email** (remember to restore it before Phase 3 verification).
 
 ```bash
 pnpm dev
 ```
 
 Auth uses Supabase's built-in `auth.users`. Application tables (plants, tasks) live in `supabase/migrations/`.
+
+### Hosted Supabase Setup
+
+For a hosted Supabase project:
+
+1. In the Supabase dashboard, navigate to **Authentication → Email → Confirm email** and enable it.
+2. Set the **Site URL** to your deployed origin with the path `/auth/signin`, e.g., `https://yapca.mlmmn.workers.dev/auth/signin`.
+3. Verify the **Confirm signup template** retains the default `{{ .ConfirmationURL }}` link (no edits needed).
 
 ## Scripts
 

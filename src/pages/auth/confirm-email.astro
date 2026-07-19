@@ -1,0 +1,72 @@
+---
+import { z } from "astro/zod";
+import { mapAuthError } from "@/lib/auth-errors";
+import { buttonVariants } from "@/components/ui/button";
+import AuthLayout from "@/layouts/auth-layout.astro";
+import AuthErrorBanner from "@/components/auth-error-banner.astro";
+
+const emailSchema = z.object({
+  email: z.email("Email must be a valid email address"),
+});
+
+const email = Astro.url.searchParams.get("email");
+const error = Astro.url.searchParams.get("error");
+const resent = Astro.url.searchParams.get("resent");
+
+const mappedError = mapAuthError(error);
+
+const validation = emailSchema.safeParse({ email });
+const isValidEmail = validation.success;
+---
+
+<AuthLayout title="Confirm your email">
+  <div>
+    {mappedError && <AuthErrorBanner message={mappedError} />}
+
+    {
+      resent === "1" && (
+        <div class="border-primary/20 bg-primary/5 mb-6 rounded-md border px-4 py-3">
+          <p class="text-foreground text-sm">Confirmation email sent. Check your inbox.</p>
+        </div>
+      )
+    }
+
+    {
+      isValidEmail ? (
+        <>
+          <div class="mb-8 text-center">
+            <h1 class="text-foreground mb-4 text-lg font-medium">Check your inbox</h1>
+            <p class="text-muted-foreground mb-4 text-sm">
+              We sent a confirmation link to <span class="text-foreground font-medium">{email}</span>
+            </p>
+            <p class="text-muted-foreground text-sm">Click the link to verify your email address.</p>
+          </div>
+
+          <form method="post" action="/api/auth/resend" class="mb-6">
+            <input type="hidden" name="email" value={email} />
+            <button type="submit" class:list={buttonVariants({ variant: "secondary" })}>
+              Resend confirmation
+            </button>
+          </form>
+        </>
+      ) : (
+        <>
+          <div class="mb-8 text-center">
+            <h1 class="text-foreground mb-4 text-lg font-medium">Create your account</h1>
+            <p class="text-muted-foreground mb-4 text-sm">
+              We need a valid email address to send you a confirmation link.
+            </p>
+          </div>
+
+          <a href="/auth/signup" class:list={buttonVariants({ variant: "default" })}>
+            Create an account
+          </a>
+        </>
+      )
+    }
+  </div>
+
+  <div class="mt-6 text-center text-sm" slot="footer">
+    <a href="/auth/signin" class="text-primary hover:underline">Back to sign in</a>
+  </div>
+</AuthLayout>

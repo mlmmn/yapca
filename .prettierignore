@@ -1,1 +1,5 @@
+.agents
 .claude
+.impeccable
+**/*.md
+pnpm-lock.yaml
