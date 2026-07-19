@@ -379,10 +379,10 @@ For an intentionally shortened local loop, confirmation can still be disabled te
 
 #### Manual
 
-- [ ] 2.4 Bad credentials show the mapped banner with icon, not the raw Supabase string
-- [ ] 2.5 With JS disabled, both forms submit and round-trip errors
-- [ ] 2.6 With JS enabled, submit disables + shows submitting state; reduced-motion is static
-- [ ] 2.7 Keyboard: tab order email → password → submit, Enter submits, focus-green ring visible
+- [x] 2.4 Bad credentials show the mapped banner with icon, not the raw Supabase string — 8c1ab2e
+- [x] 2.5 With JS disabled, both forms submit and round-trip errors — 8c1ab2e
+- [x] 2.6 With JS enabled, submit disables + shows submitting state; reduced-motion is static — 8c1ab2e
+- [x] 2.7 Keyboard: tab order email → password → submit, Enter submits, focus-green ring visible — 8c1ab2e
 
 ### Phase 3: Confirm-Email & Resend
 
@@ -396,23 +396,23 @@ For an intentionally shortened local loop, confirmation can still be disabled te
 
 #### Manual
 
-- [ ] 3.6 Sign-up lands on `/auth/confirm-email` showing the entered address
-- [ ] 3.7 Resend re-sends (new mail in inbucket) and page shows resent confirmation
-- [ ] 3.8 Confirmation link verifies the account, lands on `/auth/signin`, and permits sign-in; repeat with a resent link
-- [ ] 3.9 Missing/invalid confirm-email address shows no Resend action and offers Create account
-- [ ] 3.10 Back-to-sign-in link works
+- [x] 3.6 Sign-up lands on `/auth/confirm-email` showing the entered address — 8b7c745
+- [x] 3.7 Resend re-sends (new mail in inbucket) and page shows resent confirmation — 8b7c745
+- [x] 3.8 Confirmation link verifies the account, lands on `/auth/signin`, and permits sign-in; repeat with a resent link — 8b7c745
+- [x] 3.9 Missing/invalid confirm-email address shows no Resend action and offers Create account — 8b7c745
+- [x] 3.10 Back-to-sign-in link works — 8b7c745
 
 ### Phase 4: Root Branching, Authed Shell & Gating
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `pnpm lint`
-- [ ] 4.2 Build passes: `pnpm build`
-- [ ] 4.3 Signout exports `prerender = false`; every `/api/auth/*` route has the required SSR marker
+- [x] 4.1 Linting passes: `pnpm lint`
+- [x] 4.2 Build passes: `pnpm build`
+- [x] 4.3 Signout exports `prerender = false`; every `/api/auth/*` route has the required SSR marker
 
 #### Manual
 
-- [ ] 4.4 Signed-out `/` shows entry with both CTAs; signed-in `/` shows top bar + Sign out + placeholder
-- [ ] 4.5 Sign out returns to the signed-out entry
-- [ ] 4.6 Signed-in visit to `/auth/*` redirects to `/`
-- [ ] 4.7 Full loop works end-to-end: sign up → confirm → sign in → shell → sign out
+- [x] 4.4 Signed-out `/` shows entry with both CTAs; signed-in `/` shows top bar + Sign out + placeholder
+- [x] 4.5 Sign out returns to the signed-out entry
+- [x] 4.6 Signed-in visit to `/auth/*` redirects to `/`
+- [x] 4.7 Full loop works end-to-end: sign up → confirm → sign in → shell → sign out

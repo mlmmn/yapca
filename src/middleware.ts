@@ -1,6 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { createClient } from "@/lib/supabase";
 
+// Routes that require authentication. S-01 seeds real app routes here.
 const PROTECTED_ROUTES: string[] = [];
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -19,6 +20,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (!context.locals.user) {
       return context.redirect("/auth/signin");
     }
+  }
+
+  if (context.locals.user && context.url.pathname.startsWith("/auth/")) {
+    return context.redirect("/");
   }
 
   return next();

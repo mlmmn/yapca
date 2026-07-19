@@ -1,9 +1,27 @@
 ---
-import Layout from "@/layouts/layout.astro";
+import { buttonVariants } from "@/components/ui/button";
+import AuthLayout from "@/layouts/auth-layout.astro";
+import AuthedShell from "@/components/authed-shell.astro";
 ---
 
-<Layout>
-  <main class="flex min-h-screen items-center justify-center">
-    <h1 class="text-2xl font-medium">yapca</h1>
-  </main>
-</Layout>
+{
+  Astro.locals.user ? (
+    <AuthedShell />
+  ) : (
+    <AuthLayout title="yapca">
+      <div class="space-y-6">
+        <div class="text-center">
+          <p class="text-muted-foreground mb-6 text-sm">The daily plant-care list you can actually trust.</p>
+          <div class="flex flex-col gap-3">
+            <a href="/auth/signin" class:list={buttonVariants({ variant: "default" })}>
+              Sign in
+            </a>
+            <a href="/auth/signup" class:list={buttonVariants({ variant: "secondary" })}>
+              Create account
+            </a>
+          </div>
+        </div>
+      </div>
+    </AuthLayout>
+  )
+}

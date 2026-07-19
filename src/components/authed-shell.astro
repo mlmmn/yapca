@@ -1,0 +1,24 @@
+---
+import { buttonVariants } from "@/components/ui/button";
+import Wordmark from "@/components/wordmark.astro";
+import Layout from "@/layouts/layout.astro";
+---
+
+<Layout>
+  <div class="flex min-h-screen flex-col">
+    <div class="border-border bg-background border-b px-6 py-4">
+      <div class="flex items-center justify-between">
+        <Wordmark size="sm" />
+        <form method="post" action="/api/auth/signout">
+          <button type="submit" class:list={buttonVariants({ variant: "ghost" })}> Sign out </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="flex flex-1 items-center justify-center">
+      <div class="text-muted-foreground text-center">
+        <p class="text-sm">Your daily list will appear here</p>
+      </div>
+    </div>
+  </div>
+</Layout>
