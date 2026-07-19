@@ -32,7 +32,7 @@ export const server = {
     input: z.object({
       name: z.string().min(1, "Name is required"),
       interval_days: z.coerce.number().int().min(1).max(365),
-      alreadyWatered: z.coerce.boolean(),
+      alreadyWatered: z.preprocess((v) => v === "true", z.boolean()),
       clientDate: clientDateSchema,
       photo: photoSchema.optional(),
     }),
@@ -87,12 +87,13 @@ export const server = {
       clientDate: clientDateSchema,
     }),
     handler: async (input, context) => {
-      const { supabase } = requireSession(context);
+      const { supabase, user } = requireSession(context);
 
       const { data: plant, error: selectError } = await supabase
         .from("plants")
         .select("interval_days")
         .eq("id", input.plantId)
+        .eq("user_id", user.id)
         .single();
 
       if (selectError) {
@@ -101,7 +102,11 @@ export const server = {
 
       const next_due_on = nextDue(input.clientDate, plant.interval_days);
 
-      const { error: updateError } = await supabase.from("plants").update({ next_due_on }).eq("id", input.plantId);
+      const { error: updateError } = await supabase
+        .from("plants")
+        .update({ next_due_on })
+        .eq("id", input.plantId)
+        .eq("user_id", user.id);
 
       if (updateError) {
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to mark plant watered." });

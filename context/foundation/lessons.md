@@ -1,0 +1,10 @@
+# Lessons Learned
+
+> Append-only register of recurring rules and patterns. Re-read at start by /10x-frame, /10x-research, /10x-plan, /10x-plan-review, /10x-implement, /10x-impl-review.
+
+## Extract generic helpers to src/lib, don't duplicate them in components
+
+- **Context**: Entire codebase under `src` — any module (components, actions, pages) that needs a small utility function.
+- **Problem**: Duplicated helpers — generic, state-free helper functions (date formatting, browser feature checks, etc.) get copy-pasted into multiple components instead of being shared, causing drift and duplicate bugfixes. E.g. `todayLocalDateString()` was independently defined in both `today-list.tsx` and `add-plant-form.tsx`.
+- **Rule**: When writing a helper function, check whether it is generic (no dependency on the enclosing component's state/props/closures) — if so, place it in `src/lib/` (grouped by concern, e.g. `date.ts`, `utils.ts`) instead of defining it locally, even on first use.
+- **Applies to**: implement, impl-review

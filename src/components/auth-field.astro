@@ -1,9 +1,9 @@
 ---
-import type { HTMLInputTypeAttribute } from "react";
+import type { JSX } from "astro/jsx-runtime";
 
 type Props = {
   name: string;
-  type: HTMLInputTypeAttribute;
+  type: JSX.HTMLInputTypeAttribute;
   label: string;
   autocomplete?: string;
   required?: boolean;

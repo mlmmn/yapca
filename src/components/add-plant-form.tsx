@@ -5,6 +5,7 @@ import { actions } from "astro:actions";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
+import { todayLocalDateString } from "@/lib/date";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -24,14 +25,6 @@ const addPlantSchema = z.object({
     }),
   firstAppearance: z.enum(["today", "after"]),
 });
-
-function todayLocalDateString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 export default function AddPlantForm() {
   const nameInputRef = useRef<HTMLInputElement>(null);

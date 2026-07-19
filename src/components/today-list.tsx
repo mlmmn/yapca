@@ -3,7 +3,14 @@ import { useOptimistic } from "react";
 import { actions } from "astro:actions";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
+import { cn, prefersReducedMotion } from "@/lib/utils";
+import {
+  formatDueLabel,
+  formatIntervalLabel,
+  formatShortDate,
+  msUntilNextLocalMidnight,
+  todayLocalDateString,
+} from "@/lib/date";
 import { Button, LinkButton } from "@/components/ui/button";
 import type { PlantListItem } from "@/types";
 
@@ -15,42 +22,9 @@ type TodayListProps = {
   fetchError?: boolean;
 };
 
-function todayLocalDateString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function msUntilNextLocalMidnight(): number {
-  const now = new Date();
-  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
-  return nextMidnight.getTime() - now.getTime();
-}
-
-function parseLocalDateString(dateString: string): Date {
-  const [year, month, day] = dateString.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
-
-function formatShortDate(dateString: string): string {
-  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" }).format(
-    parseLocalDateString(dateString),
-  );
-}
-
-function formatDueLabel(dateString: string, today: string): string {
-  return dateString === today ? "Due today" : `Due ${formatShortDate(dateString)}`;
-}
-
-function formatIntervalLabel(intervalDays: number): string {
-  return `Every ${intervalDays} day${intervalDays === 1 ? "" : "s"}`;
-}
-
-function prefersReducedMotion(): boolean {
-  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
+// While a "Watered" action is in flight the row stays mounted with `deleting`
+// set, so it can animate its collapse; `basePlants` commits the real removal.
+type OptimisticPlant = PlantListItem & { deleting?: boolean };
 
 function toggleId(ids: Set<string>, id: string, present: boolean): Set<string> {
   const next = new Set(ids);
@@ -65,13 +39,10 @@ function toggleId(ids: Set<string>, id: string, present: boolean): Set<string> {
 export default function TodayList({ plants, fetchError = false }: TodayListProps) {
   const [today, setToday] = useState<string | null>(null);
   const [basePlants, setBasePlants] = useState<PlantListItem[]>(plants);
-  const [optimisticPlants, removeOptimistically] = useOptimistic(
-    basePlants,
-    (state: PlantListItem[], removedId: string) => state.filter((plant) => plant.id !== removedId),
+  const [optimisticPlants, markDeleting] = useOptimistic<OptimisticPlant[], string>(basePlants, (state, deletingId) =>
+    state.map((plant) => (plant.id === deletingId ? { ...plant, deleting: true } : plant)),
   );
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
-  const [leavingIds, setLeavingIds] = useState<Set<string>>(new Set());
-  const [enteringIds, setEnteringIds] = useState<Set<string>>(new Set());
   const buttonRefs = useRef(new Map<string, HTMLButtonElement>());
   const removalTimeouts = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
@@ -107,58 +78,46 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
       return;
     }
 
+    // Urgent update so the button disables immediately, before the transition.
     setPendingIds((prev) => toggleId(prev, plant.id, true));
-    setLeavingIds((prev) => toggleId(prev, plant.id, true));
 
     const clientDate = todayLocalDateString();
     const formData = new FormData();
     formData.set("plantId", plant.id);
     formData.set("clientDate", clientDate);
 
-    function commitRemoval() {
-      removalTimeouts.current.delete(plant.id);
-      startTransition(() => {
-        removeOptimistically(plant.id);
-      });
-    }
+    startTransition(async () => {
+      // Called before any `await`, so the optimistic overlay is genuinely held
+      // for the whole action: the row collapses and stays collapsed until
+      // markWatered resolves, then reverts on its own if the action throws.
+      markDeleting(plant.id);
 
-    if (prefersReducedMotion()) {
-      commitRemoval();
-    } else {
-      removalTimeouts.current.set(plant.id, setTimeout(commitRemoval, ANIMATION_MS));
-    }
-
-    async function run() {
       try {
         const { error } = await actions.markWatered(formData);
         if (error) {
           throw error;
         }
 
-        startTransition(() => {
-          setBasePlants((prev) => prev.filter((p) => p.id !== plant.id));
-          setPendingIds((prev) => toggleId(prev, plant.id, false));
-          setLeavingIds((prev) => toggleId(prev, plant.id, false));
-        });
-      } catch {
-        const scheduledRemoval = removalTimeouts.current.get(plant.id);
-        if (scheduledRemoval) {
-          clearTimeout(scheduledRemoval);
+        // Let the collapse animation finish while the overlay still holds, then
+        // commit the permanent removal so the row unmounts already-collapsed.
+        if (!prefersReducedMotion()) {
+          await new Promise<void>((resolve) => {
+            removalTimeouts.current.set(plant.id, setTimeout(resolve, ANIMATION_MS));
+          });
           removalTimeouts.current.delete(plant.id);
         }
 
+        // State updates after an `await` must be re-wrapped to stay in the transition.
         startTransition(() => {
-          setBasePlants((prev) => [...prev]);
+          setBasePlants((prev) => prev.filter((p) => p.id !== plant.id));
           setPendingIds((prev) => toggleId(prev, plant.id, false));
-          setLeavingIds((prev) => toggleId(prev, plant.id, false));
         });
-
-        if (!prefersReducedMotion()) {
-          setEnteringIds((prev) => toggleId(prev, plant.id, true));
-          setTimeout(() => {
-            setEnteringIds((prev) => toggleId(prev, plant.id, false));
-          }, ANIMATION_MS);
-        }
+      } catch {
+        // basePlants is untouched, so ending the action reverts the optimistic
+        // overlay and the row animates back open via the max-height transition.
+        startTransition(() => {
+          setPendingIds((prev) => toggleId(prev, plant.id, false));
+        });
 
         toast.error(`Couldn't mark ${plant.name} watered. Try again.`, {
           action: {
@@ -173,9 +132,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
           buttonRefs.current.get(plant.id)?.focus();
         });
       }
-    }
-
-    void run();
+    });
   }
 
   const dueList = useMemo(() => {
@@ -277,8 +234,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
       ) : (
         <ul>
           {dueList.map((plant) => {
-            const isLeaving = leavingIds.has(plant.id);
-            const isEntering = enteringIds.has(plant.id);
+            const isLeaving = plant.deleting ?? false;
             const initial = plant.name.trim().charAt(0).toUpperCase() || "?";
 
             return (
@@ -287,7 +243,6 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
                 className={cn(
                   "border-border grid grid-cols-[auto_1fr_auto] items-center gap-3 overflow-hidden border-b transition-[opacity,max-height,padding] duration-200 ease-out motion-reduce:transition-none",
                   isLeaving ? "max-h-0 py-0 opacity-0" : "max-h-40 py-3 opacity-100",
-                  isEntering && "animate-in fade-in duration-200 motion-reduce:animate-none",
                 )}
               >
                 <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg md:size-14">

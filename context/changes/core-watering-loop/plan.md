@@ -203,7 +203,7 @@ Install the shadcn form primitives, add `@tanstack/react-form`, and build the `/
 
 **Intent**: The first hydrated form. TanStack Form owns controlled field state and client-side Zod validation for snappy inline errors; on valid submit it builds `FormData` (including the file and the client-local date) and calls the Action.
 
-**Contract**: Use a narrow, single-column form with a conventional back link and fields in this order: Plant name; Water every (NumberField with a visible `days` suffix and 1–365 support); “When should it first appear?” radio group; Photo (optional); Save plant. The radio options are Today / “It needs water now.” (default) and After `[interval]` days / “I watered it today.” (the label updates as interval changes); map the selected value to the existing `alreadyWatered` Action boolean. `useForm` receives the Zod schema via `validators` (Standard Schema — no resolver package) and validates on blur and submit. Bind fields through `Field` (`state.value` / `handleChange`) to controlled react-aria primitives. Use a standard file picker with concise type/size guidance, cropped square preview, file name, and Remove photo control; do not use a drag-and-drop zone. On submit call `actions.addPlant(formData)` with the browser's local `YYYY-MM-DD`; change the button to “Saving plant…”, prevent duplicate submits, preserve values/preview on failure where browser security allows, show plain field-specific errors and the specified form-level recovery message, then navigate to `/` on success. Focus Plant name on desktop only; never force the mobile keyboard open before the page context is visible.
+**Contract**: Use a narrow, single-column form with a conventional back link and fields in this order: Plant name; Water every (NumberField with a visible `days` suffix and 1–365 support); “When should it first appear?” radio group; Photo (optional); Save plant. The radio options are Today / “It needs water now.” (default) and After `[interval]` days / “I watered it today.” (the label updates as interval changes); map the selected value to the existing `alreadyWatered` Action boolean. `useForm` receives the Zod schema via `validators` (Standard Schema — no resolver package) using `revalidateLogic()` (`onDynamic`): it validates on submit, then revalidates on change as the user edits. Bind fields through `Field` (`state.value` / `handleChange`) to controlled react-aria primitives. Use a standard file picker with concise type/size guidance, cropped square preview, file name, and Remove photo control; do not use a drag-and-drop zone. On submit call `actions.addPlant(formData)` with the browser's local `YYYY-MM-DD`; change the button to “Saving plant…”, prevent duplicate submits, preserve values/preview on failure where browser security allows, show plain field-specific errors and the specified form-level recovery message, then navigate to `/` on success. Focus Plant name on desktop only; never force the mobile keyboard open before the page context is visible.
 
 #### 3. New-plant page
 
@@ -232,7 +232,7 @@ Install the shadcn form primitives, add `@tanstack/react-form`, and build the `/
 #### Manual Verification:
 
 - Submitting valid input creates the plant and returns to `/`; the plant is persisted with the correct `next_due_on`.
-- Invalid input (empty name, interval out of 1–365) shows the specified inline field errors after blur and on submit without a page reload.
+- Invalid input (empty name, interval out of 1–365) shows the specified inline field errors on submit, then revalidates on change as the user edits, without a page reload.
 - The first-appearance radios default to Today; the After option updates with singular/plural interval text and correctly controls today-list appearance.
 - Uploading a valid photo shows its square preview, name, and Remove control; an invalid file preserves other values and explains the allowed type/size; omitting a photo still succeeds.
 - Saving prevents duplicate submission, uses “Saving plant…”, preserves entered values after a server/upload failure, and offers the specified retry-ready recovery message.
@@ -380,7 +380,7 @@ Greenfield data layer — `supabase/migrations/` is created by this slice. `pnpx
 #### Manual
 
 - [x] 3.4 Valid submit creates the plant and returns to `/` — 4beec48
-- [x] 3.5 Invalid input shows specific inline errors after blur and on submit — 4beec48
+- [x] 3.5 Invalid input shows specific inline errors on submit, then revalidates on change — 4beec48
 - [x] 3.6 First-appearance radios default to Today, update their interval label, and control today-list appearance — 4beec48
 - [x] 3.7 Photo picker supports preview, removal, invalid-file recovery, and omission — 4beec48
 - [x] 3.8 Saving prevents duplicates and preserves form values after recoverable failure — 4beec48
