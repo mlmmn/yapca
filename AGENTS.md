@@ -7,6 +7,9 @@ YAPCA (Yet Another Plant Care App): Astro 6 SSR app, React 19 islands, Tailwind 
 - **Package manager is `pnpm`** — never `npm` (pnpm-lock.yaml, no package-lock.json).
 - **Always enable RLS on new tables**, with granular per-operation, per-role policies.
 - **API routes must `export const prerender = false`** (full SSR — `output: "server"`).
+- **Never create a git branch unless explicitly asked to.**
+- **Filenames use kebab-case** — all new Astro components, pages, and utilities follow kebab-case naming (e.g. `auth-field.astro`, `confirm-email.astro`, not `AuthField.astro`).
+- **Never modify global eslint or prettier config** — unless explicitly asked. Report config issues instead of fixing them unilaterally.
 
 ## Commands
 

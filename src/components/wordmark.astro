@@ -1,0 +1,15 @@
+---
+type Props = {
+  size?: "sm" | "md" | "lg";
+};
+
+const { size = "md" } = Astro.props;
+
+const sizeClasses = {
+  sm: "text-lg font-medium",
+  md: "text-2xl font-medium",
+  lg: "text-3xl font-medium",
+};
+---
+
+<div class:list={`text-primary ${sizeClasses[size]}`}>yapca</div>

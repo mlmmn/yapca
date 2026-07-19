@@ -1,0 +1,22 @@
+---
+import Layout from "./layout.astro";
+import Wordmark from "@/components/wordmark.astro";
+
+type Props = {
+  title?: string;
+};
+
+const { title = "yapca" } = Astro.props;
+---
+
+<Layout title={title}>
+  <div class="bg-background flex min-h-screen items-center justify-center px-4 py-8">
+    <div class="w-full max-w-sm">
+      <div class="mb-10 flex justify-center">
+        <Wordmark />
+      </div>
+      <slot />
+      <slot name="footer" />
+    </div>
+  </div>
+</Layout>

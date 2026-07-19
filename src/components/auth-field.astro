@@ -1,0 +1,30 @@
+---
+import type { HTMLInputTypeAttribute } from "react";
+
+type Props = {
+  name: string;
+  type: HTMLInputTypeAttribute;
+  label: string;
+  autocomplete?: string;
+  required?: boolean;
+  minlength?: number;
+  describedById?: string;
+};
+
+const { name, type, label, autocomplete, required = true, minlength, describedById } = Astro.props;
+---
+
+<div class="mb-4">
+  <label for={name} class="text-foreground mb-2 block text-sm font-medium">
+    {label}
+  </label>
+  <input
+    id={name}
+    type={type}
+    autocomplete={autocomplete}
+    required={required}
+    minlength={minlength}
+    aria-describedby={describedById}
+    class="border-input bg-background text-foreground placeholder-muted-foreground focus:border-ring focus:ring-ring/30 w-full rounded-md border px-3 py-2 text-sm transition-colors outline-none focus:ring-2"
+  />
+</div>
