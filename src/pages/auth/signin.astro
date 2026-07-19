@@ -15,7 +15,14 @@ const mappedError = mapAuthError(error);
     <form method="post" action="/api/auth/signin" class="space-y-4">
       {/* eslint-disable-next-line astro/jsx-a11y/no-autofocus */}
       <AuthField name="email" type="email" label="Email" autocomplete="email" autofocus required />
-      <AuthField name="password" type="password" label="Password" autocomplete="current-password" required />
+      <AuthField
+        name="password"
+        type="password"
+        label="Password"
+        autocomplete="current-password"
+        minlength={6}
+        required
+      />
       <button type="submit" class:list={buttonVariants({ variant: "default" })} id="submit-button"> Sign in </button>
     </form>
   </div>
@@ -31,8 +38,6 @@ const mappedError = mapAuthError(error);
   if (form && submitButton) {
     form.addEventListener("submit", () => {
       submitButton.disabled = true;
-
-      const originalText = submitButton.textContent;
 
       const supportsReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
