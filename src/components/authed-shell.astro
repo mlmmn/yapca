@@ -2,6 +2,55 @@
 import { buttonVariants } from "@/components/ui/button";
 import Wordmark from "@/components/wordmark.astro";
 import Layout from "@/layouts/layout.astro";
+import TodayList from "@/components/today-list";
+import { createClient } from "@/lib/supabase";
+import type { PlantListItem } from "@/types";
+
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+async function loadPlants(): Promise<{ plants: PlantListItem[] } | { plants: null }> {
+  const supabase = createClient(Astro.request.headers, Astro.cookies);
+  if (!supabase) {
+    return { plants: null };
+  }
+
+  const { data, error } = await supabase
+    .from("plants")
+    .select("id, name, interval_days, next_due_on, photo_path")
+    .order("next_due_on", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (error) {
+    return { plants: null };
+  }
+
+  const photoPaths = data.flatMap((plant) => (plant.photo_path ? [plant.photo_path] : []));
+
+  const signedUrlByPath = new Map<string, string>();
+  if (photoPaths.length > 0) {
+    const { data: signedUrls } = await supabase.storage
+      .from("plant-photos")
+      .createSignedUrls(photoPaths, SIGNED_URL_TTL_SECONDS);
+
+    for (const item of signedUrls ?? []) {
+      if (item.path && item.signedUrl && !item.error) {
+        signedUrlByPath.set(item.path, item.signedUrl);
+      }
+    }
+  }
+
+  const plants: PlantListItem[] = data.map((plant) => ({
+    id: plant.id,
+    name: plant.name,
+    interval_days: plant.interval_days,
+    next_due_on: plant.next_due_on,
+    photoUrl: plant.photo_path ? (signedUrlByPath.get(plant.photo_path) ?? null) : null,
+  }));
+
+  return { plants };
+}
+
+const { plants } = await loadPlants();
 ---
 
 <Layout>
@@ -15,9 +64,9 @@ import Layout from "@/layouts/layout.astro";
       </div>
     </div>
 
-    <div class="flex flex-1 items-center justify-center">
-      <div class="text-muted-foreground text-center">
-        <p class="text-sm">Your daily list will appear here</p>
+    <div class="flex flex-1 justify-center px-6 py-10">
+      <div class="w-full max-w-xl">
+        {plants === null ? <TodayList client:load plants={[]} fetchError /> : <TodayList client:load plants={plants} />}
       </div>
     </div>
   </div>

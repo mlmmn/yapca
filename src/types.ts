@@ -21,3 +21,11 @@ export type MarkWateredOutput = {
   plantId: string;
   next_due_on: string;
 };
+
+export type PlantListItem = {
+  id: string;
+  name: string;
+  interval_days: number;
+  next_due_on: string;
+  photoUrl: string | null;
+};
