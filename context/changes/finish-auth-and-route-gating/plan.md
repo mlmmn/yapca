@@ -406,13 +406,13 @@ For an intentionally shortened local loop, confirmation can still be disabled te
 
 #### Automated
 
-- [x] 4.1 Linting passes: `pnpm lint`
-- [x] 4.2 Build passes: `pnpm build`
-- [x] 4.3 Signout exports `prerender = false`; every `/api/auth/*` route has the required SSR marker
+- [x] 4.1 Linting passes: `pnpm lint` — d1acbfc
+- [x] 4.2 Build passes: `pnpm build` — d1acbfc
+- [x] 4.3 Signout exports `prerender = false`; every `/api/auth/*` route has the required SSR marker — d1acbfc
 
 #### Manual
 
-- [x] 4.4 Signed-out `/` shows entry with both CTAs; signed-in `/` shows top bar + Sign out + placeholder
-- [x] 4.5 Sign out returns to the signed-out entry
-- [x] 4.6 Signed-in visit to `/auth/*` redirects to `/`
-- [x] 4.7 Full loop works end-to-end: sign up → confirm → sign in → shell → sign out
+- [x] 4.4 Signed-out `/` shows entry with both CTAs; signed-in `/` shows top bar + Sign out + placeholder — d1acbfc
+- [x] 4.5 Sign out returns to the signed-out entry — d1acbfc
+- [x] 4.6 Signed-in visit to `/auth/*` redirects to `/` — d1acbfc
+- [x] 4.7 Full loop works end-to-end: sign up → confirm → sign in → shell → sign out — d1acbfc

@@ -1,7 +1,7 @@
 ---
 change_id: finish-auth-and-route-gating
 title: Finish auth and route gating
-status: implementing
+status: implemented
 created: 2026-07-19
 updated: 2026-07-19
 archived_at: null
