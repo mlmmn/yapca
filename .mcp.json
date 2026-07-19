@@ -3,6 +3,10 @@
     "cloudflare": {
       "url": "https://mcp.cloudflare.com/mcp",
       "type": "http"
+    },
+    "exa": {
+      "url": "https://mcp.exa.ai/mcp",
+      "type": "http"
     }
   }
 }

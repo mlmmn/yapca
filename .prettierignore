@@ -3,3 +3,4 @@
 .impeccable
 **/*.md
 pnpm-lock.yaml
+src/lib/database.types.ts
