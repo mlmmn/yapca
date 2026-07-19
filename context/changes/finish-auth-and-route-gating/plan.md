@@ -388,11 +388,11 @@ For an intentionally shortened local loop, confirmation can still be disabled te
 
 #### Automated
 
-- [x] 3.1 Linting passes: `pnpm lint`
-- [x] 3.2 Build passes: `pnpm build`
-- [x] 3.3 Resend validates email before Supabase and explicitly exports `prerender = false`
-- [x] 3.4 Local Supabase defaults confirmation ON and targets Astro `/auth/signin` on port 4321
-- [x] 3.5 Signup/resend URL construction round-trips plus-addresses without alteration
+- [x] 3.1 Linting passes: `pnpm lint` — 8b7c745
+- [x] 3.2 Build passes: `pnpm build` — 8b7c745
+- [x] 3.3 Resend validates email before Supabase and explicitly exports `prerender = false` — 8b7c745
+- [x] 3.4 Local Supabase defaults confirmation ON and targets Astro `/auth/signin` on port 4321 — 8b7c745
+- [x] 3.5 Signup/resend URL construction round-trips plus-addresses without alteration — 8b7c745
 
 #### Manual
 
