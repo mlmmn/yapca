@@ -1,9 +1,9 @@
 ---
 change_id: core-watering-loop
 title: Core watering loop
-status: implementing
+status: implemented
 created: 2026-07-19
-updated: 2026-07-19
+updated: 2026-07-20
 archived_at: null
 ---
 

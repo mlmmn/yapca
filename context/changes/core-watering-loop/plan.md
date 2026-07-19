@@ -363,11 +363,11 @@ Greenfield data layer — `supabase/migrations/` is created by this slice. `pnpx
 
 #### Manual
 
-- [x] 2.4 `addPlant` persists correct `next_due_on` for both due-now and already-watered branches
-- [x] 2.5 Photo > 1 MB uploads successfully to the user's Storage folder
-- [x] 2.6 `/plants/new` redirects to `/auth/signin` when signed out
-- [x] 2.7 Direct signed-out Action calls return `UNAUTHORIZED` without mutation
-- [x] 2.8 Failed plant insert triggers best-effort uploaded-photo cleanup
+- [x] 2.4 `addPlant` persists correct `next_due_on` for both due-now and already-watered branches — d309ce1
+- [x] 2.5 Photo > 1 MB uploads successfully to the user's Storage folder — d309ce1
+- [x] 2.6 `/plants/new` redirects to `/auth/signin` when signed out — d309ce1
+- [x] 2.7 Direct signed-out Action calls return `UNAUTHORIZED` without mutation — d309ce1
+- [x] 2.8 Failed plant insert triggers best-effort uploaded-photo cleanup — d309ce1
 
 ### Phase 3: Add-plant form island
 
@@ -391,19 +391,19 @@ Greenfield data layer — `supabase/migrations/` is created by this slice. `pnpx
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `pnpm exec astro check`
-- [x] 4.2 Linting passes: `pnpm lint`
-- [x] 4.3 Production build passes: `pnpm build`
+- [x] 4.1 Type checking passes: `pnpm exec astro check` — d309ce1
+- [x] 4.2 Linting passes: `pnpm lint` — d309ce1
+- [x] 4.3 Production build passes: `pnpm build` — d309ce1
 
 #### Manual
 
-- [x] 4.4 Watered removes the row instantly with no visible network wait
-- [x] 4.5 Full-cycle determinism: plant reappears exactly `interval` days later, not before
-- [x] 4.6 Retryable action failure restores row, count, stable position, focus where practical, and Retry toast
-- [x] 4.7 Past-due plant appears without Overdue label or amber styling
-- [x] 4.8 Photo thumbnail crop/empty alt and neutral initial fallback render correctly
-- [x] 4.9 No-plants, clear-day, and fetch-failure states render their distinct messages and actions
-- [x] 4.10 Ledger handles 10–30 rows, 80-character names, date/interval grammar, and responsive action alignment
-- [x] 4.11 Success and rollback motion honor `prefers-reduced-motion`
-- [x] 4.12 Browser-local hydration bootstrap and local-midnight rollover verified
-- [x] 4.13 Signed-URL failures degrade affected photos to initial fallbacks
+- [x] 4.4 Watered removes the row instantly with no visible network wait — d309ce1
+- [x] 4.5 Full-cycle determinism: plant reappears exactly `interval` days later, not before — d309ce1
+- [x] 4.6 Retryable action failure restores row, count, stable position, focus where practical, and Retry toast — d309ce1
+- [x] 4.7 Past-due plant appears without Overdue label or amber styling — d309ce1
+- [x] 4.8 Photo thumbnail crop/empty alt and neutral initial fallback render correctly — d309ce1
+- [x] 4.9 No-plants, clear-day, and fetch-failure states render their distinct messages and actions — d309ce1
+- [x] 4.10 Ledger handles 10–30 rows, 80-character names, date/interval grammar, and responsive action alignment — d309ce1
+- [x] 4.11 Success and rollback motion honor `prefers-reduced-motion` — d309ce1
+- [x] 4.12 Browser-local hydration bootstrap and local-midnight rollover verified — d309ce1
+- [x] 4.13 Signed-URL failures degrade affected photos to initial fallbacks — d309ce1
