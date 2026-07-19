@@ -342,24 +342,24 @@ Greenfield data layer — `supabase/migrations/` is created by this slice. `pnpx
 
 #### Automated
 
-- [x] 1.1 Migrations apply cleanly on a fresh DB: `pnpx supabase db reset`
-- [x] 1.2 Type checking passes: `pnpm exec astro check`
-- [x] 1.3 Linting passes: `pnpm lint`
-- [x] 1.4 Production build passes: `pnpm build`
+- [x] 1.1 Migrations apply cleanly on a fresh DB: `pnpx supabase db reset` — 27e7271
+- [x] 1.2 Type checking passes: `pnpm exec astro check` — 27e7271
+- [x] 1.3 Linting passes: `pnpm lint` — 27e7271
+- [x] 1.4 Production build passes: `pnpm build` — 27e7271
 
 #### Manual
 
-- [ ] 1.5 Two-account RLS isolation on `plants` rows verified
-- [ ] 1.6 Storage-object isolation across accounts verified
-- [ ] 1.7 `nextDue` spot-checked across month + year boundaries
+- [x] 1.5 Two-account RLS isolation on `plants` rows verified — 27e7271
+- [x] 1.6 Storage-object isolation across accounts verified — 27e7271
+- [x] 1.7 `nextDue` spot-checked across month + year boundaries — 27e7271
 
 ### Phase 2: Server actions substrate
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm exec astro check`
-- [ ] 2.2 Linting passes: `pnpm lint`
-- [ ] 2.3 Production build passes: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm exec astro check`
+- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.3 Production build passes: `pnpm build`
 
 #### Manual
 

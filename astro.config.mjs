@@ -14,6 +14,9 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   adapter: cloudflare(),
+  security: {
+    actionBodySizeLimit: 5 * 1024 * 1024,
+  },
   env: {
     schema: {
       SUPABASE_URL: envField.string({ context: "server", access: "secret", optional: true }),
