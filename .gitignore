@@ -1,3 +1,18 @@
 .claude/.10x-cli-manifest.json
 .claude/skills/10x-*
 .claude/prompts
+
+# from 10x-astro-starter
+dist/
+.astro/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.production
+.dev.vars
+.wrangler/
+.DS_Store
+.idea/
