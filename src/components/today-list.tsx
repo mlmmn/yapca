@@ -266,8 +266,9 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
                 className={cn(
                   "border-border relative -mx-4 grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b px-4 transition-[opacity,max-height,padding,background-color] duration-200 ease-out motion-reduce:transition-none",
                   isLeaving ? "max-h-0 py-0 opacity-0" : "max-h-40 py-3 opacity-100",
-                  isStrongOverdue && "bg-warning/5",
-                  isOverdue ? "hover:bg-warning/20" : "hover:bg-muted",
+                  isOverdue &&
+                    (isStrongOverdue ? "bg-warning hover:bg-warning/80" : "bg-warning/20 hover:bg-warning/30"),
+                  !isOverdue && "hover:bg-muted",
                 )}
               >
                 <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg md:size-14">
@@ -301,7 +302,11 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
                         ) : (
                           <circle cx="12" cy="12" r="10" />
                         )}
-                        <path d="M12 6v6M12 18h.01" />
+                        <path
+                          className={cn(isStrongOverdue && "text-background")}
+                          d="M12 6v6M12 18h.01"
+                          stroke="currentColor"
+                        />
                       </svg>
                       <span className={metadataClasses}>
                         Overdue · Due {formatOverdueDate(plant.next_due_on, today)}

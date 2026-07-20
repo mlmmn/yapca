@@ -62,11 +62,20 @@ export function formatIntervalLabel(intervalDays: number): string {
 export type DueStatus = "due-today" | "overdue" | "overdue-strong";
 
 export function classifyDueStatus(dueDate: string, today: string): DueStatus {
-  if (dueDate === today) {
-    return "due-today";
+  if (!isValidDateString(dueDate) || !isValidDateString(today)) {
+    throw new RangeError("Due status requires valid YYYY-MM-DD dates");
   }
 
   const daysDifference = toEpochDay(today) - toEpochDay(dueDate);
+
+  if (daysDifference < 0) {
+    throw new RangeError("Due status cannot classify a future due date");
+  }
+
+  if (daysDifference === 0) {
+    return "due-today";
+  }
+
   if (daysDifference >= 3) {
     return "overdue-strong";
   }

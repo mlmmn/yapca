@@ -1,7 +1,7 @@
 ---
 change_id: overdue-tasks-and-urgency
 title: Overdue tasks and urgency
-status: implemented
+status: impl_reviewed
 created: 2026-07-20
 updated: 2026-07-20
 archived_at: null

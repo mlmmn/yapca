@@ -157,12 +157,12 @@ No data or API migration is required. Rollback consists of reverting the Today r
 
 #### Manual
 
-- [ ] 1.4 Due-today task remains neutral with `Due today`
-- [ ] 1.5 One- and two-day overdue tasks show the standard non-color-only amber treatment
-- [ ] 1.6 Three-plus-day overdue tasks show one stronger amber treatment without added tiers
-- [ ] 1.7 Mixed rows retain one stable ledger and inclusive count
-- [ ] 1.8 Standard and strong states pass light/dark and color-blindness checks
-- [ ] 1.9 Layout preserves identity, exact date, and Watered action at 320px and 200% zoom
-- [ ] 1.10 Keyboard and screen-reader semantics remain correct
-- [ ] 1.11 Watered concurrency, rollback, Retry, focus, and reduced-motion behavior do not regress
-- [ ] 1.12 Local-midnight rollover and the two-to-three-day threshold update without reload
+- [x] 1.4 Due-today task remains neutral with `Due today`
+- [x] 1.5 One- and two-day overdue tasks show the standard non-color-only amber treatment
+- [x] 1.6 Three-plus-day overdue tasks show one stronger amber treatment without added tiers
+- [x] 1.7 Mixed rows retain one stable ledger and inclusive count
+- [x] 1.8 Standard and strong states pass light/dark and color-blindness checks
+- [x] 1.9 Layout preserves identity, exact date, and Watered action at 320px and 200% zoom
+- [x] 1.10 Keyboard and screen-reader semantics remain correct
+- [x] 1.11 Watered concurrency, rollback, Retry, focus, and reduced-motion behavior do not regress
+- [x] 1.12 Local-midnight rollover and the two-to-three-day threshold update without reload
