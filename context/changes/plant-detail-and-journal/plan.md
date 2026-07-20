@@ -264,35 +264,35 @@ Negligible at MVP scale (target: small data volume). The detail page runs two in
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly against a fresh local DB
-- [x] 1.2 Type checking passes (astro check)
-- [x] 1.3 Linting passes (pnpm lint)
-- [x] 1.4 Build succeeds (pnpm build)
-- [x] 1.5 database.types.ts contains watering_events and mark_watered signature
+- [x] 1.1 Migration applies cleanly against a fresh local DB — 5d3e80d
+- [x] 1.2 Type checking passes (astro check) — 5d3e80d
+- [x] 1.3 Linting passes (pnpm lint) — 5d3e80d
+- [x] 1.4 Build succeeds (pnpm build) — 5d3e80d
+- [x] 1.5 database.types.ts contains watering_events and mark_watered signature — 5d3e80d
 
 #### Manual
 
-- [x] 1.6 Mark Watered inserts exactly one correct watering_events row
-- [x] 1.7 Plant next_due_on equals watered_on + interval_days (determinism)
-- [x] 1.8 Second user cannot select another user's watering_events (RLS)
-- [x] 1.9 Failed journal insert leaves the plant's due date unchanged (atomicity)
+- [x] 1.6 Mark Watered inserts exactly one correct watering_events row — 5d3e80d
+- [x] 1.7 Plant next_due_on equals watered_on + interval_days (determinism) — 5d3e80d
+- [x] 1.8 Second user cannot select another user's watering_events (RLS) — 5d3e80d
+- [x] 1.9 Failed journal insert leaves the plant's due date unchanged (atomicity) — 5d3e80d
 
 ### Phase 2: Plant detail page (SSR, read-only)
 
 #### Automated
 
-- [ ] 2.1 Type checking passes (astro check)
-- [ ] 2.2 Linting passes (pnpm lint)
-- [ ] 2.3 Build succeeds (pnpm build)
+- [x] 2.1 Type checking passes (astro check)
+- [x] 2.2 Linting passes (pnpm lint)
+- [x] 2.3 Build succeeds (pnpm build)
 
 #### Manual
 
-- [ ] 2.4 Own plant detail renders details + journal newest-first
-- [ ] 2.5 Plant with no waterings shows empty state
-- [ ] 2.6 Nonexistent id returns 404 with back link
-- [ ] 2.7 Another user's plant id returns 404
-- [ ] 2.8 Signed photo renders; missing photo shows initial fallback
-- [ ] 2.9 Unauthenticated access redirects to sign-in
+- [x] 2.4 Own plant detail renders details + journal newest-first
+- [x] 2.5 Plant with no waterings shows empty state
+- [x] 2.6 Nonexistent id returns 404 with back link
+- [x] 2.7 Another user's plant id returns 404
+- [x] 2.8 Signed photo renders; missing photo shows initial fallback
+- [x] 2.9 Unauthenticated access redirects to sign-in
 
 ### Phase 3: Navigation to plant detail
 

@@ -1,0 +1,159 @@
+---
+import { buttonVariants } from "@/components/ui/button";
+import Wordmark from "@/components/wordmark.astro";
+import Layout from "@/layouts/layout.astro";
+import { createClient } from "@/lib/supabase";
+import { formatShortDate, formatIntervalLabel, formatDueLabel, todayLocalDateString } from "@/lib/date";
+import type { JournalEntry } from "@/types";
+
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+type PlantDetail = {
+  id: string;
+  name: string;
+  interval_days: number;
+  next_due_on: string;
+  photo_path: string | null;
+};
+
+async function loadPlantDetail(
+  plantId: string,
+): Promise<{ plant: PlantDetail | null; photoUrl: string | null; journal: JournalEntry[] }> {
+  const supabase = createClient(Astro.request.headers, Astro.cookies);
+  if (!supabase) {
+    return { plant: null, photoUrl: null, journal: [] };
+  }
+
+  const { data: plantData } = await supabase
+    .from("plants")
+    .select("id, name, interval_days, next_due_on, photo_path")
+    .eq("id", plantId)
+    .single();
+
+  if (!plantData) {
+    return { plant: null, photoUrl: null, journal: [] };
+  }
+
+  const plant = plantData;
+
+  let photoUrl: string | null = null;
+  if (plant.photo_path) {
+    const { data: signedUrls } = await supabase.storage
+      .from("plant-photos")
+      .createSignedUrls([plant.photo_path], SIGNED_URL_TTL_SECONDS);
+
+    if (signedUrls && signedUrls.length > 0 && signedUrls[0].signedUrl && !signedUrls[0].error) {
+      photoUrl = signedUrls[0].signedUrl;
+    }
+  }
+
+  const { data: journalData } = await supabase
+    .from("watering_events")
+    .select("id, event_type, watered_on, prev_due_on, new_due_on")
+    .eq("plant_id", plantId)
+    .order("created_at", { ascending: false });
+
+  const journal = (journalData ?? []) as JournalEntry[];
+
+  return { plant, photoUrl, journal };
+}
+
+const plantId = Astro.params.id;
+if (!plantId) {
+  Astro.response.status = 404;
+}
+
+const { plant, photoUrl, journal } = await loadPlantDetail(plantId ?? "");
+
+if (!plant) {
+  Astro.response.status = 404;
+}
+
+const today = todayLocalDateString();
+const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
+---
+
+<Layout title={plant ? `${plant.name} · yapca` : "Plant not found · yapca"}>
+  <div class="flex min-h-screen flex-col">
+    <div class="border-border bg-background border-b px-6 py-4">
+      <div class="flex items-center justify-between">
+        <Wordmark size="sm" />
+        <form method="post" action="/api/auth/signout">
+          <button type="submit" class:list={buttonVariants({ variant: "ghost" })}> Sign out </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="flex flex-1 justify-center px-6 py-10">
+      <div class="w-full max-w-3xl">
+        {
+          plant ? (
+            <>
+              <a
+                href="/plants"
+                class="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1 text-sm"
+              >
+                &larr; Back to all plants
+              </a>
+
+              <div class="mb-10">
+                <div class="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
+                  <div class="bg-muted text-muted-foreground flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg md:h-32 md:w-32">
+                    {photoUrl ? (
+                      <img src={photoUrl} alt="" class="h-full w-full object-cover" />
+                    ) : (
+                      <span class="text-4xl font-medium md:text-5xl">{initial}</span>
+                    )}
+                  </div>
+
+                  <div class="min-w-0 flex-1">
+                    <h1 class="mb-3 text-2xl font-medium md:text-3xl">{plant.name}</h1>
+                    <div class="text-muted-foreground space-y-1 text-sm">
+                      <p>{formatIntervalLabel(plant.interval_days)}</p>
+                      <p>{formatDueLabel(plant.next_due_on, today)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border-border mb-8 border-t pt-8">
+                <h2 class="mb-6 text-xl font-medium">Watering journal</h2>
+
+                {journal.length === 0 ? (
+                  <div class="py-8">
+                    <p class="mb-2 font-medium">No waterings yet</p>
+                    <p class="text-muted-foreground text-sm">
+                      Mark this plant watered from Today to start its journal.
+                    </p>
+                  </div>
+                ) : (
+                  <div class="space-y-4">
+                    {journal.map((entry) => (
+                      <div class="border-border border-b pb-4 last:border-b-0">
+                        <div class="text-sm md:grid md:grid-cols-3 md:gap-4">
+                          <div class="font-medium">{formatShortDate(entry.watered_on)}</div>
+                          <div class="text-muted-foreground">Watered</div>
+                          <div class="text-muted-foreground">Scheduled for {formatShortDate(entry.prev_due_on)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div class="py-16 text-center">
+              <h1 class="mb-4 text-2xl font-medium">Plant not found</h1>
+              <p class="text-muted-foreground mb-6 text-sm">
+                This plant may have been removed or isn't available to this account.
+              </p>
+              <a href="/plants" class:list={buttonVariants({ variant: "default" })}>
+                Back to all plants
+              </a>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</Layout>

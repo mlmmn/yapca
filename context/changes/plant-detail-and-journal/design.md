@@ -12,7 +12,7 @@ The user opens a plant and quickly answers three questions:
 
 1. What is its current watering schedule?
 2. When was it last watered?
-3. What next-due date did each watering produce?
+3. What date had that watering been scheduled for?
 
 The current schedule and newest journal entry must be understandable without scrolling on a typical phone viewport.
 
@@ -142,14 +142,14 @@ Desktop and wide tablet use three semantic columns:
 
 1. **Date** — the date the plant was watered.
 2. **Event** — `Watered` with a small droplet or accepted project icon if available.
-3. **Next due** — the exact resulting due date.
+3. **Scheduled for** — the due date that was in effect before the plant was watered.
 
 Use a semantic list or table according to the final markup constraints. If using a table, preserve useful headers on small screens or provide equivalent accessible labels when the visual layout changes.
 
 On narrow screens, each entry becomes a compact two-line row:
 
 - First line: watering date and `Watered`.
-- Second line: `Next due <date>`.
+- Second line: `Scheduled for <date>`.
 
 Separate entries with hairlines and 12–16px vertical padding. The newest entry must not be visually promoted as a card; chronology already gives it priority.
 
@@ -259,6 +259,7 @@ Preserve hierarchy through the existing dark tokens. Do not introduce glowing gr
 - `Every 7 days`
 - `Next due July 23`
 - `Watered`
+- `Scheduled for July 16`
 - `1–10 of 34`
 - `Previous`
 - `Next`
@@ -282,7 +283,7 @@ The only visual media is the user's uploaded plant photo, delivered through the 
 
 ### Data exposure
 
-Show `watered_on`, `event_type`, and `new_due_on`. Keep `prev_due_on` hidden in this slice; it exists to support future deterministic undo, not to burden the journal now.
+Show `watered_on`, `event_type`, and `prev_due_on`. Label `prev_due_on` as `Scheduled for`; it is the date on which that watering had been due. Keep `new_due_on` hidden in the journal because the resulting future date is not useful once the event is part of history.
 
 ## 9. Accessibility and Responsive Requirements
 
@@ -311,7 +312,7 @@ Show `watered_on`, `event_type`, and `new_due_on`. Keep `prev_due_on` hidden in 
 - [ ] Today plant information opens detail while Watered remains independent.
 - [ ] All Plants lists every owned plant as a continuous, accessible linked list.
 - [ ] The detail header communicates identity, interval, and exact next-due date before the journal.
-- [ ] Journal entries are newest first and show watered date, event, and resulting next-due date.
+- [ ] Journal entries are newest first and show watered date, event, and the date that watering was scheduled for.
 - [ ] Journals paginate at ten entries with URL-based page state and correct boundary behavior.
 - [ ] Empty collection, empty journal, fetch-error, missing-photo, and 404 states are designed and implemented.
 - [ ] The feature uses existing tokens and component vocabulary without feature-local visual exceptions.
@@ -328,6 +329,6 @@ Show `watered_on`, `event_type`, and `new_due_on`. Keep `prev_due_on` hidden in 
 - Theme: existing light system with token-driven dark support.
 - Pagination: ten entries per page via `?page=N`.
 - Journal order: newest first.
-- Visible journal data: watering date, event label, and resulting next-due date.
-- Hidden journal data: previous due date.
+- Visible journal data: watering date, event label, and scheduled date (`prev_due_on`).
+- Hidden journal data: resulting next-due date (`new_due_on`).
 - Open questions: none.
