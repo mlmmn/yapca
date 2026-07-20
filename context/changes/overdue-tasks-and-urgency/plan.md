@@ -151,9 +151,9 @@ No data or API migration is required. Rollback consists of reverting the Today r
 
 #### Automated
 
-- [x] 1.1 Type checking passes
-- [x] 1.2 Linting passes
-- [x] 1.3 Production build passes
+- [x] 1.1 Type checking passes — 11d3fc0
+- [x] 1.2 Linting passes — 11d3fc0
+- [x] 1.3 Production build passes — 11d3fc0
 
 #### Manual
 
