@@ -1,0 +1,129 @@
+---
+import Header from "@/components/header.astro";
+import Layout from "@/layouts/layout.astro";
+import { LinkButton } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase";
+import { formatIntervalLabel, formatDueLabel, todayLocalDateString } from "@/lib/date";
+import type { PlantListItem } from "@/types";
+
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+async function loadAllPlants(): Promise<{ plants: PlantListItem[] } | { plants: null }> {
+  const supabase = createClient(Astro.request.headers, Astro.cookies);
+  if (!supabase) {
+    return { plants: null };
+  }
+
+  const { data, error } = await supabase
+    .from("plants")
+    .select("id, name, interval_days, next_due_on, photo_path")
+    .order("name", { ascending: true });
+
+  if (error) {
+    return { plants: null };
+  }
+
+  const photoPaths = data.flatMap((plant) => (plant.photo_path ? [plant.photo_path] : []));
+
+  const signedUrlByPath = new Map<string, string>();
+  if (photoPaths.length > 0) {
+    const { data: signedUrls } = await supabase.storage
+      .from("plant-photos")
+      .createSignedUrls(photoPaths, SIGNED_URL_TTL_SECONDS);
+
+    for (const item of signedUrls ?? []) {
+      if (item.path && item.signedUrl && !item.error) {
+        signedUrlByPath.set(item.path, item.signedUrl);
+      }
+    }
+  }
+
+  const plants: PlantListItem[] = data.map((plant) => ({
+    id: plant.id,
+    name: plant.name,
+    interval_days: plant.interval_days,
+    next_due_on: plant.next_due_on,
+    photoUrl: plant.photo_path ? (signedUrlByPath.get(plant.photo_path) ?? null) : null,
+  }));
+
+  return { plants };
+}
+
+const { plants } = await loadAllPlants();
+const today = todayLocalDateString();
+---
+
+<Layout title="All plants · yapca">
+  <div class="flex min-h-screen flex-col">
+    <Header current="all-plants" />
+
+    <div class="flex flex-1 justify-center px-6 py-10">
+      <div class="w-full max-w-2xl">
+        {
+          plants === null ? (
+            <div class="py-16 text-center">
+              <h1 class="mb-4 text-2xl font-medium">All plants</h1>
+              <p class="text-muted-foreground mb-6 text-sm">We couldn't load your plants.</p>
+              <button
+                onclick="window.location.reload()"
+                class="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
+              >
+                Try again
+              </button>
+            </div>
+          ) : plants.length === 0 ? (
+            <div class="py-16 text-center">
+              <h1 class="mb-6 text-2xl font-medium">All plants</h1>
+              <p class="mb-1 font-medium">Add your first plant</p>
+              <p class="text-muted-foreground mb-6 text-sm">
+                Set a watering interval and it will appear here when it needs water.
+              </p>
+              <LinkButton href="/plants/new">Add plant</LinkButton>
+            </div>
+          ) : (
+            <>
+              <div class="mb-6 flex items-center justify-between gap-4">
+                <h1 class="text-2xl font-medium">All plants</h1>
+                <LinkButton href="/plants/new" size="sm">
+                  Add plant
+                </LinkButton>
+              </div>
+
+              <ul class="border-border divide-border divide-y border-t border-b">
+                {plants.map((plant) => {
+                  const initial = plant.name.trim().charAt(0).toUpperCase() || "?";
+                  return (
+                    <li>
+                      <a
+                        href={`/plants/${plant.id}`}
+                        class:list={[
+                          "grid grid-cols-[auto_1fr] items-center gap-3 px-4 py-3 md:gap-4 md:px-6 md:py-4",
+                          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600",
+                          "hover:bg-muted transition-colors duration-150",
+                        ]}
+                      >
+                        <div class="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg md:size-14">
+                          {plant.photoUrl ? (
+                            <img src={plant.photoUrl} alt="" class="size-full object-cover" />
+                          ) : (
+                            <span class="text-lg font-medium md:text-xl">{initial}</span>
+                          )}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="line-clamp-2 font-medium">{plant.name}</p>
+                          <p class="text-muted-foreground text-sm">
+                            {formatIntervalLabel(plant.interval_days)} · {formatDueLabel(plant.next_due_on, today)}
+                          </p>
+                        </div>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</Layout>

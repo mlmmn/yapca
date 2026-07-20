@@ -1,0 +1,35 @@
+---
+import { buttonVariants } from "@/components/ui/button";
+import Wordmark from "@/components/wordmark.astro";
+
+type Props = {
+  current?: "today" | "all-plants" | "add-plant" | "plant-detail";
+};
+
+const { current } = Astro.props;
+---
+
+<div class="border-border bg-background border-b px-6 py-4">
+  <div class="flex items-center justify-between gap-4">
+    <Wordmark size="sm" />
+    <nav class="flex items-center gap-1">
+      <a
+        href="/"
+        class:list={[buttonVariants({ variant: "ghost" }), "text-sm"]}
+        aria-current={current === "today" ? "page" : undefined}
+      >
+        Today
+      </a>
+      <a
+        href="/plants"
+        class:list={[buttonVariants({ variant: "ghost" }), "text-sm"]}
+        aria-current={current === "all-plants" ? "page" : undefined}
+      >
+        All plants
+      </a>
+      <form method="post" action="/api/auth/signout" class="ml-2">
+        <button type="submit" class:list={buttonVariants({ variant: "ghost", size: "sm" })}> Sign out </button>
+      </form>
+    </nav>
+  </div>
+</div>

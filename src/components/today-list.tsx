@@ -245,19 +245,24 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
                   isLeaving ? "max-h-0 py-0 opacity-0" : "max-h-40 py-3 opacity-100",
                 )}
               >
-                <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg md:size-14">
-                  {plant.photoUrl ? (
-                    <img src={plant.photoUrl} alt="" className="size-full object-cover" />
-                  ) : (
-                    <span className="text-lg font-medium">{initial}</span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-2 font-medium">{plant.name}</p>
-                  <p className="text-muted-foreground text-sm">
-                    {formatDueLabel(plant.next_due_on, today)} · {formatIntervalLabel(plant.interval_days)}
-                  </p>
-                </div>
+                <a
+                  href={`/plants/${plant.id}`}
+                  className="hover:bg-muted col-span-2 -m-3 flex gap-3 rounded p-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+                >
+                  <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg md:size-14">
+                    {plant.photoUrl ? (
+                      <img src={plant.photoUrl} alt="" className="size-full object-cover" />
+                    ) : (
+                      <span className="text-lg font-medium">{initial}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 font-medium">{plant.name}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {formatDueLabel(plant.next_due_on, today)} · {formatIntervalLabel(plant.interval_days)}
+                    </p>
+                  </div>
+                </a>
                 <Button
                   ref={(node) => {
                     if (node) {

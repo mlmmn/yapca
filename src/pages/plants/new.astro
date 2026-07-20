@@ -1,20 +1,12 @@
 ---
-import { buttonVariants } from "@/components/ui/button";
-import Wordmark from "@/components/wordmark.astro";
+import Header from "@/components/header.astro";
 import Layout from "@/layouts/layout.astro";
 import AddPlantForm from "@/components/add-plant-form";
 ---
 
 <Layout title="Add plant · yapca">
   <div class="flex min-h-screen flex-col">
-    <div class="border-border bg-background border-b px-6 py-4">
-      <div class="flex items-center justify-between">
-        <Wordmark size="sm" />
-        <form method="post" action="/api/auth/signout">
-          <button type="submit" class:list={buttonVariants({ variant: "ghost" })}> Sign out </button>
-        </form>
-      </div>
-    </div>
+    <Header current="add-plant" />
 
     <div class="flex flex-1 justify-center px-6 py-10">
       <div class="w-full max-w-sm">

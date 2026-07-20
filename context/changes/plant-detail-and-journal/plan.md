@@ -281,26 +281,26 @@ Negligible at MVP scale (target: small data volume). The detail page runs two in
 
 #### Automated
 
-- [x] 2.1 Type checking passes (astro check)
-- [x] 2.2 Linting passes (pnpm lint)
-- [x] 2.3 Build succeeds (pnpm build)
+- [x] 2.1 Type checking passes (astro check) — 0c8c88c
+- [x] 2.2 Linting passes (pnpm lint) — 0c8c88c
+- [x] 2.3 Build succeeds (pnpm build) — 0c8c88c
 
 #### Manual
 
-- [x] 2.4 Own plant detail renders details + journal newest-first
-- [x] 2.5 Plant with no waterings shows empty state
-- [x] 2.6 Nonexistent id returns 404 with back link
-- [x] 2.7 Another user's plant id returns 404
-- [x] 2.8 Signed photo renders; missing photo shows initial fallback
-- [x] 2.9 Unauthenticated access redirects to sign-in
+- [x] 2.4 Own plant detail renders details + journal newest-first — 0c8c88c
+- [x] 2.5 Plant with no waterings shows empty state — 0c8c88c
+- [x] 2.6 Nonexistent id returns 404 with back link — 0c8c88c
+- [x] 2.7 Another user's plant id returns 404 — 0c8c88c
+- [x] 2.8 Signed photo renders; missing photo shows initial fallback — 0c8c88c
+- [x] 2.9 Unauthenticated access redirects to sign-in — 0c8c88c
 
 ### Phase 3: Navigation to plant detail
 
 #### Automated
 
-- [ ] 3.1 Type checking passes (astro check)
-- [ ] 3.2 Linting passes (pnpm lint)
-- [ ] 3.3 Build succeeds (pnpm build)
+- [x] 3.1 Type checking passes (astro check)
+- [x] 3.2 Linting passes (pnpm lint)
+- [x] 3.3 Build succeeds (pnpm build)
 
 #### Manual
 
