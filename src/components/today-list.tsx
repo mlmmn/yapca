@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { cn, prefersReducedMotion } from "@/lib/utils";
 import {
+  classifyDueStatus,
   formatDueLabel,
   formatIntervalLabel,
   formatShortDate,
@@ -16,6 +17,19 @@ import type { PlantListItem } from "@/types";
 
 const ANIMATION_MS = 190;
 const BOOTSTRAP_ROW_COUNT = 3;
+
+function formatOverdueDate(dateString: string, today: string): string {
+  const [dueYear, dueMonth, dueDay] = dateString.split("-").map(Number);
+  const [todayYear] = today.split("-").map(Number);
+
+  const date = new Date(dueYear, dueMonth - 1, dueDay);
+
+  if (dueYear === todayYear) {
+    return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" }).format(date);
+  }
+
+  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(date);
+}
 
 type TodayListProps = {
   plants: PlantListItem[];
@@ -236,33 +250,73 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
           {dueList.map((plant) => {
             const isLeaving = plant.deleting ?? false;
             const initial = plant.name.trim().charAt(0).toUpperCase() || "?";
+            const dueStatus = classifyDueStatus(plant.next_due_on, today);
+            const isOverdue = dueStatus !== "due-today";
+            const isStrongOverdue = dueStatus === "overdue-strong";
+
+            const linkClasses = cn(
+              "col-span-2 -m-3 flex gap-3 p-3 outline-0 focus-visible:after:border-ring focus-visible:after:ring-3 focus-visible:after:ring-ring/50 after:block after:absolute after:inset-0 after:content-[''] after:border after:border-transparent after:transition-all",
+            );
+
+            const metadataClasses = cn("text-sm", isOverdue ? "text-warning-foreground" : "text-muted-foreground");
 
             return (
               <li
                 key={plant.id}
                 className={cn(
-                  "border-border grid grid-cols-[auto_1fr_auto] items-center gap-3 overflow-hidden border-b transition-[opacity,max-height,padding] duration-200 ease-out motion-reduce:transition-none",
+                  "border-border relative -mx-4 grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b px-4 transition-[opacity,max-height,padding,background-color] duration-200 ease-out motion-reduce:transition-none",
                   isLeaving ? "max-h-0 py-0 opacity-0" : "max-h-40 py-3 opacity-100",
+                  isStrongOverdue && "bg-warning/5",
+                  isOverdue ? "hover:bg-warning/20" : "hover:bg-muted",
                 )}
               >
-                <a
-                  href={`/plants/${plant.id}`}
-                  className="hover:bg-muted col-span-2 -m-3 flex gap-3 rounded p-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
-                >
-                  <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg md:size-14">
-                    {plant.photoUrl ? (
-                      <img src={plant.photoUrl} alt="" className="size-full object-cover" />
-                    ) : (
-                      <span className="text-lg font-medium">{initial}</span>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
+                <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg md:size-14">
+                  {plant.photoUrl ? (
+                    <img src={plant.photoUrl} alt="" className="size-full object-cover" />
+                  ) : (
+                    <span className="text-lg font-medium">{initial}</span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <a href={`/plants/${plant.id}`} className={linkClasses}>
                     <p className="line-clamp-2 font-medium">{plant.name}</p>
-                    <p className="text-muted-foreground text-sm">
+                  </a>
+                  {isOverdue ? (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <svg
+                        className={cn(
+                          "size-4 shrink-0",
+                          isStrongOverdue ? "text-warning-accent" : "text-warning-foreground",
+                        )}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        {isStrongOverdue ? (
+                          <circle cx="12" cy="12" r="10" fill="currentColor" />
+                        ) : (
+                          <circle cx="12" cy="12" r="10" />
+                        )}
+                        <path d="M12 6v6M12 18h.01" />
+                      </svg>
+                      <span className={metadataClasses}>
+                        Overdue · Due {formatOverdueDate(plant.next_due_on, today)}
+                      </span>
+                      <span className={metadataClasses}>·</span>
+                      <span className={cn("line-clamp-1", metadataClasses)}>
+                        {formatIntervalLabel(plant.interval_days)}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className={metadataClasses}>
                       {formatDueLabel(plant.next_due_on, today)} · {formatIntervalLabel(plant.interval_days)}
                     </p>
-                  </div>
-                </a>
+                  )}
+                </div>
                 <Button
                   ref={(node) => {
                     if (node) {
@@ -271,6 +325,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
                       buttonRefs.current.delete(plant.id);
                     }
                   }}
+                  className="z-1"
                   size="sm"
                   isDisabled={pendingIds.has(plant.id)}
                   onPress={() => {
