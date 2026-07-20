@@ -87,28 +87,20 @@ export const server = {
       clientDate: clientDateSchema,
     }),
     handler: async (input, context) => {
-      const { supabase, user } = requireSession(context);
+      const { supabase } = requireSession(context);
 
-      const { data: plant, error: selectError } = await supabase
-        .from("plants")
-        .select("interval_days")
-        .eq("id", input.plantId)
-        .eq("user_id", user.id)
-        .single();
+      const { data: next_due_on, error } = await supabase.rpc("mark_watered", {
+        p_plant_id: input.plantId,
+        p_watered_on: input.clientDate,
+      });
 
-      if (selectError) {
-        throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
-      }
-
-      const next_due_on = nextDue(input.clientDate, plant.interval_days);
-
-      const { error: updateError } = await supabase
-        .from("plants")
-        .update({ next_due_on })
-        .eq("id", input.plantId)
-        .eq("user_id", user.id);
-
-      if (updateError) {
+      if (error) {
+        // eslint-disable-next-line no-console -- debug RPC errors
+        console.error("mark_watered RPC error:", { code: error.code, message: error.message, details: error.details });
+        // SQLSTATE 02000 is "no_data_found" — the RPC raises this when the plant isn't found
+        if (error.code === "02000") {
+          throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
+        }
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to mark plant watered." });
       }
 

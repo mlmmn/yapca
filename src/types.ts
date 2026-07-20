@@ -29,3 +29,13 @@ export type PlantListItem = {
   next_due_on: string;
   photoUrl: string | null;
 };
+
+export type WateringEvent = Database["public"]["Tables"]["watering_events"]["Row"];
+
+export type JournalEntry = {
+  id: string;
+  event_type: string;
+  watered_on: string;
+  prev_due_on: string;
+  new_due_on: string;
+};

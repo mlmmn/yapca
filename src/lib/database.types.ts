@@ -70,12 +70,66 @@ export type Database = {
         }
         Relationships: []
       }
+      watering_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          new_due_on: string
+          plant_id: string
+          prev_due_on: string
+          user_id: string
+          watered_on: string
+        }
+        Insert: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          new_due_on: string
+          plant_id: string
+          prev_due_on: string
+          user_id: string
+          watered_on: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          new_due_on?: string
+          plant_id?: string
+          prev_due_on?: string
+          user_id?: string
+          watered_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watering_events_plant_id_fkey"
+            columns: ["plant_id"]
+            isOneToOne: false
+            referencedRelation: "plants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "watering_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      mark_watered: {
+        Args: {
+          p_plant_id: string
+          p_watered_on: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
