@@ -298,15 +298,15 @@ Negligible at MVP scale (target: small data volume). The detail page runs two in
 
 #### Automated
 
-- [x] 3.1 Type checking passes (astro check)
-- [x] 3.2 Linting passes (pnpm lint)
-- [x] 3.3 Build succeeds (pnpm build)
+- [x] 3.1 Type checking passes (astro check) — 0d4516f
+- [x] 3.2 Linting passes (pnpm lint) — 0d4516f
+- [x] 3.3 Build succeeds (pnpm build) — 0d4516f
 
 #### Manual
 
-- [ ] 3.4 Today-list row click navigates to detail; Watered still waters
-- [ ] 3.5 Watered button focus/activation unaffected by row link
-- [ ] 3.6 All plants header link lists every owned plant (incl. not-due)
-- [ ] 3.7 Each All-plants row links to the correct detail page
-- [ ] 3.8 All plants empty state links to Add plant
-- [ ] 3.9 No regression in today-list optimistic mark-watered flow
+- [x] 3.4 Today-list row click navigates to detail; Watered still waters — 0d4516f
+- [x] 3.5 Watered button focus/activation unaffected by row link — 0d4516f
+- [x] 3.6 All plants header link lists every owned plant (incl. not-due) — 0d4516f
+- [x] 3.7 Each All-plants row links to the correct detail page — 0d4516f
+- [x] 3.8 All plants empty state links to Add plant — 0d4516f
+- [x] 3.9 No regression in today-list optimistic mark-watered flow — 0d4516f
