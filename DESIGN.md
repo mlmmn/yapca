@@ -82,6 +82,14 @@ components:
     textColor: "{colors.overdue-ink}"
     rounded: "{rounded.sm}"
     padding: "0.125rem 0.5rem"
+  plant-row-avatar:
+    backgroundColor: "{colors.muted-surface}"
+    textColor: "{colors.muted-ink}"
+    rounded: "{rounded.md}"
+  journal-entry:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    padding: "0 0 1rem 0"
 ---
 
 # Design System: YAPCA
@@ -127,6 +135,9 @@ A restrained, green-tinted neutral system anchored by a single canopy green; eve
 **The One Voice Rule.** Canopy green is the only saturated color on a normal screen, and it appears on ≤10% of it — primary action, selection, focus, living accent. If green is spreading into backgrounds or decoration, it has stopped being a voice and become noise.
 
 **The Amber-Not-Red Rule.** Overdue is amber; destruction is red. An overdue task is a nudge, not a failure — never dress it in destructive red, and never let red and amber appear as if they mean the same thing.
+
+### Dark Mode
+The system ships a `prefers-color-scheme: dark` palette, not just a light theme: paper inverts to near-black ink (`oklch(0.148 0.004 165)`), card/popover surfaces sit one step up (`oklch(0.218 0.008 165)`), and canopy green desaturates and lightens slightly (`oklch(0.432 0.095 166.913)`) so it stays legible without glowing on dark ink. Overdue amber shifts to a deeper surface with a lighter ink for the same reason. The same hue-165 tint carries through every neutral in both modes — dark mode is a tonal inversion of the field notebook, not a different product.
 
 ## 3. Typography
 
@@ -178,6 +189,19 @@ Every interactive component ships its full state set: default, hover, focus-visi
 
 ### Overdue Badge
 - **Style:** Overdue-surface fill, overdue-ink text, `0.375rem`/6px radius, tight `0.125rem 0.5rem` padding, paired with a warning glyph. The compact form of the amber urgency cue used inline.
+
+### Navigation
+- A single hairline-bottomed bar on paper: wordmark left, "Today" and "All plants" as ghost-button links, sign-out folded to the end. No pill/underline active indicator — the current page is marked with `aria-current="page"` and relies on the same ghost hover/focus states as any other link, keeping the bar quiet.
+- **Style:** Paper background, hairline border-bottom, ghost-button links at label size.
+
+### Plant Row (signature component)
+- The row used in "All plants" and as the header of a plant's detail view: a square photo thumbnail (or a muted-surface initial-letter fallback) at `0.5rem`/8px radius, paired with the plant name (Title) and its interval + due-date metadata (Label, muted-ink) on one line, joined by `·`.
+- **List context:** Rows sit in a hairline-divided list (top and bottom border, divider between items — no per-row card, no shadow), each a full-row link with a muted-surface hover fill and a visible focus outline.
+- **Detail context:** The same avatar scales up (`h-24 w-24` to `h-32 w-32`) and sits beside the name as a headline instead of a title, with a "Back to all plants" ghost link above it.
+
+### Journal Timeline
+- A reverse-chronological list under the plant detail view's "Watering journal" headline: each entry is a hairline-bottomed row (no border on the last entry) showing the date watered, the "Watered" event label, and the date it had been scheduled for — plain Body/Label text, no icons or badges, because a past event isn't urgent.
+- **Empty:** "No waterings yet" plus a one-line nudge back to the daily list, matching the Empty States tone below rather than a bare blank panel.
 
 ### Empty & Loading States
 - **Empty:** Teaches the interface, never a bare "nothing here." A clear day shows a calm "All watered — nothing due today" with the quiet satisfaction of a cleared notebook page; an empty collection invites "Add your first plant."

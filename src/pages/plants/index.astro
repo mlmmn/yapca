@@ -1,7 +1,7 @@
 ---
 import Header from "@/components/header.astro";
 import Layout from "@/layouts/layout.astro";
-import { LinkButton } from "@/components/ui/button";
+import { LinkButton, buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase";
 import { formatIntervalLabel, formatDueLabel, todayLocalDateString } from "@/lib/date";
 import type { PlantListItem } from "@/types";
@@ -64,10 +64,7 @@ const today = todayLocalDateString();
             <div class="py-16 text-center">
               <h1 class="mb-4 text-2xl font-medium">All plants</h1>
               <p class="text-muted-foreground mb-6 text-sm">We couldn't load your plants.</p>
-              <button
-                onclick="window.location.reload()"
-                class="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
-              >
+              <button onclick="window.location.reload()" class:list={buttonVariants({ variant: "default" })}>
                 Try again
               </button>
             </div>

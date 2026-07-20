@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-19T00:00:00.000Z",
+  "generatedAt": "2026-07-20T00:00:00.000Z",
   "title": "Design System: YAPCA",
   "extensions": {
     "colorMeta": {
@@ -117,6 +117,22 @@
       "description": "Compact inline amber urgency cue with a warning glyph.",
       "html": "<span class=\"ds-overdue-badge\"><svg viewBox=\"0 0 16 16\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M8 1.5 15 14H1L8 1.5Z\"/><path d=\"M8 6.5v3.5\"/><circle cx=\"8\" cy=\"12\" r=\"0.4\" fill=\"currentColor\"/></svg>Overdue</span>",
       "css": ".ds-overdue-badge { display: inline-flex; align-items: center; gap: 0.25rem; font-family: 'Figtree Variable', sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--color-warning-foreground, oklch(0.4 0.11 62)); background: var(--color-warning, oklch(0.92 0.1 88)); border-radius: 0.375rem; padding: 0.125rem 0.5rem; }"
+    },
+    {
+      "name": "Plant Row",
+      "kind": "custom",
+      "refersTo": "plant-row-avatar",
+      "description": "List item for 'All plants' — square avatar (or initial fallback), name, and interval/due metadata; full-row link in a hairline-divided list, no per-row card.",
+      "html": "<a class=\"ds-plant-row\" href=\"#\"><div class=\"ds-plant-avatar\">M</div><div class=\"ds-plant-main\"><p class=\"ds-plant-name\">Monstera deliciosa</p><p class=\"ds-plant-meta\">Every 5 days · due today</p></div></a>",
+      "css": ".ds-plant-row { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; text-decoration: none; transition: background 150ms cubic-bezier(0.25,1,0.5,1); } .ds-plant-row:hover { background: var(--color-muted, oklch(0.963 0.002 165)); } .ds-plant-row:focus-visible { outline: 2px solid var(--color-ring, oklch(0.55 0.11 165)); outline-offset: 2px; } .ds-plant-avatar { display: flex; align-items: center; justify-content: center; overflow: hidden; width: 3.5rem; height: 3.5rem; border-radius: 0.5rem; background: var(--color-muted, oklch(0.963 0.002 165)); color: var(--color-muted-foreground, oklch(0.5 0.021 165)); font-family: 'Figtree Variable', sans-serif; font-size: 1.25rem; font-weight: 500; } .ds-plant-name { font-family: 'Figtree Variable', sans-serif; font-weight: 500; color: var(--color-foreground, oklch(0.148 0.004 165)); margin: 0; } .ds-plant-meta { font-family: 'Figtree Variable', sans-serif; font-size: 0.875rem; color: var(--color-muted-foreground, oklch(0.5 0.021 165)); margin: 0; }"
+    },
+    {
+      "name": "Journal Entry",
+      "kind": "custom",
+      "refersTo": "journal-entry",
+      "description": "One row of a plant's watering journal — date watered, event label, and the date it had been scheduled for. Plain text, no icon or badge; a past event isn't urgent.",
+      "html": "<div class=\"ds-journal-entry\"><div class=\"ds-journal-date\">Jul 14</div><div class=\"ds-journal-event\">Watered</div><div class=\"ds-journal-sched\">Scheduled for Jul 14</div></div>",
+      "css": ".ds-journal-entry { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; font-family: 'Figtree Variable', sans-serif; font-size: 0.875rem; padding: 0 0 1rem 0; border-bottom: 1px solid var(--color-border, oklch(0.925 0.005 165)); } .ds-journal-entry:last-child { border-bottom: none; } .ds-journal-date { font-weight: 500; color: var(--color-foreground, oklch(0.148 0.004 165)); } .ds-journal-event, .ds-journal-sched { color: var(--color-muted-foreground, oklch(0.5 0.021 165)); }"
     }
   ],
   "narrative": {

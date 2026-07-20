@@ -1,7 +1,7 @@
 ---
 change_id: plant-detail-and-journal
 title: Plant detail and journal
-status: implemented
+status: impl_reviewed
 created: 2026-07-20
 updated: 2026-07-20
 archived_at: null

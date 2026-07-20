@@ -30,7 +30,7 @@ Deliver **S-02** (FR-005, FR-014): a signed-in user can open any of their plants
 A signed-in user can:
 1. From the home "Today" list, click a plant row and land on `/plants/<id>` showing that plant's name, photo (or initial fallback), interval, current due status, and a reverse-chronological watering journal.
 2. Reach an **All plants** page (`/plants`) from the app header listing every plant they own (due or not), each linking to its detail page.
-3. Marking a plant "Watered" (from the today list) now records a journal event; opening that plant afterward shows the new entry with its reschedule ("watered on X → next due Y").
+3. Marking a plant "Watered" (from the today list) now records a journal event; opening that plant afterward shows the new entry with the date it was watered and the date it had been scheduled for ("watered on X · scheduled for Y").
 
 Verified when: mark-watered inserts exactly one `watering_events` row inside the same transaction as the due-date update; the detail page renders that plant's own journal only (RLS-isolated); a plant with no waterings shows a clear empty state; a plant id that doesn't exist or isn't owned returns 404.
 
@@ -144,7 +144,7 @@ Add `/plants/[id].astro` rendering a single plant's details and its watering jou
 
 **Intent**: Render each journal entry with a human date and the reschedule it produced; show a clear empty state when there are none.
 
-**Contract**: Each entry shows: the event label ("Watered"), the `watered_on` date, and a "next due <new_due_on>" secondary line — formatted via `src/lib/date.ts` helpers (`formatShortDate`; add a `formatLongDate`/`formatJournalDate` helper there if a fuller format is wanted, per the no-duplication lesson). Empty state: a quiet "No waterings yet — mark this plant watered from Today to start its journal." Detail header shows name, photo-or-initial fallback (reuse the `plant.name.trim().charAt(0)` pattern from `today-list.tsx`), and the interval + next-due status via existing `formatIntervalLabel`/`formatDueLabel`.
+**Contract**: Each entry shows: the event label ("Watered"), the `watered_on` date, and a "Scheduled for <prev_due_on>" secondary line (the date the plant had been due before this watering; `new_due_on` remains persisted for undo/S-04 but is not shown) — formatted via `src/lib/date.ts` helpers (`formatShortDate`; add a `formatLongDate`/`formatJournalDate` helper there if a fuller format is wanted, per the no-duplication lesson). Empty state: a quiet "No waterings yet — mark this plant watered from Today to start its journal." Detail header shows name, photo-or-initial fallback (reuse the `plant.name.trim().charAt(0)` pattern from `today-list.tsx`), and the interval + next-due status via existing `formatIntervalLabel`/`formatDueLabel`.
 
 ### Success Criteria:
 
@@ -198,6 +198,8 @@ Make today-list rows open the detail page, and add an "All plants" collection pa
 **Intent**: Give the app header a way to reach the All plants page.
 
 **Contract**: Add an "All plants" nav link (to `/plants`) in the authed shell header next to the wordmark/sign-out. Use `buttonVariants`/existing link styling; do not hand-concatenate classes (`cn()` convention).
+
+> **Addendum (impl-review)**: Rather than editing each page's header inline, a shared `src/components/header.astro` was extracted and adopted by `authed-shell.astro`, `new.astro`, `plants/index.astro`, and `plants/[id].astro`. It takes a `current` prop (`"today" | "all-plants" | "add-plant" | "plant-detail"`) driving `aria-current`, and renders Today / All plants / Sign out. This DRY refactor supersedes the per-header edits and achieves the cross-page consistency this contract flagged as optional.
 
 ### Success Criteria:
 
