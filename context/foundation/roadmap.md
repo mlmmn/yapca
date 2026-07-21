@@ -3,7 +3,7 @@ project: "YAPCA (Yet Another Plant Care App)"
 version: 1
 status: draft
 created: 2026-07-19
-updated: 2026-07-19
+updated: 2026-07-21
 prd_version: 1
 main_goal: quality
 top_blocker: time
@@ -37,6 +37,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | blocked  |
 | S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | proposed |
 | S-07 | delete-plant                 | delete a plant                                                | S-01          | FR-007                  | proposed |
+| S-08 | design-review-and-polish     | (quality) have the whole app design/UI/UX-reviewed with impeccable, triaged, and fixed | F-01, S-01–S-04, S-06, S-07 | quality goal, a11y NFR, DESIGN.md/PRODUCT.md | proposed |
 
 ## Streams
 
@@ -49,6 +50,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 | C      | Daily triage        | `S-03`                             | Forks off `S-01`. Overdue surfacing + a11y urgency cue; parallel with Stream B. |
 | D      | Season model        | `S-05`                             | Forks off `S-01`. Blocked until the season-boundary dates are decided (ORQ-2). |
 | E      | Plant lifecycle     | `S-07`                             | Forks off `S-01`. Standalone delete; parallel with Streams B/C/D.          |
+| F      | Cross-cutting polish | `(all UI slices)` → `S-08`         | Terminal. Does not fork from `S-01`; converges every other stream — the final `impeccable` design/UI/UX pass over the assembled app. |
 
 ## Baseline
 
@@ -165,6 +167,18 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Small, standalone CRUD slice depending only on the plant record (S-01). Delete must also clean up the plant's tasks/journal under RLS so no orphaned rows leak across the account boundary.
 - **Status:** proposed
 
+### S-08: Design/UI/UX review + polish
+
+- **Outcome:** every user-facing surface — signed-out auth entry, today's due list, plant detail + watering journal, add/edit plant forms, overdue treatment, postpone/undo affordances, delete — is reviewed with the `impeccable` skill against the `DESIGN.md` visual system and the `PRODUCT.md`/`AGENTS.md` register and WCAG 2.2 AA-plus bar; the findings are triaged (severity-ranked) and the accepted fixes applied.
+- **Change ID:** design-review-and-polish
+- **PRD refs:** `main_goal: quality`, NFR (overdue cue perceivable without color alone), NFR (daily list feels instant), DESIGN.md / PRODUCT.md visual system (design context, not a numbered FR)
+- **Prerequisites:** F-01, S-01, S-02, S-03, S-04, S-06, S-07
+- **Parallel with:** — (terminal; nothing forks off it)
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Unlike S-01–S-07 this is a **horizontal, cross-cutting quality pass, not a vertical feature slice** — it ships no new user capability; it raises the quality of everything already shipped. Sequenced last because the botanical-with-editorial-restraint personality and the `quality` goal only verify holistically once the app is whole: reviewing surfaces slice-by-slice misses cross-surface inconsistency (spacing rhythm, type scale, the color-not-alone overdue cue read against the rest of the palette). If skipped, the `quality` goal and the launch-gating a11y NFR are never checked against the assembled product. S-05 caveat: if season-aware intervals (S-05) has shipped, its surfaces are covered here; if S-05 is still blocked, the review runs on what exists and S-05's surfaces are revisited when it lands.
+- **Status:** proposed
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                    | Suggested issue title                              | Ready for `/10x-plan` | Notes                                             |
@@ -177,6 +191,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-05       | season-aware-intervals       | Season-aware growing/dormancy intervals            | no                    | Blocked on ORQ-2 (season boundary dates)          |
 | S-06       | edit-plant-and-recalc        | Edit plant + next-due recalculation                | no                    | Prereq S-01, S-02                                 |
 | S-07       | delete-plant                 | Delete a plant                                     | no                    | Prereq S-01                                       |
+| S-08       | design-review-and-polish     | Full design/UI/UX review + polish (impeccable pass) | no                   | Prereq F-01 + all UI slices; run last. Not a `/10x-plan` feature slice — an `impeccable` review + fix pass |
 
 ## Open Roadmap Questions
 
