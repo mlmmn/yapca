@@ -3,7 +3,6 @@ import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { z } from "astro/zod";
 import { actions } from "astro:actions";
 import { toast } from "sonner";
-
 import { cn } from "@/lib/utils";
 import { todayLocalDateString } from "@/lib/date";
 import { Button } from "@/components/ui/button";
@@ -45,12 +44,15 @@ export default function AddPlantForm() {
     },
     onSubmit: async ({ value }) => {
       const formData = new FormData();
+
       formData.set("name", value.name);
       formData.set("interval_days", String(value.intervalDays));
       formData.set("clientDate", todayLocalDateString());
+
       if (value.firstAppearance === "after") {
         formData.set("alreadyWatered", "true");
       }
+
       if (photoFile) {
         formData.set("photo", photoFile);
       }
@@ -62,12 +64,14 @@ export default function AddPlantForm() {
 
         if (error) {
           toast.error(message);
+
           return;
         }
       } catch {
         // actions.addPlant rejects (rather than resolving to { error }) on a
         // network-level failure such as being offline, so it must be caught here too.
         toast.error(message);
+
         return;
       }
 
@@ -82,12 +86,14 @@ export default function AddPlantForm() {
       setPhotoFile(null);
       setPhotoPreview(null);
       setPhotoError(null);
+
       return;
     }
 
     if (!ALLOWED_PHOTO_TYPES.has(file.type) || file.size > MAX_PHOTO_BYTES) {
       setPhotoError(PHOTO_GUIDANCE);
       event.target.value = "";
+
       return;
     }
 
@@ -100,6 +106,7 @@ export default function AddPlantForm() {
     setPhotoFile(null);
     setPhotoPreview(null);
     setPhotoError(null);
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -184,6 +191,7 @@ export default function AddPlantForm() {
             <form.Subscribe selector={(state) => state.values.intervalDays}>
               {(intervalDays) => {
                 const safeInterval = Number.isInteger(intervalDays) && intervalDays > 0 ? intervalDays : 1;
+
                 return (
                   <Field>
                     <FieldLabel>When should it first appear?</FieldLabel>

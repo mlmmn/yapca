@@ -12,9 +12,7 @@ const emailSchema = z.object({
 const email = Astro.url.searchParams.get("email");
 const error = Astro.url.searchParams.get("error");
 const resent = Astro.url.searchParams.get("resent");
-
 const mappedError = mapAuthError(error);
-
 const validation = emailSchema.safeParse({ email });
 const isValidEmail = validation.success;
 ---

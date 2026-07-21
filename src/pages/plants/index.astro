@@ -10,6 +10,7 @@ const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 async function loadAllPlants(): Promise<{ plants: PlantListItem[] } | { plants: null }> {
   const supabase = createClient(Astro.request.headers, Astro.cookies);
+
   if (!supabase) {
     return { plants: null };
   }
@@ -24,8 +25,8 @@ async function loadAllPlants(): Promise<{ plants: PlantListItem[] } | { plants: 
   }
 
   const photoPaths = data.flatMap((plant) => (plant.photo_path ? [plant.photo_path] : []));
-
   const signedUrlByPath = new Map<string, string>();
+
   if (photoPaths.length > 0) {
     const { data: signedUrls } = await supabase.storage
       .from("plant-photos")
@@ -51,6 +52,15 @@ async function loadAllPlants(): Promise<{ plants: PlantListItem[] } | { plants: 
 
 const { plants } = await loadAllPlants();
 const today = todayLocalDateString();
+let status: "error" | "empty" | "list";
+
+if (plants === null) {
+  status = "error";
+} else if (plants.length === 0) {
+  status = "empty";
+} else {
+  status = "list";
+}
 ---
 
 <Layout title="All plants · yapca">
@@ -60,7 +70,7 @@ const today = todayLocalDateString();
     <div class="flex flex-1 justify-center px-6 py-10">
       <div class="w-full max-w-2xl">
         {
-          plants === null ? (
+          status === "error" && (
             <div class="py-16 text-center">
               <h1 class="mb-4 text-2xl font-medium">All plants</h1>
               <p class="text-muted-foreground mb-6 text-sm">We couldn't load your plants.</p>
@@ -68,7 +78,10 @@ const today = todayLocalDateString();
                 Try again
               </button>
             </div>
-          ) : plants.length === 0 ? (
+          )
+        }
+        {
+          status === "empty" && (
             <div class="py-16 text-center">
               <h1 class="mb-6 text-2xl font-medium">All plants</h1>
               <p class="mb-1 font-medium">Add your first plant</p>
@@ -77,7 +90,10 @@ const today = todayLocalDateString();
               </p>
               <LinkButton href="/plants/new">Add plant</LinkButton>
             </div>
-          ) : (
+          )
+        }
+        {
+          status === "list" && plants !== null && (
             <>
               <div class="mb-6 flex items-center justify-between gap-4">
                 <h1 class="text-2xl font-medium">All plants</h1>
@@ -89,6 +105,7 @@ const today = todayLocalDateString();
               <ul class="border-border divide-border divide-y border-t border-b">
                 {plants.map((plant) => {
                   const initial = plant.name.trim().charAt(0).toUpperCase() || "?";
+
                   return (
                     <li>
                       <a

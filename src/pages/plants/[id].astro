@@ -20,6 +20,7 @@ async function loadPlantDetail(
   plantId: string,
 ): Promise<{ plant: PlantDetail | null; photoUrl: string | null; journal: JournalEntry[] }> {
   const supabase = createClient(Astro.request.headers, Astro.cookies);
+
   if (!supabase) {
     return { plant: null, photoUrl: null, journal: [] };
   }
@@ -35,8 +36,8 @@ async function loadPlantDetail(
   }
 
   const plant = plantData;
-
   let photoUrl: string | null = null;
+
   if (plant.photo_path) {
     const { data: signedUrls } = await supabase.storage
       .from("plant-photos")
@@ -59,6 +60,7 @@ async function loadPlantDetail(
 }
 
 const plantId = Astro.params.id;
+
 if (!plantId) {
   Astro.response.status = 404;
 }

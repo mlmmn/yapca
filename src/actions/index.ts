@@ -20,9 +20,11 @@ const photoSchema = z
 
 function requireSession(context: ActionAPIContext) {
   const supabase = createClient(context.request.headers, context.cookies);
+
   if (!supabase || !context.locals.user) {
     throw new ActionError({ code: "UNAUTHORIZED", message: "You must be signed in." });
   }
+
   return { supabase, user: context.locals.user };
 }
 
@@ -38,16 +40,18 @@ export const server = {
     }),
     handler: async (input, context) => {
       const { supabase, user } = requireSession(context);
-
       const next_due_on = input.alreadyWatered ? nextDue(input.clientDate, input.interval_days) : input.clientDate;
-
       let photo_path: string | null = null;
+
       if (input.photo) {
         const extension = PHOTO_MIME_EXTENSIONS[input.photo.type];
+
         photo_path = `${user.id}/${crypto.randomUUID()}.${extension}`;
+
         const { error: uploadError } = await supabase.storage
           .from("plant-photos")
           .upload(photo_path, input.photo, { contentType: input.photo.type });
+
         if (uploadError) {
           throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to upload photo." });
         }
@@ -68,11 +72,13 @@ export const server = {
       if (error) {
         if (photo_path) {
           const { error: cleanupError } = await supabase.storage.from("plant-photos").remove([photo_path]);
+
           if (cleanupError) {
             // eslint-disable-next-line no-console -- best-effort cleanup failure must not mask the original insert error
             console.error("Failed to clean up uploaded photo after insert failure:", cleanupError);
           }
         }
+
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to save plant." });
       }
 
@@ -97,10 +103,12 @@ export const server = {
       if (error) {
         // eslint-disable-next-line no-console -- debug RPC errors
         console.error("mark_watered RPC error:", { code: error.code, message: error.message, details: error.details });
+
         // SQLSTATE 02000 is "no_data_found" — the RPC raises this when the plant isn't found
         if (error.code === "02000") {
           throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
         }
+
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to mark plant watered." });
       }
 

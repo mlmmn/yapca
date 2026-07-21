@@ -9,6 +9,7 @@ const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 async function loadPlants(): Promise<{ plants: PlantListItem[] } | { plants: null }> {
   const supabase = createClient(Astro.request.headers, Astro.cookies);
+
   if (!supabase) {
     return { plants: null };
   }
@@ -24,8 +25,8 @@ async function loadPlants(): Promise<{ plants: PlantListItem[] } | { plants: nul
   }
 
   const photoPaths = data.flatMap((plant) => (plant.photo_path ? [plant.photo_path] : []));
-
   const signedUrlByPath = new Map<string, string>();
+
   if (photoPaths.length > 0) {
     const { data: signedUrls } = await supabase.storage
       .from("plant-photos")

@@ -8,11 +8,15 @@ import reactCompiler from "eslint-plugin-react-compiler";
 import eslintPluginReactHooks from "eslint-plugin-react-hooks";
 import path from "node:path";
 import tseslint from "typescript-eslint";
+import stylistic from "@stylistic/eslint-plugin";
 
 const gitignorePath = path.resolve(import.meta.dirname, ".gitignore");
 
 const baseConfig = tseslint.config({
   extends: [eslint.configs.recommended, tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
+  plugins: {
+    "@stylistic": stylistic,
+  },
   languageOptions: {
     parserOptions: {
       projectService: true,
@@ -22,6 +26,7 @@ const baseConfig = tseslint.config({
   rules: {
     "no-console": "warn",
     "no-unused-vars": "off",
+    curly: ["error", "all"],
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
@@ -35,6 +40,77 @@ const baseConfig = tseslint.config({
     "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: { attributes: false } }],
     "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "no-nested-ternary": "error",
+    "no-unneeded-ternary": "error",
+    "@stylistic/padding-line-between-statements": [
+      "warn",
+      {
+        blankLine: "never",
+        next: ["import"],
+        prev: ["import"],
+      },
+      {
+        blankLine: "never",
+        next: ["const", "let", "var"],
+        prev: ["const", "let", "var"],
+      },
+      {
+        blankLine: "any",
+        next: ["const", "let", "var", "multiline-const", "multiline-let", "multiline-var"],
+        prev: ["multiline-const", "multiline-let", "multiline-var"],
+      },
+      {
+        blankLine: "any",
+        next: ["multiline-const", "multiline-let", "multiline-var"],
+        prev: ["const", "let", "var", "multiline-const", "multiline-let", "multiline-var"],
+      },
+      {
+        blankLine: "always",
+        next: ["expression"],
+        prev: ["const", "let", "var"],
+      },
+      {
+        blankLine: "always",
+        next: ["const", "let", "var"],
+        prev: ["expression", "import"],
+      },
+      {
+        blankLine: "always",
+        next: ["*"],
+        prev: ["block-like", "default"],
+      },
+      {
+        blankLine: "always",
+        next: ["block-like", "default"],
+        prev: ["*"],
+      },
+      {
+        blankLine: "any",
+        next: ["case"],
+        prev: ["case"],
+      },
+      {
+        blankLine: "always",
+        next: ["case"],
+        prev: ["block-like"],
+      },
+      {
+        blankLine: "always",
+        next: ["expression", "const", "let", "var"],
+        prev: ["require"],
+      },
+      {
+        blankLine: "never",
+        next: ["require"],
+        prev: ["require"],
+      },
+      {
+        blankLine: "always",
+        next: ["return"],
+        prev: ["*"],
+      },
+    ],
   },
 });
 
@@ -58,6 +134,19 @@ const reactConfig = tseslint.config({
     "react/react-in-jsx-scope": "off",
     "react-compiler/react-compiler": "error",
     "react/no-multi-comp": "error",
+    "react/jsx-no-useless-fragment": [
+      "warn",
+      {
+        allowExpressions: true,
+      },
+    ],
+    "react/jsx-one-expression-per-line": "warn",
+    "react/no-unstable-nested-components": [
+      "error",
+      {
+        allowAsProps: true,
+      },
+    ],
   },
 });
 

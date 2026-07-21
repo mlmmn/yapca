@@ -2,7 +2,6 @@ import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { useOptimistic } from "react";
 import { actions } from "astro:actions";
 import { toast } from "sonner";
-
 import { cn, prefersReducedMotion } from "@/lib/utils";
 import {
   classifyDueStatus,
@@ -21,7 +20,6 @@ const BOOTSTRAP_ROW_COUNT = 3;
 function formatOverdueDate(dateString: string, today: string): string {
   const [dueYear, dueMonth, dueDay] = dateString.split("-").map(Number);
   const [todayYear] = today.split("-").map(Number);
-
   const date = new Date(dueYear, dueMonth - 1, dueDay);
 
   if (dueYear === todayYear) {
@@ -42,11 +40,13 @@ type OptimisticPlant = PlantListItem & { deleting?: boolean };
 
 function toggleId(ids: Set<string>, id: string, present: boolean): Set<string> {
   const next = new Set(ids);
+
   if (present) {
     next.add(id);
   } else {
     next.delete(id);
   }
+
   return next;
 }
 
@@ -65,14 +65,18 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
     // client-local date is only known once this effect runs after hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reveals the browser-local bootstrap; see the SSR/hydration contract in plan.md Phase 4
     setToday(todayLocalDateString());
+
     let timer: ReturnType<typeof setTimeout>;
+
     function scheduleRollover() {
       timer = setTimeout(() => {
         setToday(todayLocalDateString());
         scheduleRollover();
       }, msUntilNextLocalMidnight());
     }
+
     scheduleRollover();
+
     return () => {
       clearTimeout(timer);
     };
@@ -80,6 +84,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
 
   useEffect(() => {
     const timeouts = removalTimeouts.current;
+
     return () => {
       timeouts.forEach((timeoutId) => {
         clearTimeout(timeoutId);
@@ -97,6 +102,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
 
     const clientDate = todayLocalDateString();
     const formData = new FormData();
+
     formData.set("plantId", plant.id);
     formData.set("clientDate", clientDate);
 
@@ -108,6 +114,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
 
       try {
         const { error } = await actions.markWatered(formData);
+
         if (error) {
           throw error;
         }
@@ -153,6 +160,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
     if (today === null) {
       return [];
     }
+
     return optimisticPlants.filter((plant) => plant.next_due_on <= today);
   }, [optimisticPlants, today]);
 
@@ -160,6 +168,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
     if (today === null) {
       return null;
     }
+
     return basePlants.find((plant) => plant.next_due_on > today) ?? null;
   }, [basePlants, today]);
 

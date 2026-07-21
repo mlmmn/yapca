@@ -5,7 +5,6 @@ import {
   NumberField as NumberFieldPrimitive,
   type NumberFieldProps,
 } from "react-aria-components";
-
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 

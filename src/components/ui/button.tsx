@@ -6,7 +6,6 @@ import {
   type ButtonProps as ButtonPrimitiveProps,
   type LinkProps as LinkPrimitiveProps,
 } from "react-aria-components";
-
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(

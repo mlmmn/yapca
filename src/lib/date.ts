@@ -3,6 +3,7 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export function toEpochDay(dateString: string): number {
   const [year, month, day] = dateString.split("-").map(Number);
+
   return Date.UTC(year, month - 1, day) / MS_PER_DAY;
 }
 
@@ -11,6 +12,7 @@ export function fromEpochDay(epochDay: number): string {
   const year = date.getUTCFullYear();
   const month = String(date.getUTCMonth() + 1).padStart(2, "0");
   const day = String(date.getUTCDate()).padStart(2, "0");
+
   return `${year}-${month}-${day}`;
 }
 
@@ -31,17 +33,20 @@ export function todayLocalDateString(): string {
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
+
   return `${year}-${month}-${day}`;
 }
 
 export function msUntilNextLocalMidnight(): number {
   const now = new Date();
   const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+
   return nextMidnight.getTime() - now.getTime();
 }
 
 export function parseLocalDateString(dateString: string): Date {
   const [year, month, day] = dateString.split("-").map(Number);
+
   return new Date(year, month - 1, day);
 }
 
