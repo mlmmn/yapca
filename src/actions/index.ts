@@ -95,24 +95,73 @@ export const server = {
     handler: async (input, context) => {
       const { supabase } = requireSession(context);
 
-      const { data: next_due_on, error } = await supabase.rpc("mark_watered", {
+      const { data, error } = await supabase.rpc("mark_watered", {
         p_plant_id: input.plantId,
-        p_watered_on: input.clientDate,
+        p_acted_on: input.clientDate,
       });
 
       if (error) {
         // eslint-disable-next-line no-console -- debug RPC errors
         console.error("mark_watered RPC error:", { code: error.code, message: error.message, details: error.details });
 
-        // SQLSTATE 02000 is "no_data_found" — the RPC raises this when the plant isn't found
-        if (error.code === "02000") {
+        if (error.code === "P0002") {
           throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
         }
 
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to mark plant watered." });
       }
 
-      return { plantId: input.plantId, next_due_on };
+      return data[0];
+    },
+  }),
+
+  postponePlant: defineAction({
+    accept: "form",
+    input: z.object({
+      plantId: z.uuid(),
+      clientDate: clientDateSchema,
+    }),
+    handler: async (input, context) => {
+      const { supabase } = requireSession(context);
+      const { data, error } = await supabase.rpc("postpone_plant", {
+        p_plant_id: input.plantId,
+        p_acted_on: input.clientDate,
+      });
+
+      if (error) {
+        if (error.code === "P0002") {
+          throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
+        }
+
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to postpone plant." });
+      }
+
+      return data[0];
+    },
+  }),
+
+  undoWateringEvent: defineAction({
+    accept: "form",
+    input: z.object({ eventId: z.uuid() }),
+    handler: async (input, context) => {
+      const { supabase } = requireSession(context);
+      const { data, error } = await supabase.rpc("undo_watering_event", {
+        p_event_id: input.eventId,
+      });
+
+      if (error) {
+        if (error.code === "P0002") {
+          throw new ActionError({ code: "NOT_FOUND", message: "Event not found." });
+        }
+
+        if (error.code === "P0003") {
+          throw new ActionError({ code: "CONFLICT", message: "This event is no longer current." });
+        }
+
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to undo event." });
+      }
+
+      return data[0];
     },
   }),
 };

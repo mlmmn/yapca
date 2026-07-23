@@ -50,7 +50,7 @@ async function loadPlantDetail(
 
   const { data: journalData } = await supabase
     .from("watering_events")
-    .select("id, event_type, watered_on, prev_due_on, new_due_on")
+    .select("id, event_type, acted_on, prev_due_on, new_due_on")
     .eq("plant_id", plantId)
     .order("created_at", { ascending: false });
 
@@ -126,7 +126,7 @@ const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
                     {journal.map((entry) => (
                       <div class="border-border border-b pb-4 last:border-b-0">
                         <div class="text-sm md:grid md:grid-cols-3 md:gap-4">
-                          <div class="font-medium">{formatShortDate(entry.watered_on)}</div>
+                          <div class="font-medium">{formatShortDate(entry.acted_on)}</div>
                           <div class="text-muted-foreground">Watered</div>
                           <div class="text-muted-foreground">Scheduled for {formatShortDate(entry.prev_due_on)}</div>
                         </div>

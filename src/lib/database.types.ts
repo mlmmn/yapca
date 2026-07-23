@@ -79,7 +79,7 @@ export type Database = {
           plant_id: string
           prev_due_on: string
           user_id: string
-          watered_on: string
+          acted_on: string
         }
         Insert: {
           created_at?: string
@@ -89,7 +89,7 @@ export type Database = {
           plant_id: string
           prev_due_on: string
           user_id: string
-          watered_on: string
+          acted_on: string
         }
         Update: {
           created_at?: string
@@ -99,7 +99,7 @@ export type Database = {
           plant_id?: string
           prev_due_on?: string
           user_id?: string
-          watered_on?: string
+          acted_on?: string
         }
         Relationships: [
           {
@@ -126,9 +126,40 @@ export type Database = {
       mark_watered: {
         Args: {
           p_plant_id: string
-          p_watered_on: string
+          p_acted_on: string
         }
-        Returns: string
+        Returns: {
+          event_id: string
+          plant_id: string
+          event_type: string
+          acted_on: string
+          prev_due_on: string
+          new_due_on: string
+        }[]
+      }
+      postpone_plant: {
+        Args: {
+          p_plant_id: string
+          p_acted_on: string
+        }
+        Returns: {
+          event_id: string
+          plant_id: string
+          event_type: string
+          acted_on: string
+          prev_due_on: string
+          new_due_on: string
+        }[]
+      }
+      undo_watering_event: {
+        Args: {
+          p_event_id: string
+        }
+        Returns: {
+          event_id: string
+          plant_id: string
+          restored_due_on: string
+        }[]
       }
     }
     Enums: {
@@ -265,4 +296,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

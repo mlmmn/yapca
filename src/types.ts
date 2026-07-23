@@ -18,8 +18,28 @@ export type MarkWateredInput = {
 };
 
 export type MarkWateredOutput = {
-  plantId: string;
-  next_due_on: string;
+  event_id: string;
+  plant_id: string;
+  event_type: "watered";
+  acted_on: string;
+  prev_due_on: string;
+  new_due_on: string;
+};
+
+export type PostponePlantInput = MarkWateredInput;
+
+export type PostponePlantOutput = Omit<MarkWateredOutput, "event_type"> & {
+  event_type: "postponed";
+};
+
+export type UndoWateringEventInput = {
+  eventId: string;
+};
+
+export type UndoWateringEventOutput = {
+  event_id: string;
+  plant_id: string;
+  restored_due_on: string;
 };
 
 export type PlantListItem = {
@@ -34,8 +54,8 @@ export type WateringEvent = Database["public"]["Tables"]["watering_events"]["Row
 
 export type JournalEntry = {
   id: string;
-  event_type: string;
-  watered_on: string;
+  event_type: "watered" | "postponed";
+  acted_on: string;
   prev_due_on: string;
   new_due_on: string;
 };
