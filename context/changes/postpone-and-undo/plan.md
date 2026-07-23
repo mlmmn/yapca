@@ -342,10 +342,10 @@ All mutations remain one RPC round trip and one row-level transaction. The Today
 
 #### Automated
 
-- [x] 2.1 Astro type checking passes
-- [x] 2.2 Linting passes with no new ignores
-- [x] 2.3 Production build passes on the Cloudflare adapter
-- [x] 2.4 Touched React components comply with folder and module conventions
+- [x] 2.1 Astro type checking passes — 269588f
+- [x] 2.2 Linting passes with no new ignores — 269588f
+- [x] 2.3 Production build passes on the Cloudflare adapter — 269588f
+- [x] 2.4 Touched React components comply with folder and module conventions — 269588f
 
 #### Manual
 
@@ -362,10 +362,10 @@ All mutations remain one RPC round trip and one row-level transaction. The Today
 
 #### Automated
 
-- [ ] 3.1 Local Supabase reset and regenerated types remain clean
-- [ ] 3.2 Astro type checking passes
-- [ ] 3.3 Linting passes
-- [ ] 3.4 Production build passes on the Cloudflare adapter
+- [x] 3.1 Local Supabase reset and regenerated types remain clean
+- [x] 3.2 Astro type checking passes
+- [x] 3.3 Linting passes
+- [x] 3.4 Production build passes on the Cloudflare adapter
 
 #### Manual
 

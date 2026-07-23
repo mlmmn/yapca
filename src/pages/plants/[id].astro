@@ -127,8 +127,21 @@ const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
                       <div class="border-border border-b pb-4 last:border-b-0">
                         <div class="text-sm md:grid md:grid-cols-3 md:gap-4">
                           <div class="font-medium">{formatShortDate(entry.acted_on)}</div>
-                          <div class="text-muted-foreground">Watered</div>
-                          <div class="text-muted-foreground">Scheduled for {formatShortDate(entry.prev_due_on)}</div>
+                          {entry.event_type === "watered" ? (
+                            <>
+                              <div class="text-muted-foreground">Watered</div>
+                              <div class="text-muted-foreground">
+                                Scheduled for {formatShortDate(entry.prev_due_on)}
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div class="text-muted-foreground">Postponed 2 days</div>
+                              <div class="text-muted-foreground">
+                                Due {formatShortDate(entry.prev_due_on)} → {formatShortDate(entry.new_due_on)}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     ))}
