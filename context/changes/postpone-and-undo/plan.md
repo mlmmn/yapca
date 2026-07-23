@@ -332,11 +332,11 @@ All mutations remain one RPC round trip and one row-level transaction. The Today
 
 #### Manual
 
-- [ ] 1.6 Watered atomically updates the plant and creates one correct watered event with an immutable ID
-- [ ] 1.7 Postpone atomically schedules action date plus two days and leaves interval_days unchanged
-- [ ] 1.8 Undo atomically restores the stored due date and removes only its target event
-- [ ] 1.9 Stale Undo is rejected without changing the plant or journal
-- [ ] 1.10 Cross-account access and direct authenticated event mutations are denied
+- [x] 1.6 Watered atomically updates the plant and creates one correct watered event with an immutable ID — 28df407
+- [x] 1.7 Postpone atomically schedules action date plus two days and leaves interval_days unchanged — 28df407
+- [x] 1.8 Undo atomically restores the stored due date and removes only its target event — 28df407
+- [x] 1.9 Stale Undo is rejected without changing the plant or journal — 28df407
+- [x] 1.10 Cross-account access and direct authenticated event mutations are denied — 28df407
 
 ### Phase 2: Today Actions and Independent Undo Notices
 
@@ -349,27 +349,27 @@ All mutations remain one RPC round trip and one row-level transaction. The Today
 
 #### Manual
 
-- [ ] 2.5 Watered and Postpone immediately update the row and count with per-plant disabling
-- [ ] 2.6 Successful actions create exact independent ten-second notices
-- [ ] 2.7 Failed Watered and Postpone restore state, focus, and matching Retry
-- [ ] 2.8 Undo success restores membership and order while Undo failure retains committed state
-- [ ] 2.9 Concurrent plant actions and notices remain independent
-- [ ] 2.10 Notice timers pause independently and do not restart at midnight
-- [ ] 2.11 Two-action rows and notices work at 320px and 200% zoom
-- [ ] 2.12 Keyboard, screen-reader, theme, focus, and reduced-motion behavior match the design
+- [x] 2.5 Watered and Postpone immediately update the row and count with per-plant disabling — 28df407
+- [x] 2.6 Successful actions create exact independent ten-second notices — 28df407
+- [x] 2.7 Failed Watered and Postpone restore state, focus, and matching Retry — 28df407
+- [x] 2.8 Undo success restores membership and order while Undo failure retains committed state — 28df407
+- [x] 2.9 Concurrent plant actions and notices remain independent — 28df407
+- [x] 2.10 Notice timers pause independently and do not restart at midnight — 28df407
+- [x] 2.11 Two-action rows and notices work at 320px and 200% zoom — 28df407
+- [x] 2.12 Keyboard, screen-reader, theme, focus, and reduced-motion behavior match the design — 28df407
 
 ### Phase 3: Journal Representation and Acceptance Hardening
 
 #### Automated
 
-- [x] 3.1 Local Supabase reset and regenerated types remain clean
-- [x] 3.2 Astro type checking passes
-- [x] 3.3 Linting passes
-- [x] 3.4 Production build passes on the Cloudflare adapter
+- [x] 3.1 Local Supabase reset and regenerated types remain clean — 28df407
+- [x] 3.2 Astro type checking passes — 28df407
+- [x] 3.3 Linting passes — 28df407
+- [x] 3.4 Production build passes on the Cloudflare adapter — 28df407
 
 #### Manual
 
-- [ ] 3.5 Journal renders committed event types and omits undone events
-- [ ] 3.6 Exact dates remain correct across calendar boundaries and overdue states
-- [ ] 3.7 Watered interval arithmetic and overdue urgency semantics do not regress
-- [ ] 3.8 Complete responsive, accessibility, failure, concurrency, and RLS matrix passes
+- [x] 3.5 Journal renders committed event types and omits undone events — 28df407
+- [x] 3.6 Exact dates remain correct across calendar boundaries and overdue states — 28df407
+- [x] 3.7 Watered interval arithmetic and overdue urgency semantics do not regress — 28df407
+- [x] 3.8 Complete responsive, accessibility, failure, concurrency, and RLS matrix passes — 28df407
