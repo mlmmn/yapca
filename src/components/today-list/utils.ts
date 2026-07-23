@@ -1,0 +1,28 @@
+import type { ActionKind } from "./types";
+
+export const ANIMATION_MS = 190;
+export const BOOTSTRAP_ROW_COUNT = 3;
+
+export function getActionLabel(kind: ActionKind): string {
+  return kind === "watered" ? "Watered" : "Postpone 2 days";
+}
+
+export function getSuccessMessage(kind: ActionKind, name: string, dueDate: string): string {
+  return kind === "watered" ? `${name} marked watered · Next due ${dueDate}` : `${name} postponed · Due ${dueDate}`;
+}
+
+export function getFailureMessage(kind: ActionKind, name: string): string {
+  return kind === "watered" ? `Couldn't mark ${name} watered. Try again.` : `Couldn't postpone ${name}. Try again.`;
+}
+
+export function formatOverdueDate(dateString: string, today: string): string {
+  const [dueYear, dueMonth, dueDay] = dateString.split("-").map(Number);
+  const [todayYear] = today.split("-").map(Number);
+  const date = new Date(dueYear, dueMonth - 1, dueDay);
+
+  if (dueYear === todayYear) {
+    return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" }).format(date);
+  }
+
+  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(date);
+}

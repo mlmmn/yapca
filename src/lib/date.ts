@@ -64,6 +64,21 @@ export function formatIntervalLabel(intervalDays: number): string {
   return `Every ${intervalDays} day${intervalDays === 1 ? "" : "s"}`;
 }
 
+export type DueRecord = {
+  next_due_on: string;
+  name: string;
+};
+
+export function compareDueRecords(first: DueRecord, second: DueRecord): number {
+  const dueDateOrder = toEpochDay(first.next_due_on) - toEpochDay(second.next_due_on);
+
+  if (dueDateOrder !== 0) {
+    return dueDateOrder;
+  }
+
+  return first.name.localeCompare(second.name);
+}
+
 export type DueStatus = "due-today" | "overdue" | "overdue-strong";
 
 export function classifyDueStatus(dueDate: string, today: string): DueStatus {

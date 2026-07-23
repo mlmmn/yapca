@@ -324,11 +324,11 @@ All mutations remain one RPC round trip and one row-level transaction. The Today
 
 #### Automated
 
-- [x] 1.1 Local Supabase reset applies every migration cleanly
-- [x] 1.2 Generated database types contain acted_on, both event types, and all three RPC signatures
-- [x] 1.3 Astro type checking passes
-- [x] 1.4 Linting passes
-- [x] 1.5 Production build passes on the Cloudflare adapter
+- [x] 1.1 Local Supabase reset applies every migration cleanly — 5a4cab9
+- [x] 1.2 Generated database types contain acted_on, both event types, and all three RPC signatures — 5a4cab9
+- [x] 1.3 Astro type checking passes — 5a4cab9
+- [x] 1.4 Linting passes — 5a4cab9
+- [x] 1.5 Production build passes on the Cloudflare adapter — 5a4cab9
 
 #### Manual
 
@@ -342,10 +342,10 @@ All mutations remain one RPC round trip and one row-level transaction. The Today
 
 #### Automated
 
-- [ ] 2.1 Astro type checking passes
-- [ ] 2.2 Linting passes with no new ignores
-- [ ] 2.3 Production build passes on the Cloudflare adapter
-- [ ] 2.4 Touched React components comply with folder and module conventions
+- [x] 2.1 Astro type checking passes
+- [x] 2.2 Linting passes with no new ignores
+- [x] 2.3 Production build passes on the Cloudflare adapter
+- [x] 2.4 Touched React components comply with folder and module conventions
 
 #### Manual
 
