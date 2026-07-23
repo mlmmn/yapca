@@ -129,6 +129,13 @@ export const server = {
       });
 
       if (error) {
+        // eslint-disable-next-line no-console -- debug RPC errors
+        console.error("postpone_plant RPC error:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+        });
+
         if (error.code === "P0002") {
           throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
         }
@@ -150,6 +157,13 @@ export const server = {
       });
 
       if (error) {
+        // eslint-disable-next-line no-console -- debug RPC errors
+        console.error("undo_watering_event RPC error:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+        });
+
         if (error.code === "P0002") {
           throw new ActionError({ code: "NOT_FOUND", message: "Event not found." });
         }

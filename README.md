@@ -41,6 +41,15 @@ pnpm dev
 
 Auth uses Supabase's built-in `auth.users`. Application tables (plants, tasks) live in `supabase/migrations/`.
 
+### Local database resets
+
+`pnpx supabase db reset` is destructive: it drops the local database, reapplies every migration, and then runs `supabase/seed.sql`. The reset cannot preserve data you created manually, but the committed seed restores a known development account and three sample plants every time:
+
+- Email: `test@yapca.local`
+- Password: `password`
+
+Use the seeded account for repeatable local verification. Treat any other local account or plant as disposable before running a reset; never run this command against a hosted project.
+
 ### Hosted Supabase Setup
 
 For a hosted Supabase project:

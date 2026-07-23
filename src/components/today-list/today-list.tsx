@@ -47,11 +47,15 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
   const removalTimeouts = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const notices = useRef(new Map<string, NoticeContext>());
 
-  function focusNextAction(plantId: string) {
+  function getRowButton(plantId: string, kind: ActionKind) {
+    return buttonRefs.current.get(`${plantId}:${kind}`) ?? buttonRefs.current.get(`${plantId}:watered`);
+  }
+
+  function focusNextAction(plantId: string, kind: ActionKind) {
     const currentIndex = dueList.findIndex((plant) => plant.id === plantId);
     const nextButton =
       currentIndex >= 0 && currentIndex + 1 < dueList.length
-        ? buttonRefs.current.get(`${dueList[currentIndex + 1].id}:watered`)
+        ? getRowButton(dueList[currentIndex + 1].id, kind)
         : undefined;
 
     if (nextButton) {
@@ -62,7 +66,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
 
     const alternateButton = dueList
       .filter((plant) => plant.id !== plantId)
-      .map((plant) => buttonRefs.current.get(`${plant.id}:watered`))
+      .map((plant) => getRowButton(plant.id, kind))
       .find(Boolean);
 
     if (alternateButton) {
@@ -135,7 +139,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
     setLeavingIds((current) => updateSet(current, plant.id, true));
 
     if (keyboard) {
-      focusNextAction(plant.id);
+      focusNextAction(plant.id, kind);
     }
 
     const clientDate = todayLocalDateString();
@@ -208,7 +212,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
 
         if (context.keyboard) {
           requestAnimationFrame(() => {
-            buttonRefs.current.get(`${context.plant.id}:watered`)?.focus();
+            getRowButton(context.plant.id, context.kind)?.focus();
           });
         }
       } catch {

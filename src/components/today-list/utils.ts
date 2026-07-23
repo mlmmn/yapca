@@ -1,3 +1,4 @@
+import { formatShortDate } from "@/lib/date";
 import type { ActionKind } from "./types";
 
 export const ANIMATION_MS = 190;
@@ -8,7 +9,9 @@ export function getActionLabel(kind: ActionKind): string {
 }
 
 export function getSuccessMessage(kind: ActionKind, name: string, dueDate: string): string {
-  return kind === "watered" ? `${name} marked watered · Next due ${dueDate}` : `${name} postponed · Due ${dueDate}`;
+  const formatted = formatShortDate(dueDate);
+
+  return kind === "watered" ? `${name} marked watered · Next due ${formatted}` : `${name} postponed · Due ${formatted}`;
 }
 
 export function getFailureMessage(kind: ActionKind, name: string): string {
