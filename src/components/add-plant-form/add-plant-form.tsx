@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { z } from "astro/zod";
 import { actions } from "astro:actions";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { todayLocalDateString } from "@/lib/date";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { NumberField, NumberFieldGroup, NumberFieldInput, NumberFieldSuffix } from "@/components/ui/number-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { todayLocalDateString } from "@/lib/date";
+import { getSeason, getSeasonLabel, selectSeasonInterval } from "@/lib/season";
+import { cn } from "@/lib/utils";
 
 const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
 const ALLOWED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -17,7 +18,12 @@ const PHOTO_GUIDANCE = "Choose a JPEG, PNG, or WebP image up to 4 MB.";
 
 const addPlantSchema = z.object({
   name: z.string().min(1, "Enter a plant name"),
-  intervalDays: z
+  growingIntervalDays: z
+    .number({ error: "Choose a number from 1 to 365" })
+    .refine((value) => Number.isInteger(value) && value >= 1 && value <= 365, {
+      error: "Choose a number from 1 to 365",
+    }),
+  dormancyIntervalDays: z
     .number({ error: "Choose a number from 1 to 365" })
     .refine((value) => Number.isInteger(value) && value >= 1 && value <= 365, {
       error: "Choose a number from 1 to 365",
@@ -31,11 +37,15 @@ export default function AddPlantForm() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const localDate = useMemo(() => todayLocalDateString(), []);
+  const activeSeason = getSeason(localDate);
+  const activeSeasonLabel = getSeasonLabel(activeSeason);
 
   const form = useForm({
     defaultValues: {
       name: "",
-      intervalDays: 7,
+      growingIntervalDays: 7,
+      dormancyIntervalDays: 7,
       firstAppearance: "today" as "today" | "after",
     },
     validationLogic: revalidateLogic(),
@@ -46,9 +56,9 @@ export default function AddPlantForm() {
       const formData = new FormData();
 
       formData.set("name", value.name);
-      formData.set("growing_interval_days", String(value.intervalDays));
-      formData.set("dormancy_interval_days", String(value.intervalDays));
-      formData.set("clientDate", todayLocalDateString());
+      formData.set("growing_interval_days", String(value.growingIntervalDays));
+      formData.set("dormancy_interval_days", String(value.dormancyIntervalDays));
+      formData.set("clientDate", localDate);
 
       if (value.firstAppearance === "after") {
         formData.set("alreadyWatered", "true");
@@ -159,10 +169,10 @@ export default function AddPlantForm() {
           )}
         </form.Field>
 
-        <form.Field name="intervalDays">
+        <form.Field name="growingIntervalDays">
           {(field) => (
             <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
-              <FieldLabel htmlFor={field.name}>Water every</FieldLabel>
+              <FieldLabel htmlFor={field.name}>Growing season</FieldLabel>
               <FieldContent>
                 <NumberField
                   id={field.name}
@@ -181,6 +191,36 @@ export default function AddPlantForm() {
                     <NumberFieldSuffix>days</NumberFieldSuffix>
                   </NumberFieldGroup>
                 </NumberField>
+                <FieldDescription>March–October</FieldDescription>
+                <FieldError errors={field.state.meta.errors} />
+              </FieldContent>
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field name="dormancyIntervalDays">
+          {(field) => (
+            <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
+              <FieldLabel htmlFor={field.name}>Dormancy season</FieldLabel>
+              <FieldContent>
+                <NumberField
+                  id={field.name}
+                  name={field.name}
+                  minValue={1}
+                  maxValue={365}
+                  value={field.state.value}
+                  onChange={(value) => {
+                    field.handleChange(value);
+                  }}
+                  onBlur={field.handleBlur}
+                  isInvalid={field.state.meta.errors.length > 0}
+                >
+                  <NumberFieldGroup>
+                    <NumberFieldInput />
+                    <NumberFieldSuffix>days</NumberFieldSuffix>
+                  </NumberFieldGroup>
+                </NumberField>
+                <FieldDescription>November–February</FieldDescription>
                 <FieldError errors={field.state.meta.errors} />
               </FieldContent>
             </Field>
@@ -189,9 +229,18 @@ export default function AddPlantForm() {
 
         <form.Field name="firstAppearance">
           {(field) => (
-            <form.Subscribe selector={(state) => state.values.intervalDays}>
-              {(intervalDays) => {
-                const safeInterval = Number.isInteger(intervalDays) && intervalDays > 0 ? intervalDays : 1;
+            <form.Subscribe
+              selector={(state) => ({
+                growingIntervalDays: state.values.growingIntervalDays,
+                dormancyIntervalDays: state.values.dormancyIntervalDays,
+              })}
+            >
+              {({ growingIntervalDays, dormancyIntervalDays }) => {
+                const growingInterval =
+                  Number.isInteger(growingIntervalDays) && growingIntervalDays > 0 ? growingIntervalDays : 1;
+                const dormancyInterval =
+                  Number.isInteger(dormancyIntervalDays) && dormancyIntervalDays > 0 ? dormancyIntervalDays : 1;
+                const activeInterval = selectSeasonInterval(localDate, growingInterval, dormancyInterval);
 
                 return (
                   <Field>
@@ -209,9 +258,9 @@ export default function AddPlantForm() {
                         </RadioGroupItem>
                         <RadioGroupItem value="after">
                           <span>
-                            After {safeInterval} day{safeInterval === 1 ? "" : "s"}
+                            After {activeInterval} day{activeInterval === 1 ? "" : "s"}
                           </span>
-                          <FieldDescription>I watered it today.</FieldDescription>
+                          <FieldDescription>I watered it today · {activeSeasonLabel}</FieldDescription>
                         </RadioGroupItem>
                       </RadioGroup>
                     </FieldContent>
@@ -257,9 +306,9 @@ export default function AddPlantForm() {
       </FieldGroup>
 
       <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <Button type="submit" isDisabled={isSubmitting} className={cn("w-full sm:w-fit")}>
-            {isSubmitting ? "Saving plant…" : "Save plant"}
+        {(submitting) => (
+          <Button type="submit" isDisabled={submitting} className={cn("w-full sm:w-fit")}>
+            {submitting ? "Saving plant…" : "Save plant"}
           </Button>
         )}
       </form.Subscribe>

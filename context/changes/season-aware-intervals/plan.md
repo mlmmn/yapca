@@ -362,12 +362,12 @@ This is deliberately an interim measure. Roadmap slice **S-08 (`user-timezone-da
 
 #### Automated
 
-- [x] 1.1 Local database reset applies all migrations and the aligned seed cleanly
-- [x] 1.2 Database boundary and ownership verification passes
-- [x] 1.3 Generated Supabase types match the migrated local schema
-- [x] 1.4 Astro type checking passes
-- [x] 1.5 Linting passes
-- [x] 1.6 Cloudflare production build passes
+- [x] 1.1 Local database reset applies all migrations and the aligned seed cleanly — aa3ae30
+- [x] 1.2 Database boundary and ownership verification passes — aa3ae30
+- [x] 1.3 Generated Supabase types match the migrated local schema — aa3ae30
+- [x] 1.4 Astro type checking passes — aa3ae30
+- [x] 1.5 Linting passes — aa3ae30
+- [x] 1.6 Cloudflare production build passes — aa3ae30
 
 #### Manual
 
@@ -378,16 +378,16 @@ This is deliberately an interim measure. Roadmap slice **S-08 (`user-timezone-da
 
 #### Automated
 
-- [ ] 2.1 Astro type checking passes
-- [ ] 2.2 Linting passes
-- [ ] 2.3 Cloudflare production build passes
+- [x] 2.1 Astro type checking passes
+- [x] 2.2 Linting passes
+- [x] 2.3 Cloudflare production build passes
 
 #### Manual
 
-- [ ] 2.4 Add form accepts and validates two independent seasonal intervals
-- [ ] 2.5 First-appearance preview selects and names the browser-local active season
-- [ ] 2.6 Saving persists both intervals and the exact initial due date
-- [ ] 2.7 Photo, error, keyboard, responsive, theme, and motion behavior does not regress
+- [x] 2.4 Add form accepts and validates two independent seasonal intervals
+- [x] 2.5 First-appearance preview selects and names the browser-local active season
+- [x] 2.6 Saving persists both intervals and the exact initial due date
+- [x] 2.7 Photo, error, keyboard, responsive, theme, and motion behavior does not regress
 
 ### Phase 3: Active-Season Schedule Presentation
 
