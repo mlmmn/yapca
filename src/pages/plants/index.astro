@@ -17,7 +17,7 @@ async function loadAllPlants(): Promise<{ plants: PlantListItem[] } | { plants: 
 
   const { data, error } = await supabase
     .from("plants")
-    .select("id, name, interval_days, next_due_on, photo_path")
+    .select("id, name, growing_interval_days, dormancy_interval_days, next_due_on, photo_path")
     .order("name", { ascending: true });
 
   if (error) {
@@ -42,7 +42,8 @@ async function loadAllPlants(): Promise<{ plants: PlantListItem[] } | { plants: 
   const plants: PlantListItem[] = data.map((plant) => ({
     id: plant.id,
     name: plant.name,
-    interval_days: plant.interval_days,
+    growing_interval_days: plant.growing_interval_days,
+    dormancy_interval_days: plant.dormancy_interval_days,
     next_due_on: plant.next_due_on,
     photoUrl: plant.photo_path ? (signedUrlByPath.get(plant.photo_path) ?? null) : null,
   }));
@@ -126,7 +127,9 @@ if (plants === null) {
                         <div class="min-w-0 flex-1">
                           <p class="line-clamp-2 font-medium">{plant.name}</p>
                           <p class="text-muted-foreground text-sm">
-                            {formatIntervalLabel(plant.interval_days)} · {formatDueLabel(plant.next_due_on, today)}
+                            {formatIntervalLabel(plant.growing_interval_days)}
+                            {" · "}
+                            {formatDueLabel(plant.next_due_on, today)}
                           </p>
                         </div>
                       </a>

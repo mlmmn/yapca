@@ -2,6 +2,7 @@ import { ActionError, defineAction, type ActionAPIContext } from "astro:actions"
 import { z } from "astro/zod";
 import { createClient } from "@/lib/supabase";
 import { isValidDateString, nextDue } from "@/lib/interval";
+import { selectSeasonInterval } from "@/lib/season";
 
 const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
 
@@ -33,14 +34,20 @@ export const server = {
     accept: "form",
     input: z.object({
       name: z.string().min(1, "Name is required"),
-      interval_days: z.coerce.number().int().min(1).max(365),
+      growing_interval_days: z.coerce.number().int().min(1).max(365),
+      dormancy_interval_days: z.coerce.number().int().min(1).max(365),
       alreadyWatered: z.preprocess((v) => v === "true", z.boolean()),
       clientDate: clientDateSchema,
       photo: photoSchema.optional(),
     }),
     handler: async (input, context) => {
       const { supabase, user } = requireSession(context);
-      const next_due_on = input.alreadyWatered ? nextDue(input.clientDate, input.interval_days) : input.clientDate;
+      const activeInterval = selectSeasonInterval(
+        input.clientDate,
+        input.growing_interval_days,
+        input.dormancy_interval_days,
+      );
+      const next_due_on = input.alreadyWatered ? nextDue(input.clientDate, activeInterval) : input.clientDate;
       let photo_path: string | null = null;
 
       if (input.photo) {
@@ -62,7 +69,8 @@ export const server = {
         .insert({
           user_id: user.id,
           name: input.name,
-          interval_days: input.interval_days,
+          growing_interval_days: input.growing_interval_days,
+          dormancy_interval_days: input.dormancy_interval_days,
           next_due_on,
           photo_path,
         })

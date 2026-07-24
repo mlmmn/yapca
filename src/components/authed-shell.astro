@@ -16,7 +16,7 @@ async function loadPlants(): Promise<{ plants: PlantListItem[] } | { plants: nul
 
   const { data, error } = await supabase
     .from("plants")
-    .select("id, name, interval_days, next_due_on, photo_path")
+    .select("id, name, growing_interval_days, dormancy_interval_days, next_due_on, photo_path")
     .order("next_due_on", { ascending: true })
     .order("name", { ascending: true });
 
@@ -42,7 +42,8 @@ async function loadPlants(): Promise<{ plants: PlantListItem[] } | { plants: nul
   const plants: PlantListItem[] = data.map((plant) => ({
     id: plant.id,
     name: plant.name,
-    interval_days: plant.interval_days,
+    growing_interval_days: plant.growing_interval_days,
+    dormancy_interval_days: plant.dormancy_interval_days,
     next_due_on: plant.next_due_on,
     photoUrl: plant.photo_path ? (signedUrlByPath.get(plant.photo_path) ?? null) : null,
   }));

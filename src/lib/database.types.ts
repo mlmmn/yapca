@@ -1,6 +1,3 @@
-// Generated from the local Supabase schema — do not hand-edit.
-// Regenerate after any migration: pnpx supabase gen types typescript --local > src/lib/database.types.ts
-
 export type Json =
   | string
   | number
@@ -40,8 +37,9 @@ export type Database = {
       plants: {
         Row: {
           created_at: string
+          dormancy_interval_days: number
+          growing_interval_days: number
           id: string
-          interval_days: number
           name: string
           next_due_on: string
           photo_path: string | null
@@ -50,8 +48,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dormancy_interval_days: number
+          growing_interval_days: number
           id?: string
-          interval_days: number
           name: string
           next_due_on: string
           photo_path?: string | null
@@ -60,8 +59,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dormancy_interval_days?: number
+          growing_interval_days?: number
           id?: string
-          interval_days?: number
           name?: string
           next_due_on?: string
           photo_path?: string | null
@@ -72,6 +72,7 @@ export type Database = {
       }
       watering_events: {
         Row: {
+          acted_on: string
           created_at: string
           event_type: string
           id: string
@@ -79,9 +80,9 @@ export type Database = {
           plant_id: string
           prev_due_on: string
           user_id: string
-          acted_on: string
         }
         Insert: {
+          acted_on: string
           created_at?: string
           event_type?: string
           id?: string
@@ -89,9 +90,9 @@ export type Database = {
           plant_id: string
           prev_due_on: string
           user_id: string
-          acted_on: string
         }
         Update: {
+          acted_on?: string
           created_at?: string
           event_type?: string
           id?: string
@@ -99,7 +100,6 @@ export type Database = {
           plant_id?: string
           prev_due_on?: string
           user_id?: string
-          acted_on?: string
         }
         Relationships: [
           {
@@ -107,13 +107,6 @@ export type Database = {
             columns: ["plant_id"]
             isOneToOne: false
             referencedRelation: "plants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "watering_events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -124,37 +117,29 @@ export type Database = {
     }
     Functions: {
       mark_watered: {
-        Args: {
-          p_plant_id: string
-          p_acted_on: string
-        }
+        Args: { p_acted_on: string; p_plant_id: string }
         Returns: {
-          event_id: string
-          plant_id: string
-          event_type: string
           acted_on: string
-          prev_due_on: string
+          event_id: string
+          event_type: string
           new_due_on: string
+          plant_id: string
+          prev_due_on: string
         }[]
       }
       postpone_plant: {
-        Args: {
-          p_plant_id: string
-          p_acted_on: string
-        }
+        Args: { p_acted_on: string; p_plant_id: string }
         Returns: {
-          event_id: string
-          plant_id: string
-          event_type: string
           acted_on: string
-          prev_due_on: string
+          event_id: string
+          event_type: string
           new_due_on: string
+          plant_id: string
+          prev_due_on: string
         }[]
       }
       undo_watering_event: {
-        Args: {
-          p_event_id: string
-        }
+        Args: { p_event_id: string }
         Returns: {
           event_id: string
           plant_id: string
@@ -296,3 +281,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

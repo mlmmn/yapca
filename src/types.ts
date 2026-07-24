@@ -4,7 +4,8 @@ export type Plant = Database["public"]["Tables"]["plants"]["Row"];
 
 export type AddPlantInput = {
   name: string;
-  interval_days: number;
+  growing_interval_days: number;
+  dormancy_interval_days: number;
   alreadyWatered: boolean;
   clientDate: string;
   photo?: File;
@@ -45,7 +46,8 @@ export type UndoWateringEventOutput = {
 export type PlantListItem = {
   id: string;
   name: string;
-  interval_days: number;
+  growing_interval_days: number;
+  dormancy_interval_days: number;
   next_due_on: string;
   photoUrl: string | null;
 };

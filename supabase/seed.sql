@@ -70,14 +70,15 @@ begin
 end
 $$;
 
-insert into public.plants (id, user_id, name, interval_days, next_due_on)
+insert into public.plants (id, user_id, name, growing_interval_days, dormancy_interval_days, next_due_on)
 values
-  ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000001', 'Monstera', 7, current_date),
-  ('00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000001', 'Snake plant', 21, current_date + 5),
-  ('00000000-0000-0000-0000-000000000103', '00000000-0000-0000-0000-000000000001', 'Peace lily', 4, current_date - 1)
+  ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000001', 'Monstera', 7, 30, current_date),
+  ('00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000001', 'Snake plant', 21, 21, current_date + 5),
+  ('00000000-0000-0000-0000-000000000103', '00000000-0000-0000-0000-000000000001', 'Peace lily', 4, 14, current_date - 1)
 on conflict (id) do update
   set user_id = excluded.user_id,
       name = excluded.name,
-      interval_days = excluded.interval_days,
+      growing_interval_days = excluded.growing_interval_days,
+      dormancy_interval_days = excluded.dormancy_interval_days,
       next_due_on = excluded.next_due_on,
       updated_at = now();

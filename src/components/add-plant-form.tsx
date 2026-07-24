@@ -46,7 +46,8 @@ export default function AddPlantForm() {
       const formData = new FormData();
 
       formData.set("name", value.name);
-      formData.set("interval_days", String(value.intervalDays));
+      formData.set("growing_interval_days", String(value.intervalDays));
+      formData.set("dormancy_interval_days", String(value.intervalDays));
       formData.set("clientDate", todayLocalDateString());
 
       if (value.firstAppearance === "after") {

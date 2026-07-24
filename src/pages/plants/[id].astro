@@ -11,7 +11,8 @@ const SIGNED_URL_TTL_SECONDS = 60 * 60;
 type PlantDetail = {
   id: string;
   name: string;
-  interval_days: number;
+  growing_interval_days: number;
+  dormancy_interval_days: number;
   next_due_on: string;
   photo_path: string | null;
 };
@@ -27,7 +28,7 @@ async function loadPlantDetail(
 
   const { data: plantData } = await supabase
     .from("plants")
-    .select("id, name, interval_days, next_due_on, photo_path")
+    .select("id, name, growing_interval_days, dormancy_interval_days, next_due_on, photo_path")
     .eq("id", plantId)
     .single();
 
@@ -104,7 +105,7 @@ const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
                   <div class="min-w-0 flex-1">
                     <h1 class="mb-3 text-2xl font-medium md:text-3xl">{plant.name}</h1>
                     <div class="text-muted-foreground space-y-1 text-sm">
-                      <p>{formatIntervalLabel(plant.interval_days)}</p>
+                      <p>{formatIntervalLabel(plant.growing_interval_days)}</p>
                       <p>{formatDueLabel(plant.next_due_on, today)}</p>
                     </div>
                   </div>
