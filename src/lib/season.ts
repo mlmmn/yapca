@@ -30,3 +30,7 @@ export function selectSeasonInterval(
 export function getSeasonLabel(season: Season): string {
   return season === "growing" ? "Growing season" : "Dormancy season";
 }
+
+export function getShortSeasonLabel(season: Season): string {
+  return season === "growing" ? "Growing" : "Dormancy";
+}

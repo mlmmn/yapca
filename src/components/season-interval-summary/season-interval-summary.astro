@@ -1,0 +1,80 @@
+---
+import { formatIntervalLabel, formatShortDate } from "@/lib/date";
+
+type Props = {
+  growingIntervalDays: number;
+  dormancyIntervalDays: number;
+  dueDate: string;
+  mode: "active" | "full";
+};
+
+const { growingIntervalDays, dormancyIntervalDays, dueDate, mode } = Astro.props;
+const fallbackSchedule = `Growing ${formatIntervalLabel(growingIntervalDays)} · Dormancy ${formatIntervalLabel(dormancyIntervalDays)}`;
+const fallbackDue = `Due ${formatShortDate(dueDate)}`;
+---
+
+<div
+  class="text-muted-foreground min-w-0 space-y-1 text-sm"
+  data-season-summary
+  data-mode={mode}
+  data-growing-interval={growingIntervalDays}
+  data-dormancy-interval={dormancyIntervalDays}
+  data-due-date={dueDate}
+>
+  <div data-season-due>{fallbackDue}</div>
+  <div class="min-h-5 text-xs" data-season-summary-text>
+    {fallbackSchedule}
+  </div>
+</div>
+
+<script>
+  import { formatDueLabel, formatIntervalLabel, msUntilNextLocalMidnight, todayLocalDateString } from "@/lib/date";
+  import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
+
+  const summaries = Array.from(document.querySelectorAll<HTMLElement>("[data-season-summary]"));
+
+  function updateSummary(summary: HTMLElement, dateString: string): void {
+    const mode = summary.dataset.mode;
+    const growingInterval = Number(summary.dataset.growingInterval);
+    const dormancyInterval = Number(summary.dataset.dormancyInterval);
+    const dueDate = summary.dataset.dueDate;
+    const season = getSeason(dateString);
+    const activeInterval = selectSeasonInterval(dateString, growingInterval, dormancyInterval);
+    const seasonLabel = getShortSeasonLabel(season);
+    const summaryText = summary.querySelector<HTMLElement>("[data-season-summary-text]");
+    const dueText = summary.querySelector<HTMLElement>("[data-season-due]");
+
+    if (summaryText) {
+      if (mode === "full") {
+        summaryText.textContent = [
+          `Growing: ${formatIntervalLabel(growingInterval)}${season === "growing" ? " (active now)" : ""}`,
+          `Dormancy: ${formatIntervalLabel(dormancyInterval)}${season === "dormancy" ? " (active now)" : ""}`,
+        ].join(" · ");
+      } else {
+        summaryText.textContent = `${seasonLabel} · then ${formatIntervalLabel(activeInterval)}`;
+      }
+    }
+
+    if (dueText && dueDate) {
+      dueText.textContent = formatDueLabel(dueDate, dateString);
+    }
+  }
+
+  function refreshSummaries(): void {
+    const dateString = todayLocalDateString();
+
+    summaries.forEach((summary) => {
+      updateSummary(summary, dateString);
+    });
+  }
+
+  function scheduleMidnightRefresh(): void {
+    window.setTimeout(() => {
+      refreshSummaries();
+      scheduleMidnightRefresh();
+    }, msUntilNextLocalMidnight());
+  }
+
+  refreshSummaries();
+  scheduleMidnightRefresh();
+</script>

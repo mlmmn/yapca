@@ -11,7 +11,7 @@ import {
   msUntilNextLocalMidnight,
   todayLocalDateString,
 } from "@/lib/date";
-import { getSeasonLabel, getSeason, selectSeasonInterval } from "@/lib/season";
+import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
 import { cn, prefersReducedMotion } from "@/lib/utils";
 import type { PlantListItem } from "@/types";
 import {
@@ -408,7 +408,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
                       </span>
                       <span className={metadataClasses}>·</span>
                       <span className={cn("line-clamp-1", metadataClasses)}>
-                        {getSeasonLabel(getSeason(today))} ·{" "}
+                        {getShortSeasonLabel(getSeason(today))} · then{" "}
                         {formatIntervalLabel(
                           selectSeasonInterval(today, plant.growing_interval_days, plant.dormancy_interval_days),
                         )}
@@ -416,7 +416,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
                     </div>
                   ) : (
                     <p className={metadataClasses}>
-                      {formatDueLabel(plant.next_due_on, today)} · {getSeasonLabel(getSeason(today))} ·{" "}
+                      {formatDueLabel(plant.next_due_on, today)} · {getShortSeasonLabel(getSeason(today))} · then{" "}
                       {formatIntervalLabel(
                         selectSeasonInterval(today, plant.growing_interval_days, plant.dormancy_interval_days),
                       )}

@@ -2,8 +2,8 @@
 import Header from "@/components/header.astro";
 import Layout from "@/layouts/layout.astro";
 import { LinkButton, buttonVariants } from "@/components/ui/button";
+import SeasonIntervalSummary from "@/components/season-interval-summary";
 import { createClient } from "@/lib/supabase";
-import { formatIntervalLabel, formatDueLabel, todayLocalDateString } from "@/lib/date";
 import type { PlantListItem } from "@/types";
 
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
@@ -52,7 +52,6 @@ async function loadAllPlants(): Promise<{ plants: PlantListItem[] } | { plants: 
 }
 
 const { plants } = await loadAllPlants();
-const today = todayLocalDateString();
 let status: "error" | "empty" | "list";
 
 if (plants === null) {
@@ -126,11 +125,12 @@ if (plants === null) {
                         </div>
                         <div class="min-w-0 flex-1">
                           <p class="line-clamp-2 font-medium">{plant.name}</p>
-                          <p class="text-muted-foreground text-sm">
-                            {formatIntervalLabel(plant.growing_interval_days)}
-                            {" · "}
-                            {formatDueLabel(plant.next_due_on, today)}
-                          </p>
+                          <SeasonIntervalSummary
+                            mode="active"
+                            growingIntervalDays={plant.growing_interval_days}
+                            dormancyIntervalDays={plant.dormancy_interval_days}
+                            dueDate={plant.next_due_on}
+                          />
                         </div>
                       </a>
                     </li>

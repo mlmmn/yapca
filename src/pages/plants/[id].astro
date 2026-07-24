@@ -2,8 +2,9 @@
 import { buttonVariants } from "@/components/ui/button";
 import Header from "@/components/header.astro";
 import Layout from "@/layouts/layout.astro";
+import SeasonIntervalSummary from "@/components/season-interval-summary";
 import { createClient } from "@/lib/supabase";
-import { formatShortDate, formatIntervalLabel, formatDueLabel, todayLocalDateString } from "@/lib/date";
+import { formatShortDate } from "@/lib/date";
 import type { JournalEntry } from "@/types";
 
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
@@ -72,7 +73,6 @@ if (!plant) {
   Astro.response.status = 404;
 }
 
-const today = todayLocalDateString();
 const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
 ---
 
@@ -104,10 +104,12 @@ const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
 
                   <div class="min-w-0 flex-1">
                     <h1 class="mb-3 text-2xl font-medium md:text-3xl">{plant.name}</h1>
-                    <div class="text-muted-foreground space-y-1 text-sm">
-                      <p>{formatIntervalLabel(plant.growing_interval_days)}</p>
-                      <p>{formatDueLabel(plant.next_due_on, today)}</p>
-                    </div>
+                    <SeasonIntervalSummary
+                      mode="full"
+                      growingIntervalDays={plant.growing_interval_days}
+                      dormancyIntervalDays={plant.dormancy_interval_days}
+                      dueDate={plant.next_due_on}
+                    />
                   </div>
                 </div>
               </div>

@@ -378,30 +378,30 @@ This is deliberately an interim measure. Roadmap slice **S-08 (`user-timezone-da
 
 #### Automated
 
-- [x] 2.1 Astro type checking passes
-- [x] 2.2 Linting passes
-- [x] 2.3 Cloudflare production build passes
+- [x] 2.1 Astro type checking passes — 728b94d
+- [x] 2.2 Linting passes — 728b94d
+- [x] 2.3 Cloudflare production build passes — 728b94d
 
 #### Manual
 
-- [x] 2.4 Add form accepts and validates two independent seasonal intervals
-- [x] 2.5 First-appearance preview selects and names the browser-local active season
-- [x] 2.6 Saving persists both intervals and the exact initial due date
-- [x] 2.7 Photo, error, keyboard, responsive, theme, and motion behavior does not regress
+- [x] 2.4 Add form accepts and validates two independent seasonal intervals — 728b94d
+- [x] 2.5 First-appearance preview selects and names the browser-local active season — 728b94d
+- [x] 2.6 Saving persists both intervals and the exact initial due date — 728b94d
+- [x] 2.7 Photo, error, keyboard, responsive, theme, and motion behavior does not regress — 728b94d
 
 ### Phase 3: Active-Season Schedule Presentation
 
 #### Automated
 
-- [ ] 3.1 Astro type checking passes
-- [ ] 3.2 Linting passes
-- [ ] 3.3 Cloudflare production build passes
+- [x] 3.1 Astro type checking passes
+- [x] 3.2 Linting passes
+- [x] 3.3 Cloudflare production build passes
 
 #### Manual
 
-- [ ] 3.4 Today and All plants show the correct browser-local active schedule without changing membership
-- [ ] 3.5 Plant detail shows both intervals and identifies the active one accessibly
-- [ ] 3.6 Local-midnight boundary rollover updates labels without rewriting due dates
-- [ ] 3.7 Due dates, urgency, mutations, journal, and ordering do not regress
-- [ ] 3.8 Schedule summaries pass responsive, zoom, keyboard, screen-reader, theme, and no-JavaScript checks
-- [ ] 3.9 A due date created in the previous season reads unambiguously against the active-season label
+- [x] 3.4 Today and All plants show the correct browser-local active schedule without changing membership
+- [x] 3.5 Plant detail shows both intervals and identifies the active one accessibly
+- [x] 3.6 Local-midnight boundary rollover updates labels without rewriting due dates
+- [x] 3.7 Due dates, urgency, mutations, journal, and ordering do not regress
+- [x] 3.8 Schedule summaries pass responsive, zoom, keyboard, screen-reader, theme, and no-JavaScript checks
+- [x] 3.9 A due date created in the previous season reads unambiguously against the active-season label
