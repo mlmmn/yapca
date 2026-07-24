@@ -3,7 +3,7 @@ project: "YAPCA (Yet Another Plant Care App)"
 version: 1
 status: draft
 created: 2026-07-19
-updated: 2026-07-21
+updated: 2026-07-24
 prd_version: 1
 main_goal: quality
 top_blocker: time
@@ -37,7 +37,8 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | blocked  |
 | S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | proposed |
 | S-07 | delete-plant                 | delete a plant                                                | S-01          | FR-007                  | proposed |
-| S-08 | design-review-and-polish     | (quality) have the whole app design/UI/UX-reviewed with impeccable, triaged, and fixed | F-01, S-01–S-04, S-06, S-07 | quality goal, a11y NFR, DESIGN.md/PRODUCT.md | proposed |
+| S-08 | user-timezone-dates          | (correctness) see "Due today" mean today where *they* are, on every page | S-02          | FR-009, FR-011, NFR (deterministic math) | ready |
+| S-09 | design-review-and-polish     | (quality) have the whole app design/UI/UX-reviewed with impeccable, triaged, and fixed | F-01, S-01–S-04, S-06, S-07, S-08 | quality goal, a11y NFR, DESIGN.md/PRODUCT.md | proposed |
 
 ## Streams
 
@@ -50,7 +51,8 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 | C      | Daily triage        | `S-03`                             | Forks off `S-01`. Overdue surfacing + a11y urgency cue; parallel with Stream B. |
 | D      | Season model        | `S-05`                             | Forks off `S-01`. Blocked until the season-boundary dates are decided (ORQ-2). |
 | E      | Plant lifecycle     | `S-07`                             | Forks off `S-01`. Standalone delete; parallel with Streams B/C/D.          |
-| F      | Cross-cutting polish | `(all UI slices)` → `S-08`         | Terminal. Does not fork from `S-01`; converges every other stream — the final `impeccable` design/UI/UX pass over the assembled app. |
+| F      | Calendar correctness | `S-02` → `S-08`                   | Forks off `S-02`. Makes the user's timezone — not the Worker's UTC clock — the calendar authority for every server-rendered date. Parallel with Streams B/C/D/E. |
+| G      | Cross-cutting polish | `(all UI slices)` → `S-09`         | Terminal. Does not fork from `S-01`; converges every other stream — the final `impeccable` design/UI/UX pass over the assembled app. |
 
 ## Baseline
 
@@ -167,12 +169,25 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Small, standalone CRUD slice depending only on the plant record (S-01). Delete must also clean up the plant's tasks/journal under RLS so no orphaned rows leak across the account boundary.
 - **Status:** proposed
 
-### S-08: Design/UI/UX review + polish
+### S-08: User-timezone date authority
+
+- **Outcome:** every server-rendered surface reports dates in the user's own calendar day — "Due today" means today where the user is, not where the Worker is — so All plants and plant detail agree with Today about what day it is.
+- **Change ID:** user-timezone-dates
+- **PRD refs:** FR-009, FR-011, NFR (deterministic interval math), PRODUCT.md "deterministic and honest"
+- **Prerequisites:** S-02
+- **Parallel with:** S-03, S-04, S-05, S-06, S-07
+- **Blockers:** —
+- **Unknowns:**
+  - What does the very first request render, before the timezone cookie exists? — Owner: user. Block: no. Default: render the exact date (`Due 3 Aug`) and omit the "today" phrasing until the cookie lands — never guess a day.
+- **Risk:** Fixes a live bug, not a missing feature. `todayLocalDateString()` (`src/lib/date.ts:31`) reads the host machine's local date; on Cloudflare Workers that is always UTC, and two pages call it during SSR (`src/pages/plants/index.astro:54`, `src/pages/plants/[id].astro:74`) before passing it to `formatDueLabel`. For a user at UTC+13 the Worker's day and the user's day disagree from midnight until 12:59 — over half of every day — so `/plants` shows `Due 1 Mar` for a plant that is due today, and `Due today` for one that is already overdue. Today's list is unaffected because it hydrates from the browser (`today-list.tsx:241-245`), which is exactly why the two pages can contradict it. The approach: capture the browser's IANA timezone once into a cookie, read it in the existing `src/middleware.ts`, and expose `context.locals.today` so pages render a correct date server-side. Sequenced after S-02 (the surfaces must exist) and before the terminal design pass (S-09) so the review sees corrected labels. **Supersedes the workaround in S-05** — season-aware-intervals patches these two labels client-side because it would otherwise put two disagreeing clocks on one line; this slice removes that patch and fixes the class of bug instead. Risk if skipped: every future server-rendered date surface (S-06's edit preview first) repeats the same mistake, and the workaround calcifies into the pattern.
+- **Status:** ready
+
+### S-09: Design/UI/UX review + polish
 
 - **Outcome:** every user-facing surface — signed-out auth entry, today's due list, plant detail + watering journal, add/edit plant forms, overdue treatment, postpone/undo affordances, delete — is reviewed with the `impeccable` skill against the `DESIGN.md` visual system and the `PRODUCT.md`/`AGENTS.md` register and WCAG 2.2 AA-plus bar; the findings are triaged (severity-ranked) and the accepted fixes applied.
 - **Change ID:** design-review-and-polish
 - **PRD refs:** `main_goal: quality`, NFR (overdue cue perceivable without color alone), NFR (daily list feels instant), DESIGN.md / PRODUCT.md visual system (design context, not a numbered FR)
-- **Prerequisites:** F-01, S-01, S-02, S-03, S-04, S-06, S-07
+- **Prerequisites:** F-01, S-01, S-02, S-03, S-04, S-06, S-07, S-08
 - **Parallel with:** — (terminal; nothing forks off it)
 - **Blockers:** —
 - **Unknowns:** —
@@ -191,7 +206,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-05       | season-aware-intervals       | Season-aware growing/dormancy intervals            | no                    | Blocked on ORQ-2 (season boundary dates)          |
 | S-06       | edit-plant-and-recalc        | Edit plant + next-due recalculation                | no                    | Prereq S-01, S-02                                 |
 | S-07       | delete-plant                 | Delete a plant                                     | no                    | Prereq S-01                                       |
-| S-08       | design-review-and-polish     | Full design/UI/UX review + polish (impeccable pass) | no                   | Prereq F-01 + all UI slices; run last. Not a `/10x-plan` feature slice — an `impeccable` review + fix pass |
+| S-08       | user-timezone-dates          | Make the user's timezone the SSR calendar authority | yes                  | Prereq S-02 (done). Run `/10x-plan user-timezone-dates` — supersedes the client-side date patch in S-05 |
+| S-09       | design-review-and-polish     | Full design/UI/UX review + polish (impeccable pass) | no                   | Prereq F-01 + all UI slices incl. S-08; run last. Not a `/10x-plan` feature slice — an `impeccable` review + fix pass |
 
 ## Open Roadmap Questions
 
