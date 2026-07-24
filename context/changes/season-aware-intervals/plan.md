@@ -67,7 +67,7 @@ Season selection happens exactly when a due date is created: add-after-watered a
 
 ### User experience spec
 
-Today and All plants use a compact `Growing · Every N days` or `Dormancy · Every N days` label. Plant detail lists both schedules and marks the active one with text/semantics, not color alone; boundary copy names the fixed March–October and November–February ranges where it helps users understand the rule.
+Today and All plants use a compact `Growing · Every N days` or `Dormancy · Every N days` label. Plant detail lists both schedules and marks the active one with text/semantics, not color alone. The fixed March–October and November–February ranges are named in the add form, where the user is choosing the intervals; they are not repeated per plant (see the decision note in Phase 3).
 
 ## Phase 1: Seasonal Scheduling Foundation
 
@@ -146,7 +146,7 @@ Establish the data contract and authoritative scheduling behavior while preservi
 
 - Local database reset applies all migrations and the aligned seed cleanly: `pnpx supabase db reset`
 - Database boundary and ownership verification passes: `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 -f supabase/tests/season-aware-intervals.sql`
-- Generated Supabase types match the migrated local schema: `pnpx supabase gen types typescript --local > src/lib/database.types.ts`, then `git diff --exit-code src/lib/database.types.ts` after committing the regenerated file
+- Generated Supabase types match the migrated local schema: `pnpx supabase gen types typescript --local > src/lib/database.types.ts`, then `git diff --exit-code src/lib/database.types.ts` after committing the regenerated file. Note: `gen types` strips the file's two-line "do not hand-edit" header — re-add it after regenerating, or the diff check reports it.
 - Astro type checking passes: `pnpm exec astro check`
 - Linting passes: `pnpm lint`
 - Cloudflare production build passes: `pnpm build`
@@ -273,7 +273,9 @@ This is deliberately an interim measure. Roadmap slice **S-08 (`user-timezone-da
 
 **Contract**: All plants uses the active-only summary beside the exact due label. Plant detail uses full-schedule mode, shows both named intervals, and identifies the active one; its exact due date and journal remain unchanged. Do not use decorative seasonal imagery or color-only state, and do not introduce vague schedule wording.
 
-**What the interval number means**: Because the season is selected when a due date is created, an outstanding `next_due_on` can predate the current season — a plant watered October 25 on a 7-day growing interval is due November 1, when dormancy is already active. The label must not imply the stored due date came from the interval it names. Word it as the cadence that applies from the next watering (`Dormancy · then every 30 days`), keep the exact due date unqualified beside it, and state the rule once in plain words in plant detail's full-schedule mode rather than repeating it per row. Check the wording at 320px alongside the due label.
+**What the interval number means**: Because the season is selected when a due date is created, an outstanding `next_due_on` can predate the current season — a plant watered October 25 on a 7-day growing interval is due November 1, when dormancy is already active. The label must not imply the stored due date came from the interval it names. Word it as the cadence that applies from the next watering (`Dormancy · then every 30 days`) and keep the exact due date unqualified beside it. Check the wording at 320px alongside the due label.
+
+**Decision (implementation, 2026-07-24)**: an earlier draft also required plant detail's full-schedule mode to restate the March–October / November–February rule in plain words. That was dropped — repeating the fixed rule on every plant's page reads as boilerplate, and the `then`-framed cadence already carries the anti-ambiguity meaning. The ranges are stated once, at the point of choice, in the add form.
 
 ### Success Criteria:
 

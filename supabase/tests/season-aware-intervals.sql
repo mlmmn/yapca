@@ -8,8 +8,12 @@ declare
   v_owner_id constant uuid := '00000000-0000-0000-0000-000000000001';
   v_other_id constant uuid := '00000000-0000-0000-0000-000000000002';
 begin
+  -- Create both accounts so the script is self-contained: it must not assume
+  -- `supabase/seed.sql` has run, and the rollback discards whatever it created.
   insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at)
-  values (v_other_id, 'authenticated', 'authenticated', 'other@yapca.local', crypt('password', gen_salt('bf')), now())
+  values
+    (v_owner_id, 'authenticated', 'authenticated', 'test@yapca.local', crypt('password', gen_salt('bf')), now()),
+    (v_other_id, 'authenticated', 'authenticated', 'other@yapca.local', crypt('password', gen_salt('bf')), now())
   on conflict (id) do nothing;
 
   insert into public.plants (
@@ -37,6 +41,8 @@ begin
       (date '2024-03-01', date '2024-03-08'),
       (date '2024-10-31', date '2024-11-07'),
       (date '2024-11-01', date '2024-12-01'),
+      -- Dormancy interval carried across the year boundary.
+      (date '2024-12-15', date '2025-01-14'),
       (date '2025-02-28', date '2025-03-30'),
       (date '2025-03-01', date '2025-03-08')
     ) as cases(acted_on, expected_due)

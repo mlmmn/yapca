@@ -9,7 +9,10 @@ type Props = {
 };
 
 const { growingIntervalDays, dormancyIntervalDays, dueDate, mode } = Astro.props;
-const fallbackSchedule = `Growing ${formatIntervalLabel(growingIntervalDays)} · Dormancy ${formatIntervalLabel(dormancyIntervalDays)}`;
+// Without JavaScript the server cannot know the browser's date, so it states the truthful
+// pair rather than asserting a season. Punctuation matches the enhanced full-mode string so
+// the swap reads as a refinement, not a rewrite.
+const fallbackSchedule = `Growing: ${formatIntervalLabel(growingIntervalDays)} · Dormancy: ${formatIntervalLabel(dormancyIntervalDays)}`;
 const fallbackDue = `Due ${formatShortDate(dueDate)}`;
 ---
 
@@ -22,7 +25,16 @@ const fallbackDue = `Due ${formatShortDate(dueDate)}`;
   data-due-date={dueDate}
 >
   <div data-season-due>{fallbackDue}</div>
-  <div class="min-h-5 text-xs" data-season-summary-text>
+  <div
+    class:list={[
+      "text-xs leading-5",
+      // The enhancement replaces this slot's text, never its box, so the height is pinned
+      // rather than a minimum: one truncated line in list rows, two lines on detail where
+      // both intervals must stay readable at 320px.
+      mode === "active" ? "h-5 truncate" : "h-10",
+    ]}
+    data-season-summary-text
+  >
     {fallbackSchedule}
   </div>
 </div>
@@ -30,8 +42,6 @@ const fallbackDue = `Due ${formatShortDate(dueDate)}`;
 <script>
   import { formatDueLabel, formatIntervalLabel, msUntilNextLocalMidnight, todayLocalDateString } from "@/lib/date";
   import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
-
-  const summaries = Array.from(document.querySelectorAll<HTMLElement>("[data-season-summary]"));
 
   function updateSummary(summary: HTMLElement, dateString: string): void {
     const mode = summary.dataset.mode;
@@ -61,6 +71,9 @@ const fallbackDue = `Due ${formatShortDate(dueDate)}`;
   }
 
   function refreshSummaries(): void {
+    // Queried on every run rather than captured once, so the refresh stays correct if the
+    // document is swapped under it (a client router) or restored from bfcache.
+    const summaries = document.querySelectorAll<HTMLElement>("[data-season-summary]");
     const dateString = todayLocalDateString();
 
     summaries.forEach((summary) => {
@@ -75,6 +88,17 @@ const fallbackDue = `Due ${formatShortDate(dueDate)}`;
     }, msUntilNextLocalMidnight());
   }
 
+  function handleVisibilityChange(): void {
+    if (document.visibilityState === "visible") {
+      refreshSummaries();
+    }
+  }
+
   refreshSummaries();
   scheduleMidnightRefresh();
+
+  // A bfcache restore or a resume from sleep can land past local midnight without the timer
+  // having fired on time, so re-read the date whenever the page becomes visible again.
+  window.addEventListener("pageshow", refreshSummaries);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 </script>

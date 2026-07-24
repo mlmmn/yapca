@@ -8,6 +8,9 @@ function validateSeasonDate(dateString: string): void {
   }
 }
 
+// Growing season is March 1 through October 31, inclusive. This rule is mirrored in
+// `mark_watered` (supabase/migrations/20260724120000_add_season_aware_intervals.sql), which
+// selects the interval for every reschedule after creation. Change both together.
 export function getSeason(dateString: string): Season {
   validateSeasonDate(dateString);
 

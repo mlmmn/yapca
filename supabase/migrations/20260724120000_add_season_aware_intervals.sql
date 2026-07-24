@@ -54,6 +54,9 @@ begin
     raise exception 'Plant not found' using errcode = 'P0002';
   end if;
 
+  -- Growing season is March 1 through October 31, inclusive. This rule is mirrored in
+  -- `src/lib/season.ts` (getSeason), which selects the interval for a plant's FIRST due
+  -- date at creation; every later reschedule comes through here. Change both together.
   if p_acted_on between make_date(extract(year from p_acted_on)::int, 3, 1)
     and make_date(extract(year from p_acted_on)::int, 10, 31) then
     v_interval_days := v_growing_interval_days;

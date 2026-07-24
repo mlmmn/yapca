@@ -1,3 +1,7 @@
+// Generated from the local Supabase schema — do not hand-edit.
+// Regenerate after any migration: pnpx supabase gen types typescript --local > src/lib/database.types.ts
+// `gen types` strips this header — re-add these two lines after regenerating.
+
 export type Json =
   | string
   | number

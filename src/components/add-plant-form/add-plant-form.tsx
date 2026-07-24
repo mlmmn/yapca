@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { z } from "astro/zod";
 import { actions } from "astro:actions";
@@ -37,9 +37,7 @@ export default function AddPlantForm() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
-  const localDate = useMemo(() => todayLocalDateString(), []);
-  const activeSeason = getSeason(localDate);
-  const activeSeasonLabel = getSeasonLabel(activeSeason);
+  const [localDate, setLocalDate] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -58,7 +56,9 @@ export default function AddPlantForm() {
       formData.set("name", value.name);
       formData.set("growing_interval_days", String(value.growingIntervalDays));
       formData.set("dormancy_interval_days", String(value.dormancyIntervalDays));
-      formData.set("clientDate", localDate);
+      // Read the date at submit, not at mount, so a form left open across local midnight
+      // still schedules from the day the user actually saved.
+      formData.set("clientDate", todayLocalDateString());
 
       if (value.firstAppearance === "after") {
         formData.set("alreadyWatered", "true");
@@ -122,6 +122,13 @@ export default function AddPlantForm() {
       fileInputRef.current.value = "";
     }
   }
+
+  useEffect(() => {
+    // The Worker cannot know the browser's calendar date on the first request, so the
+    // active season is only known once this effect runs after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reveals the browser-local bootstrap contract
+    setLocalDate(todayLocalDateString());
+  }, []);
 
   useEffect(() => {
     if (window.matchMedia("(min-width: 768px)").matches) {
@@ -240,7 +247,9 @@ export default function AddPlantForm() {
                   Number.isInteger(growingIntervalDays) && growingIntervalDays > 0 ? growingIntervalDays : 1;
                 const dormancyInterval =
                   Number.isInteger(dormancyIntervalDays) && dormancyIntervalDays > 0 ? dormancyIntervalDays : 1;
-                const activeInterval = selectSeasonInterval(localDate, growingInterval, dormancyInterval);
+                const activeInterval =
+                  localDate === null ? null : selectSeasonInterval(localDate, growingInterval, dormancyInterval);
+                const activeSeasonLabel = localDate === null ? null : getSeasonLabel(getSeason(localDate));
 
                 return (
                   <Field>
@@ -258,9 +267,17 @@ export default function AddPlantForm() {
                         </RadioGroupItem>
                         <RadioGroupItem value="after">
                           <span>
-                            After {activeInterval} day{activeInterval === 1 ? "" : "s"}
+                            {activeInterval === null ? (
+                              <>After the seasonal interval</>
+                            ) : (
+                              <>
+                                After {activeInterval} day{activeInterval === 1 ? "" : "s"}
+                              </>
+                            )}
                           </span>
-                          <FieldDescription>I watered it today · {activeSeasonLabel}</FieldDescription>
+                          <FieldDescription>
+                            I watered it today{activeSeasonLabel === null ? "" : ` · ${activeSeasonLabel}`}
+                          </FieldDescription>
                         </RadioGroupItem>
                       </RadioGroup>
                     </FieldContent>
