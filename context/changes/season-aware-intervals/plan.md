@@ -371,8 +371,8 @@ This is deliberately an interim measure. Roadmap slice **S-08 (`user-timezone-da
 
 #### Manual
 
-- [ ] 1.7 Migrated fixtures retain their prior due date and receive equal seasonal intervals
-- [ ] 1.8 Watered, Postpone, and Undo retain exact journal and schedule contracts
+- [x] 1.7 Migrated fixtures retain their prior due date and receive equal seasonal intervals
+- [x] 1.8 Watered, Postpone, and Undo retain exact journal and schedule contracts
 
 ### Phase 2: Season-Aware Plant Creation
 
@@ -393,15 +393,15 @@ This is deliberately an interim measure. Roadmap slice **S-08 (`user-timezone-da
 
 #### Automated
 
-- [x] 3.1 Astro type checking passes
-- [x] 3.2 Linting passes
-- [x] 3.3 Cloudflare production build passes
+- [x] 3.1 Astro type checking passes — 93c29c2
+- [x] 3.2 Linting passes — 93c29c2
+- [x] 3.3 Cloudflare production build passes — 93c29c2
 
 #### Manual
 
-- [x] 3.4 Today and All plants show the correct browser-local active schedule without changing membership
-- [x] 3.5 Plant detail shows both intervals and identifies the active one accessibly
-- [x] 3.6 Local-midnight boundary rollover updates labels without rewriting due dates
-- [x] 3.7 Due dates, urgency, mutations, journal, and ordering do not regress
-- [x] 3.8 Schedule summaries pass responsive, zoom, keyboard, screen-reader, theme, and no-JavaScript checks
-- [x] 3.9 A due date created in the previous season reads unambiguously against the active-season label
+- [x] 3.4 Today and All plants show the correct browser-local active schedule without changing membership — 93c29c2
+- [x] 3.5 Plant detail shows both intervals and identifies the active one accessibly — 93c29c2
+- [x] 3.6 Local-midnight boundary rollover updates labels without rewriting due dates — 93c29c2
+- [x] 3.7 Due dates, urgency, mutations, journal, and ordering do not regress — 93c29c2
+- [x] 3.8 Schedule summaries pass responsive, zoom, keyboard, screen-reader, theme, and no-JavaScript checks — 93c29c2
+- [x] 3.9 A due date created in the previous season reads unambiguously against the active-season label — 93c29c2

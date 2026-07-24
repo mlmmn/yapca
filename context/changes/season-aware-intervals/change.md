@@ -1,7 +1,7 @@
 ---
 change_id: season-aware-intervals
 title: Season aware intervals
-status: implementing
+status: implemented
 created: 2026-07-23
 updated: 2026-07-24
 archived_at: null
