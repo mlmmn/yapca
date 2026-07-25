@@ -12,6 +12,18 @@ export type AddPlantInput = {
 
 export type AddPlantOutput = Plant;
 
+export type UpdatePlantInput = {
+  plantId: string;
+  name: string;
+  growing_interval_days: number;
+  dormancy_interval_days: number;
+  photo?: File;
+  removePhoto: boolean;
+  updated_at: string;
+};
+
+export type UpdatePlantOutput = Plant;
+
 export type MarkWateredInput = {
   plantId: string;
 };

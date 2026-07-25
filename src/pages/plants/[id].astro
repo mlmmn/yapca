@@ -5,9 +5,8 @@ import Layout from "@/layouts/layout.astro";
 import SeasonIntervalSummary from "@/components/season-interval-summary";
 import { createClient } from "@/lib/supabase";
 import { formatShortDate } from "@/lib/date";
+import { resolvePhotoUrl } from "@/lib/photo";
 import type { JournalEntry } from "@/types";
-
-const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 type PlantDetail = {
   id: string;
@@ -41,13 +40,7 @@ async function loadPlantDetail(
   let photoUrl: string | null = null;
 
   if (plant.photo_path) {
-    const { data: signedUrls } = await supabase.storage
-      .from("plant-photos")
-      .createSignedUrls([plant.photo_path], SIGNED_URL_TTL_SECONDS);
-
-    if (signedUrls && signedUrls.length > 0 && signedUrls[0].signedUrl && !signedUrls[0].error) {
-      photoUrl = signedUrls[0].signedUrl;
-    }
+    photoUrl = await resolvePhotoUrl(supabase, plant.photo_path);
   }
 
   const { data: journalData } = await supabase

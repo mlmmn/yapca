@@ -9,12 +9,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getSeason, getSeasonLabel, selectSeasonInterval } from "@/lib/season";
+import { isValidPhoto, PHOTO_ACCEPT, PHOTO_GUIDANCE } from "@/lib/photo";
 import { cn } from "@/lib/utils";
 import type { AddPlantFormProps } from "./types";
-
-const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
-const ALLOWED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-const PHOTO_GUIDANCE = "Choose a JPEG, PNG, or WebP image up to 4 MB.";
 
 const addPlantSchema = z.object({
   name: z.string().min(1, "Enter a plant name"),
@@ -97,7 +94,7 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
       return;
     }
 
-    if (!ALLOWED_PHOTO_TYPES.has(file.type) || file.size > MAX_PHOTO_BYTES) {
+    if (!isValidPhoto(file)) {
       setPhotoError(PHOTO_GUIDANCE);
       event.target.value = "";
 
@@ -300,7 +297,7 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
                 id="photo"
                 name="photo"
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept={PHOTO_ACCEPT}
                 onChange={handlePhotoChange}
                 className="text-muted-foreground file:text-foreground file:bg-secondary w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:px-3 file:py-1.5 file:text-sm file:font-medium"
               />

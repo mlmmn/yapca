@@ -2,10 +2,9 @@
 import Header from "@/components/header.astro";
 import Layout from "@/layouts/layout.astro";
 import TodayList from "@/components/today-list";
+import { SIGNED_URL_TTL_SECONDS } from "@/lib/photo";
 import { createClient } from "@/lib/supabase";
 import type { PlantListItem } from "@/types";
-
-const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 async function loadPlants(): Promise<{ plants: PlantListItem[] } | { plants: null }> {
   const supabase = createClient(Astro.request.headers, Astro.cookies);

@@ -2,21 +2,12 @@ import { ActionError, defineAction, type ActionAPIContext } from "astro:actions"
 import { z } from "astro/zod";
 import { createClient } from "@/lib/supabase";
 import { nextDue } from "@/lib/interval";
+import { buildPhotoPath, isValidPhoto, PHOTO_GUIDANCE } from "@/lib/photo";
 import { selectSeasonInterval } from "@/lib/season";
+import { resolveScheduleChange } from "@/lib/schedule";
 import { getTodayInTimeZone } from "@/lib/timezone";
 
-const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
-
-const PHOTO_MIME_EXTENSIONS: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
-
-const photoSchema = z
-  .instanceof(File)
-  .refine((file) => file.size <= MAX_PHOTO_BYTES, "Photo must be 4 MB or smaller")
-  .refine((file) => file.type in PHOTO_MIME_EXTENSIONS, "Photo must be a JPEG, PNG, or WebP image");
+const photoSchema = z.instanceof(File).refine(isValidPhoto, PHOTO_GUIDANCE);
 
 function requireSession(context: ActionAPIContext) {
   const supabase = createClient(context.request.headers, context.cookies);
@@ -56,9 +47,7 @@ export const server = {
       let photo_path: string | null = null;
 
       if (input.photo) {
-        const extension = PHOTO_MIME_EXTENSIONS[input.photo.type];
-
-        photo_path = `${user.id}/${crypto.randomUUID()}.${extension}`;
+        photo_path = buildPhotoPath(user.id, input.photo.type);
 
         const { error: uploadError } = await supabase.storage
           .from("plant-photos")
@@ -96,6 +85,123 @@ export const server = {
       }
 
       return data;
+    },
+  }),
+
+  updatePlant: defineAction({
+    accept: "form",
+    input: z.object({
+      plantId: z.uuid(),
+      name: z.string().trim().min(1, "Enter a plant name"),
+      growing_interval_days: z.coerce.number().int().min(1).max(365),
+      dormancy_interval_days: z.coerce.number().int().min(1).max(365),
+      photo: photoSchema.optional(),
+      removePhoto: z.preprocess((value) => value === "true", z.boolean()),
+      updated_at: z.string().min(1),
+    }),
+    handler: async (input, context) => {
+      const { supabase, user } = requireSession(context);
+      const actionDate = getActionDate(context);
+      const { data: currentPlant, error: readError } = await supabase
+        .from("plants")
+        .select(
+          "id, name, growing_interval_days, dormancy_interval_days, next_due_on, photo_path, updated_at, user_id, created_at",
+        )
+        .eq("id", input.plantId)
+        .maybeSingle();
+
+      if (readError) {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to load plant." });
+      }
+
+      if (!currentPlant) {
+        throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
+      }
+
+      const scheduleChange = resolveScheduleChange({
+        activeDay: actionDate,
+        oldNextDue: currentPlant.next_due_on,
+        oldGrowingIntervalDays: currentPlant.growing_interval_days,
+        oldDormancyIntervalDays: currentPlant.dormancy_interval_days,
+        newGrowingIntervalDays: input.growing_interval_days,
+        newDormancyIntervalDays: input.dormancy_interval_days,
+      });
+      let nextPhotoPath: string | null | undefined;
+
+      if (input.photo) {
+        nextPhotoPath = buildPhotoPath(user.id, input.photo.type);
+      } else if (input.removePhoto) {
+        nextPhotoPath = null;
+      }
+
+      let uploadedPhotoPath: string | null = null;
+
+      try {
+        if (input.photo && nextPhotoPath) {
+          const { error: uploadError } = await supabase.storage
+            .from("plant-photos")
+            .upload(nextPhotoPath, input.photo, { contentType: input.photo.type });
+
+          if (uploadError) {
+            throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to upload photo." });
+          }
+
+          uploadedPhotoPath = nextPhotoPath;
+        }
+
+        const payload = {
+          name: input.name,
+          growing_interval_days: input.growing_interval_days,
+          dormancy_interval_days: input.dormancy_interval_days,
+          ...(nextPhotoPath !== undefined ? { photo_path: nextPhotoPath } : {}),
+          ...(scheduleChange.deltaDays !== 0 ? { next_due_on: scheduleChange.newNextDue } : {}),
+        };
+        let query = supabase.from("plants").update(payload).eq("id", input.plantId);
+
+        if (scheduleChange.deltaDays !== 0) {
+          query = query.eq("updated_at", input.updated_at);
+        }
+
+        const { data, error } = await query.select().maybeSingle();
+
+        if (error) {
+          throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to save plant." });
+        }
+
+        if (!data) {
+          if (scheduleChange.deltaDays !== 0) {
+            throw new ActionError({ code: "CONFLICT", message: "This plant changed elsewhere." });
+          }
+
+          throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
+        }
+
+        if (currentPlant.photo_path && nextPhotoPath !== undefined && currentPlant.photo_path !== nextPhotoPath) {
+          const { error: cleanupError } = await supabase.storage.from("plant-photos").remove([currentPlant.photo_path]);
+
+          if (cleanupError) {
+            // eslint-disable-next-line no-console -- best-effort old-photo cleanup must not mask a successful update
+            console.error("Failed to clean up superseded plant photo:", cleanupError);
+          }
+        }
+
+        return data;
+      } catch (error) {
+        if (uploadedPhotoPath) {
+          const { error: cleanupError } = await supabase.storage.from("plant-photos").remove([uploadedPhotoPath]);
+
+          if (cleanupError) {
+            // eslint-disable-next-line no-console -- best-effort cleanup failure must not mask the original action error
+            console.error("Failed to clean up uploaded photo after update failure:", cleanupError);
+          }
+        }
+
+        if (error instanceof ActionError) {
+          throw error;
+        }
+
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to save plant." });
+      }
     },
   }),
 
