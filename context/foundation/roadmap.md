@@ -4,6 +4,7 @@ version: 1
 status: draft
 created: 2026-07-19
 updated: 2026-07-25
+archived_at: 2026-07-25T00:00:00Z
 prd_version: 1
 main_goal: quality
 top_blocker: time
@@ -30,7 +31,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | ID   | Change ID                    | Outcome (user can …)                                          | Prerequisites | PRD refs                | Status   |
 | ---- | ---------------------------- | ------------------------------------------------------------ | ------------- | ----------------------- | -------- |
 | F-01 | finish-auth-and-route-gating | (foundation) sign up / sign in / sign out; app requires session | —             | FR-001, FR-002, Access Control | done     |
-| S-01 | core-watering-loop           | add a plant, see it due today, mark Watered → reschedules 1 interval later | F-01          | FR-004, FR-009, FR-011  | proposed |
+| S-01 | core-watering-loop           | add a plant, see it due today, mark Watered → reschedules 1 interval later | F-01          | FR-004, FR-009, FR-011  | done     |
 | S-02 | plant-detail-and-journal     | open a plant and see its details + watering journal          | S-01          | FR-005, FR-014          | proposed |
 | S-03 | overdue-tasks-and-urgency    | see overdue tasks with a non-color-only urgency cue and clear them | S-01          | FR-009, FR-010          | proposed |
 | S-04 | postpone-and-undo            | postpone a task 2 days; undo a Watered/Postpone misclick      | S-01, S-02    | FR-012, FR-013          | proposed |
@@ -93,7 +94,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** The north star and the heaviest slice by design — it stands up the `plants` table with per-account RLS and the deterministic interval-math module, the two "invest deeply in data" pieces. Kept to a single interval so the loop proves determinism without waiting on the season model (S-05); the growing/dormancy split lands in S-05. Main risk: interval math that drifts across repeated cycles would violate the core Success Criterion, so this slice carries the determinism verification.
-- **Status:** proposed
+- **Status:** done
 
 ### S-02: Plant detail view + watering journal
 
@@ -231,3 +232,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 (Empty on first generation. `/10x-archive` appends here — and flips that item's `Status` to `done` — when a change whose `Change ID` matches an item is archived.)
 
 - **F-01: (foundation) a user can register, sign in, and sign out through the UI, app routes require an authenticated session, and an unauthenticated visitor lands on a minimal signed-out entry (replacing the placeholder root) that routes to sign in / create account — the backend auth routes that already exist are now reachable and enforced end-to-end.** — Archived 2026-07-25 → `context/archive/2026-07-19-finish-auth-and-route-gating/`. Lesson: —.
+- **S-01: user can add a plant (name, watering interval, optional photo), see it on today's due list, and mark it Watered so it reschedules exactly one interval later (today + interval).** — Archived 2026-07-25 → `context/archive/2026-07-19-core-watering-loop/`. Lesson: —.

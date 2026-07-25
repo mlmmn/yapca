@@ -1,10 +1,10 @@
 ---
 change_id: core-watering-loop
 title: Core watering loop
-status: impl_reviewed
+status: archived
 created: 2026-07-19
-updated: 2026-07-20
-archived_at: null
+updated: 2026-07-25
+archived_at: 2026-07-25T00:00:00Z
 ---
 
 ## Notes
