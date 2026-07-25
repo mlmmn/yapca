@@ -345,16 +345,16 @@ Rollback is a straight revert — no schema, RPC, or stored-data changes to unwi
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm astro check`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Production build succeeds: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm astro check` — 20507ec
+- [x] 1.2 Linting passes: `pnpm lint` — 20507ec
+- [x] 1.3 Production build succeeds: `pnpm build` — 20507ec
 
 #### Manual
 
-- [ ] 1.4 `tz` cookie is written with the correct IANA value
-- [ ] 1.5 Second load does not trigger another reload
-- [ ] 1.6 Cookies-blocked case settles after at most one extra request
-- [ ] 1.7 `astro dev` cold profile resolves `null` then the browser's date
+- [x] 1.4 `tz` cookie is written with the correct IANA value — 20507ec
+- [x] 1.5 Second load does not trigger another reload — 20507ec
+- [x] 1.6 Cookies-blocked case settles after at most one extra request — 20507ec
+- [x] 1.7 `astro dev` cold profile resolves `null` then the browser's date — 20507ec
 
 ### Phase 2: Server-Rendered Date Surfaces
 
