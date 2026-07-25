@@ -337,6 +337,28 @@ Rollback is a straight revert — no schema, RPC, or stored-data changes to unwi
 - Astro 6 Cloudflare runtime API: `Astro.request.cf`; `Astro.locals.runtime` removed in adapter v13
 - Season rule duplication: `src/lib/season.ts:17` ↔ `supabase/migrations/20260724120000_add_season_aware_intervals.sql`
 
+## Addenda
+
+Recorded during implementation review (2026-07-25, `reviews/impl-review.md`). These describe where the shipped code intentionally differs from the contracts above; the contracts are left as written so the review trail stays readable.
+
+### A1 — Due-filtering stayed in the island (F4, Phase 3 · Change 1)
+
+`authed-shell.astro` forwards `today` and `timeZone` but does not filter. `dueList` and `nextUpcoming` remain in `today-list.tsx`, and the full ordered plant list is passed unconditionally.
+
+User-visible behaviour matches the contract: Astro server-renders the `client:load` island and it seeds `today` from props, so the first byte already carries the filtered list (criterion 3.6 passes on its own terms). What is unrealized is the payload half — plants due months out are still serialized into island props on every render of `/`. The island also needs the unfiltered list for the midnight-rollover case, so shell-side filtering would mean passing *two* lists rather than a smaller one. Accepted as-is; revisit only if collection sizes make the payload matter.
+
+### A2 — No browser-zone fallback in the island (F3, Phase 3 · Change 2)
+
+Change 2 said the rollover timer falls back to the browser zone when `timeZone` is `null`. That was dropped: with a `null` zone the island now schedules nothing and keeps rendering exact dates.
+
+Reason: `locals.today` is `null` in exactly that case, so the server records mutations against a UTC-derived date (Change 4) while the island would have been showing a browser-zone date — a cookie-blocked user in a far-east zone could store `p_acted_on` a day early on every mutation. This restores the Desired End State's "it never guesses a day", which Change 2 contradicted. The cost is that a cookie-blocked user loses relative phrasing and rollover.
+
+### A3 — Date formatting is pinned to `en-GB`, not the viewer's locale (F10, Phase 3 · Change 2)
+
+`formatOverdueDate` moved from `new Intl.DateTimeFormat(undefined, …)` to `"en-GB"`, matching the locale `formatShortDate` already used. The plan did not call this out.
+
+Kept deliberately: the same date is now rendered on the server for some surfaces and in the island for others, and a viewer-locale formatter would make those two disagree in-page. A fixed locale is the price of that agreement. If the app ever localizes, the locale becomes a resolved value passed from the server, not a client-side default.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.

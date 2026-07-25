@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Button, LinkButton } from "@/components/ui/button";
 import { classifyDueStatus, compareDueRecords, formatDueLabel, formatIntervalLabel, formatShortDate } from "@/lib/date";
 import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
-import { getBrowserTimeZone, getMillisecondsUntilNextMidnight, getTodayInTimeZone } from "@/lib/timezone";
+import { getMillisecondsUntilNextMidnight, getTodayInTimeZone } from "@/lib/timezone";
 import { cn, prefersReducedMotion } from "@/lib/utils";
 import type { PlantListItem } from "@/types";
 import { ANIMATION_MS, formatOverdueDate, getActionLabel, getFailureMessage, getSuccessMessage } from "./utils";
@@ -223,25 +223,21 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
   const nextUpcoming = today === null ? null : (basePlants.find((plant) => plant.next_due_on > today) ?? null);
 
   useEffect(() => {
+    // No browser-zone fallback on purpose: the server records mutations against `locals.today`,
+    // which is null in exactly this case. Guessing a day here would disagree with what gets
+    // stored, so an unknown zone keeps rendering exact dates instead.
+    if (timeZone === null) {
+      return;
+    }
+
+    const activeTimeZone = timeZone;
     let timer: ReturnType<typeof setTimeout>;
 
     const refreshToday = () => {
-      const activeTimeZone = timeZone ?? getBrowserTimeZone();
-
-      if (activeTimeZone) {
-        setToday(getTodayInTimeZone(activeTimeZone));
-      }
+      setToday(getTodayInTimeZone(activeTimeZone));
     };
 
     function scheduleRollover() {
-      const activeTimeZone = timeZone ?? getBrowserTimeZone();
-
-      if (!activeTimeZone) {
-        timer = setTimeout(scheduleRollover, 60_000);
-
-        return;
-      }
-
       timer = setTimeout(() => {
         refreshToday();
         scheduleRollover();

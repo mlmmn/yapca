@@ -17,8 +17,16 @@ const { title = "yapca" } = Astro.props;
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
     <script is:inline>
+      // Mirrors `TIME_ZONE_COOKIE` and `getDayFormatter`/`getTodayInTimeZone` from
+      // `src/lib/timezone.ts`, which an is:inline script cannot import. Change both together.
       try {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const secure = location.protocol === "https:" ? "; Secure" : "";
+
+        // Write the cookie first: it is what the server needs, and it must not be lost to a
+        // throw in the date computation below, which only feeds the reload comparison.
+        document.cookie = `tz=${encodeURIComponent(timeZone)}; Path=/; SameSite=Lax; Max-Age=31536000${secure}`;
+
         const now = new Date();
         const parts = new Intl.DateTimeFormat("en-US", {
           timeZone,
@@ -30,9 +38,6 @@ const { title = "yapca" } = Astro.props;
         const month = parts.find((part) => part.type === "month")?.value;
         const day = parts.find((part) => part.type === "day")?.value;
         const browserToday = `${year}-${month}-${day}`;
-        const secure = location.protocol === "https:" ? "; Secure" : "";
-
-        document.cookie = `tz=${encodeURIComponent(timeZone)}; Path=/; SameSite=Lax; Max-Age=31536000${secure}`;
 
         if (browserToday !== document.documentElement.dataset.today) {
           if (sessionStorage.getItem("tz-sync") !== timeZone) {

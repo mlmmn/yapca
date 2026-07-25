@@ -11,18 +11,25 @@ type Props = {
 
 const { growingIntervalDays, dormancyIntervalDays, dueDate, mode } = Astro.props;
 const today = Astro.locals.today;
-const season = today === null ? null : getSeason(today);
-const activeInterval = today === null ? null : selectSeasonInterval(today, growingIntervalDays, dormancyIntervalDays);
-const seasonLabel = season === null ? null : getShortSeasonLabel(season);
 const fallbackSchedule = `Growing: ${formatIntervalLabel(growingIntervalDays)} · Dormancy: ${formatIntervalLabel(dormancyIntervalDays)}`;
-const schedule =
-  mode === "full"
-    ? [
-        `Growing: ${formatIntervalLabel(growingIntervalDays)}${season === "growing" ? " (active now)" : ""}`,
-        `Dormancy: ${formatIntervalLabel(dormancyIntervalDays)}${season === "dormancy" ? " (active now)" : ""}`,
-      ].join(" · ")
-    : `${seasonLabel} · then ${formatIntervalLabel(activeInterval ?? growingIntervalDays)}`;
-const summary = today === null ? fallbackSchedule : schedule;
+
+// Only reachable with a known day — every season-dependent value needs one.
+function buildSchedule(activeDay: string): string {
+  const season = getSeason(activeDay);
+
+  if (mode === "full") {
+    return [
+      `Growing: ${formatIntervalLabel(growingIntervalDays)}${season === "growing" ? " (active now)" : ""}`,
+      `Dormancy: ${formatIntervalLabel(dormancyIntervalDays)}${season === "dormancy" ? " (active now)" : ""}`,
+    ].join(" · ");
+  }
+
+  const activeInterval = selectSeasonInterval(activeDay, growingIntervalDays, dormancyIntervalDays);
+
+  return `${getShortSeasonLabel(season)} · then ${formatIntervalLabel(activeInterval)}`;
+}
+
+const summary = today === null ? fallbackSchedule : buildSchedule(today);
 const dueLabel = formatDueLabel(dueDate, today);
 ---
 

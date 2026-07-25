@@ -1,32 +1,44 @@
+// This cookie name and the "en-US" 2-digit day formatting in `getDayFormatter` are duplicated
+// verbatim by the inline head script in `src/layouts/layout.astro`, which cannot import from here.
+// Drift makes that script's `data-today` comparison fail forever, costing every visitor an extra
+// document request per session. Change both together.
 export const TIME_ZONE_COOKIE = "tz";
 
 const TIME_ZONE_PATTERN = /^[A-Za-z0-9._+-]+(?:\/[A-Za-z0-9._+-]+)*$/;
+// Constructing an Intl.DateTimeFormat is the expensive half of formatting, and the
+// midnight-rollover search formats the same zone dozens of times per call. Only
+// successfully constructed formatters are cached, so untrusted input cannot grow the map.
+const dayFormatters = new Map<string, Intl.DateTimeFormat>();
 
-export function isSupportedTimeZone(value: string): boolean {
-  if (value.length === 0 || value.length > 100 || !TIME_ZONE_PATTERN.test(value)) {
-    return false;
+function getDayFormatter(timeZone: string): Intl.DateTimeFormat | null {
+  if (timeZone.length === 0 || timeZone.length > 100 || !TIME_ZONE_PATTERN.test(timeZone)) {
+    return null;
+  }
+
+  const cached = dayFormatters.get(timeZone);
+
+  if (cached) {
+    return cached;
   }
 
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone: value });
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
 
-    return true;
+    dayFormatters.set(timeZone, formatter);
+
+    return formatter;
   } catch {
-    return false;
+    return null;
   }
 }
 
-export function getTodayInTimeZone(timeZone: string, now = new Date()): string {
-  if (!isSupportedTimeZone(timeZone)) {
-    throw new RangeError(`Unsupported time zone: ${timeZone}`);
-  }
-
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
+function formatDay(formatter: Intl.DateTimeFormat, now: Date): string {
+  const parts = formatter.formatToParts(now);
   const year = parts.find((part) => part.type === "year")?.value;
   const month = parts.find((part) => part.type === "month")?.value;
   const day = parts.find((part) => part.type === "day")?.value;
@@ -38,25 +50,40 @@ export function getTodayInTimeZone(timeZone: string, now = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
-export function getBrowserTimeZone(): string | null {
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+export function isSupportedTimeZone(value: string): boolean {
+  return getDayFormatter(value) !== null;
+}
 
-  return isSupportedTimeZone(timeZone) ? timeZone : null;
+export function getTodayInTimeZone(timeZone: string, now = new Date()): string {
+  const formatter = getDayFormatter(timeZone);
+
+  if (!formatter) {
+    throw new RangeError(`Unsupported time zone: ${timeZone}`);
+  }
+
+  return formatDay(formatter, now);
 }
 
 export function getMillisecondsUntilNextMidnight(timeZone: string, now = new Date()): number {
-  const today = getTodayInTimeZone(timeZone, now);
+  const formatter = getDayFormatter(timeZone);
+
+  if (!formatter) {
+    throw new RangeError(`Unsupported time zone: ${timeZone}`);
+  }
+
+  const today = formatDay(formatter, now);
   let lowerBound = now.getTime();
   let upperBound = lowerBound + 36 * 60 * 60 * 1000;
 
-  while (getTodayInTimeZone(timeZone, new Date(upperBound)) === today) {
+  while (formatDay(formatter, new Date(upperBound)) === today) {
     upperBound += 24 * 60 * 60 * 1000;
   }
 
-  for (let iteration = 0; iteration < 42; iteration += 1) {
+  // 28 halvings narrow the 36 h seed window (~1.3e8 ms) to sub-millisecond precision.
+  for (let iteration = 0; iteration < 28; iteration += 1) {
     const midpoint = Math.floor((lowerBound + upperBound) / 2);
 
-    if (getTodayInTimeZone(timeZone, new Date(midpoint)) === today) {
+    if (formatDay(formatter, new Date(midpoint)) === today) {
       lowerBound = midpoint;
     } else {
       upperBound = midpoint;

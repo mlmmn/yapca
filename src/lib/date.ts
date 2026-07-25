@@ -1,5 +1,8 @@
 const DATE_STRING_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+// Hoisted because SSR calls this once per plant row per request, and constructing an
+// Intl.DateTimeFormat is the expensive half of formatting.
+const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 
 export function toEpochDay(dateString: string): number {
   const [year, month, day] = dateString.split("-").map(Number);
@@ -28,22 +31,6 @@ export function isValidDateString(value: string): boolean {
   return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
 }
 
-export function todayLocalDateString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
-
-export function msUntilNextLocalMidnight(): number {
-  const now = new Date();
-  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
-
-  return nextMidnight.getTime() - now.getTime();
-}
-
 export function parseLocalDateString(dateString: string): Date {
   const [year, month, day] = dateString.split("-").map(Number);
 
@@ -51,7 +38,7 @@ export function parseLocalDateString(dateString: string): Date {
 }
 
 export function formatShortDate(dateString: string): string {
-  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(parseLocalDateString(dateString));
+  return SHORT_DATE_FORMATTER.format(parseLocalDateString(dateString));
 }
 
 export function formatDueLabel(dateString: string, today: string | null): string {

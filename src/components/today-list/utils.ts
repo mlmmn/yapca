@@ -3,6 +3,13 @@ import type { ActionKind } from "./types";
 
 export const ANIMATION_MS = 190;
 
+const OVERDUE_DATE_FORMATTER = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
+const OVERDUE_DATE_WITH_YEAR_FORMATTER = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
 export function getActionLabel(kind: ActionKind): string {
   return kind === "watered" ? "Watered" : "Postpone 2 days";
 }
@@ -23,8 +30,8 @@ export function formatOverdueDate(dateString: string, today: string): string {
   const date = new Date(dueYear, dueMonth - 1, dueDay);
 
   if (dueYear === todayYear) {
-    return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(date);
+    return OVERDUE_DATE_FORMATTER.format(date);
   }
 
-  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(date);
+  return OVERDUE_DATE_WITH_YEAR_FORMATTER.format(date);
 }
