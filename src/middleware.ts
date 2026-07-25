@@ -1,10 +1,23 @@
 import { defineMiddleware } from "astro:middleware";
 import { createClient } from "@/lib/supabase";
+import { getTodayInTimeZone, isSupportedTimeZone, TIME_ZONE_COOKIE } from "@/lib/timezone";
 
 // Routes that require authentication. S-01 seeds real app routes here.
 const PROTECTED_ROUTES: string[] = ["/plants"];
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  const requestWithCf = context.request as Request & {
+    cf?: { timezone?: unknown };
+  };
+  const cookieValue = context.cookies.get(TIME_ZONE_COOKIE)?.value;
+  const cookieTimeZone = cookieValue && isSupportedTimeZone(cookieValue) ? cookieValue : null;
+  const cfValue = requestWithCf.cf?.timezone;
+  const cfTimeZone = typeof cfValue === "string" && isSupportedTimeZone(cfValue) ? cfValue : null;
+  const timeZone = cookieTimeZone ?? cfTimeZone;
+
+  context.locals.timeZone = timeZone;
+  context.locals.today = timeZone ? getTodayInTimeZone(timeZone) : null;
+
   const supabase = createClient(context.request.headers, context.cookies);
 
   if (supabase) {

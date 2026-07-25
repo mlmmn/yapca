@@ -10,12 +10,40 @@ const { title = "yapca" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-today={Astro.locals.today ?? ""}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
+    <script is:inline>
+      try {
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(now);
+        const year = parts.find((part) => part.type === "year")?.value;
+        const month = parts.find((part) => part.type === "month")?.value;
+        const day = parts.find((part) => part.type === "day")?.value;
+        const browserToday = `${year}-${month}-${day}`;
+        const secure = location.protocol === "https:" ? "; Secure" : "";
+
+        document.cookie = `tz=${encodeURIComponent(timeZone)}; Path=/; SameSite=Lax; Max-Age=31536000${secure}`;
+
+        if (browserToday !== document.documentElement.dataset.today) {
+          if (sessionStorage.getItem("tz-sync") !== timeZone) {
+            sessionStorage.setItem("tz-sync", timeZone);
+            location.reload();
+          }
+        }
+      } catch {
+        // Cookie and storage APIs can be unavailable in privacy modes.
+      }
+    </script>
   </head>
   <body>
     <slot />
