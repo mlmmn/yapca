@@ -3,7 +3,7 @@ project: "YAPCA (Yet Another Plant Care App)"
 version: 1
 status: draft
 created: 2026-07-19
-updated: 2026-07-24
+updated: 2026-07-25
 prd_version: 1
 main_goal: quality
 top_blocker: time
@@ -29,7 +29,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 
 | ID   | Change ID                    | Outcome (user can …)                                          | Prerequisites | PRD refs                | Status   |
 | ---- | ---------------------------- | ------------------------------------------------------------ | ------------- | ----------------------- | -------- |
-| F-01 | finish-auth-and-route-gating | (foundation) sign up / sign in / sign out; app requires session | —             | FR-001, FR-002, Access Control | ready    |
+| F-01 | finish-auth-and-route-gating | (foundation) sign up / sign in / sign out; app requires session | —             | FR-001, FR-002, Access Control | done     |
 | S-01 | core-watering-loop           | add a plant, see it due today, mark Watered → reschedules 1 interval later | F-01          | FR-004, FR-009, FR-011  | proposed |
 | S-02 | plant-detail-and-journal     | open a plant and see its details + watering journal          | S-01          | FR-005, FR-014          | proposed |
 | S-03 | overdue-tasks-and-urgency    | see overdue tasks with a non-color-only urgency cue and clear them | S-01          | FR-009, FR-010          | proposed |
@@ -79,7 +79,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Sequenced first because nothing user-facing works without a session and the baseline auth is a backend-only shell (routes exist; no UI, empty `PROTECTED_ROUTES`, placeholder `index.astro`). Scope is deliberately minimal — sign-up/in/out UI + gating + a bare signed-out entry (logo + auth CTA, not a marketing page — see ORQ-3); account deletion (FR-003, nice-to-have) is parked, not bundled here. Risk if skipped: RLS policies written later would have no authenticated principal to key on.
-- **Status:** ready
+- **Status:** done
 
 ## Slices
 
@@ -229,3 +229,5 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Done
 
 (Empty on first generation. `/10x-archive` appends here — and flips that item's `Status` to `done` — when a change whose `Change ID` matches an item is archived.)
+
+- **F-01: (foundation) a user can register, sign in, and sign out through the UI, app routes require an authenticated session, and an unauthenticated visitor lands on a minimal signed-out entry (replacing the placeholder root) that routes to sign in / create account — the backend auth routes that already exist are now reachable and enforced end-to-end.** — Archived 2026-07-25 → `context/archive/2026-07-19-finish-auth-and-route-gating/`. Lesson: —.
