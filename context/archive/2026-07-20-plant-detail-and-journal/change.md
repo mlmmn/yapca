@@ -1,10 +1,10 @@
 ---
 change_id: plant-detail-and-journal
 title: Plant detail and journal
-status: impl_reviewed
+status: archived
 created: 2026-07-20
-updated: 2026-07-20
-archived_at: null
+updated: 2026-07-25
+archived_at: 2026-07-25T14:02:51Z
 ---
 
 ## Notes

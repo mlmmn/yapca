@@ -32,7 +32,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | ---- | ---------------------------- | ------------------------------------------------------------ | ------------- | ----------------------- | -------- |
 | F-01 | finish-auth-and-route-gating | (foundation) sign up / sign in / sign out; app requires session | —             | FR-001, FR-002, Access Control | done     |
 | S-01 | core-watering-loop           | add a plant, see it due today, mark Watered → reschedules 1 interval later | F-01          | FR-004, FR-009, FR-011  | done     |
-| S-02 | plant-detail-and-journal     | open a plant and see its details + watering journal          | S-01          | FR-005, FR-014          | proposed |
+| S-02 | plant-detail-and-journal     | open a plant and see its details + watering journal          | S-01          | FR-005, FR-014          | done     |
 | S-03 | overdue-tasks-and-urgency    | see overdue tasks with a non-color-only urgency cue and clear them | S-01          | FR-009, FR-010          | proposed |
 | S-04 | postpone-and-undo            | postpone a task 2 days; undo a Watered/Postpone misclick      | S-01, S-02    | FR-012, FR-013          | proposed |
 | S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | blocked  |
@@ -106,7 +106,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Sequenced before postpone/undo (S-04) because the PRD states the journal is load-bearing for undo — it is the record of actions that undo reverses. Building the journal first means undo has a persisted history to reverse against rather than inventing ad-hoc state.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: Overdue tasks + urgency cue
 
@@ -233,3 +233,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **F-01: (foundation) a user can register, sign in, and sign out through the UI, app routes require an authenticated session, and an unauthenticated visitor lands on a minimal signed-out entry (replacing the placeholder root) that routes to sign in / create account — the backend auth routes that already exist are now reachable and enforced end-to-end.** — Archived 2026-07-25 → `context/archive/2026-07-19-finish-auth-and-route-gating/`. Lesson: —.
 - **S-01: user can add a plant (name, watering interval, optional photo), see it on today's due list, and mark it Watered so it reschedules exactly one interval later (today + interval).** — Archived 2026-07-25 → `context/archive/2026-07-19-core-watering-loop/`. Lesson: —.
+- **S-02: user can open a plant and see its details plus a per-plant watering journal (the history of Watered/Postpone actions).** — Archived 2026-07-25 → `context/archive/2026-07-20-plant-detail-and-journal/`. Lesson: —.
