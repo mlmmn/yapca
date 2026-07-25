@@ -33,7 +33,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | F-01 | finish-auth-and-route-gating | (foundation) sign up / sign in / sign out; app requires session | —             | FR-001, FR-002, Access Control | done     |
 | S-01 | core-watering-loop           | add a plant, see it due today, mark Watered → reschedules 1 interval later | F-01          | FR-004, FR-009, FR-011  | done     |
 | S-02 | plant-detail-and-journal     | open a plant and see its details + watering journal          | S-01          | FR-005, FR-014          | done     |
-| S-03 | overdue-tasks-and-urgency    | see overdue tasks with a non-color-only urgency cue and clear them | S-01          | FR-009, FR-010          | proposed |
+| S-03 | overdue-tasks-and-urgency    | see overdue tasks with a non-color-only urgency cue and clear them | S-01          | FR-009, FR-010          | done     |
 | S-04 | postpone-and-undo            | postpone a task 2 days; undo a Watered/Postpone misclick      | S-01, S-02    | FR-012, FR-013          | proposed |
 | S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | blocked  |
 | S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | proposed |
@@ -118,7 +118,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Not deferred behind other feature slices because the `quality` goal treats the color-not-alone a11y NFR as launch-gating, not polish. Depends only on S-01 (the task list must exist first). Risk: overdue carry-over that silently drops tasks would defeat the product's whole reason for existing (memory fails).
-- **Status:** proposed
+- **Status:** done
 
 ### S-04: Postpone + undo
 
@@ -234,3 +234,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **F-01: (foundation) a user can register, sign in, and sign out through the UI, app routes require an authenticated session, and an unauthenticated visitor lands on a minimal signed-out entry (replacing the placeholder root) that routes to sign in / create account — the backend auth routes that already exist are now reachable and enforced end-to-end.** — Archived 2026-07-25 → `context/archive/2026-07-19-finish-auth-and-route-gating/`. Lesson: —.
 - **S-01: user can add a plant (name, watering interval, optional photo), see it on today's due list, and mark it Watered so it reschedules exactly one interval later (today + interval).** — Archived 2026-07-25 → `context/archive/2026-07-19-core-watering-loop/`. Lesson: —.
 - **S-02: user can open a plant and see its details plus a per-plant watering journal (the history of Watered/Postpone actions).** — Archived 2026-07-25 → `context/archive/2026-07-20-plant-detail-and-journal/`. Lesson: —.
+- **S-03: user can see overdue tasks carried over from previous days alongside today's, distinguished by an urgency cue that does not rely on color alone, and clear them the same way as today's tasks.** — Archived 2026-07-25 → `context/archive/2026-07-20-overdue-tasks-and-urgency/`. Lesson: —.
