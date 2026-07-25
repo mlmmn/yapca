@@ -705,21 +705,21 @@ change remain valid inputs to the delta rule.
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `pnpm astro check`
-- [x] 3.2 Linting passes: `pnpm lint`
-- [x] 3.3 Production build succeeds: `pnpm build`
-- [x] 3.4 No new eslint suppression was added
+- [x] 3.1 Type checking passes: `pnpm astro check` — ca42510
+- [x] 3.2 Linting passes: `pnpm lint` — ca42510
+- [x] 3.3 Production build succeeds: `pnpm build` — ca42510
+- [x] 3.4 No new eslint suppression was added — ca42510
 
 #### Manual
 
-- [x] 3.5 Conflict state offers reload and safe exit, merges nothing
-- [x] 3.6 Offline save preserves every value and stays submittable
-- [x] 3.7 Invalid name, interval, and photo show exact messages with `aria-invalid`
-- [x] 3.8 Rejected photo leaves the saved photo and unrelated fields untouched
-- [x] 3.9 Failed submit moves focus to the first invalid control
-- [x] 3.10 Preview does not announce per keystroke but announces the settled consequence
-- [x] 3.11 320px and 200% zoom: no horizontal scrolling, all controls reachable
-- [x] 3.12 Keyboard-only pass follows the documented tab order with visible focus
-- [x] 3.13 Dark mode contrast holds; reduced motion removes any transition
-- [x] 3.14 Long plant name wraps without truncation
-- [x] 3.15 Already-overdue plant: exact shifted date on detail, overdue cue on the Today list
+- [x] 3.5 Conflict state offers reload and safe exit, merges nothing — ca42510
+- [x] 3.6 Offline save preserves every value and stays submittable — ca42510
+- [x] 3.7 Invalid name, interval, and photo show exact messages with `aria-invalid` — ca42510
+- [x] 3.8 Rejected photo leaves the saved photo and unrelated fields untouched — ca42510
+- [x] 3.9 Failed submit moves focus to the first invalid control — ca42510
+- [x] 3.10 Preview does not announce per keystroke but announces the settled consequence — ca42510
+- [x] 3.11 320px and 200% zoom: no horizontal scrolling, all controls reachable — ca42510
+- [x] 3.12 Keyboard-only pass follows the documented tab order with visible focus — ca42510
+- [x] 3.13 Dark mode contrast holds; reduced motion removes any transition — ca42510
+- [x] 3.14 Long plant name wraps without truncation — ca42510
+- [x] 3.15 Already-overdue plant: exact shifted date on detail, overdue cue on the Today list — ca42510
