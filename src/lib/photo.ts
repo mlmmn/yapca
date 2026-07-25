@@ -15,7 +15,7 @@ export const PHOTO_ACCEPT = Object.keys(PHOTO_MIME_EXTENSIONS).join(",");
 export const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 export function isValidPhoto(file: File): boolean {
-  return file.size <= MAX_PHOTO_BYTES && file.type in PHOTO_MIME_EXTENSIONS;
+  return file.size <= MAX_PHOTO_BYTES && Object.hasOwn(PHOTO_MIME_EXTENSIONS, file.type);
 }
 
 export function buildPhotoPath(userId: string, mimeType: string): string {

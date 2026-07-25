@@ -653,6 +653,16 @@ change remain valid inputs to the delta rule.
 - Concurrency token: `supabase/migrations/20260719120000_create_plants.sql:12,17-30`
 - Date authority precedent: `context/changes/user-timezone-dates/plan.md`
 
+## Addenda
+
+Recorded after implementation review (2026-07-25), see `reviews/impl-review.md`.
+
+### A1 — `addPlant`'s photo rejection copy was unified (Phase 1 §5)
+
+Phase 1 §5 described repointing `addPlant`'s photo zod schema at the shared module "without changing any existing behavior". The shared `photoSchema` collapses the two former refinements into one, so `addPlant` now rejects both an oversized file and an unsupported type with the single string `Choose a JPEG, PNG, or WebP image up to 4 MB.` — replacing `Photo must be 4 MB or smaller` and `Photo must be a JPEG, PNG, or WebP image`.
+
+Kept, not reverted: the new string is the one `design.md:402` mandates and the one both client forms already display, so the consolidation removed a pre-existing client/server message mismatch in the add-plant flow. Recorded here because it is a user-visible change to an existing flow that the phase's success criteria did not cover.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.

@@ -39,7 +39,7 @@ export default function EditPlantForm({
   const formRef = useRef<HTMLFormElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const saveButtonRef = useRef<HTMLButtonElement>(null);
+  const saveAlertRef = useRef<HTMLDivElement>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -232,7 +232,7 @@ export default function EditPlantForm({
 
   useEffect(() => {
     if (saveError) {
-      saveButtonRef.current?.focus();
+      saveAlertRef.current?.focus();
     }
   }, [saveError]);
 
@@ -412,7 +412,12 @@ export default function EditPlantForm({
       </FieldGroup>
 
       {saveError && (
-        <div className="border-border bg-muted space-y-3 rounded-lg border p-3" role="alert">
+        <div
+          ref={saveAlertRef}
+          tabIndex={-1}
+          className="border-border bg-muted space-y-3 rounded-lg border p-3 outline-none"
+          role="alert"
+        >
           <p className="text-sm">{SAVE_ERROR_MESSAGES[saveError]}</p>
           {saveError === "conflict" && (
             <div className="flex flex-wrap items-center gap-2">
@@ -429,11 +434,11 @@ export default function EditPlantForm({
 
       <form.Subscribe selector={(state) => ({ valid: state.isValid, submitting: state.isSubmitting })}>
         {({ valid, submitting }) => {
-          const submitReady = valid && !submitting && photoError === null;
+          const submitReady = valid && !submitting;
 
           return (
             <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-              <Button ref={saveButtonRef} type="submit" isDisabled={!submitReady} className="min-h-11 w-full sm:w-fit">
+              <Button type="submit" isDisabled={!submitReady} className="min-h-11 w-full sm:w-fit">
                 {submitting ? "Saving changes…" : "Save changes"}
               </Button>
               <a

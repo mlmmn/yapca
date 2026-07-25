@@ -30,14 +30,14 @@ export function getSaveErrorState(code: string | undefined): SaveErrorState | "n
   return "generic";
 }
 
-function getValidInterval(value: number | null): value is number {
+function isValidInterval(value: number | null): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 365;
 }
 
 export function buildSchedulePreview(input: PreviewInput): string {
   const oldDueLabel = formatShortDate(input.oldNextDue);
 
-  if (!getValidInterval(input.newGrowingIntervalDays) || !getValidInterval(input.newDormancyIntervalDays)) {
+  if (!isValidInterval(input.newGrowingIntervalDays) || !isValidInterval(input.newDormancyIntervalDays)) {
     return "Enter valid intervals to preview the next due date.";
   }
 

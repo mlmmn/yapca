@@ -1,7 +1,7 @@
 ---
 change_id: edit-plant-and-recalc
 title: Edit plant and recalc
-status: implemented
+status: impl_reviewed
 created: 2026-07-25
 updated: 2026-07-25
 archived_at: null
