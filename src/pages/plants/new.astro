@@ -14,7 +14,7 @@ import AddPlantForm from "@/components/add-plant-form";
           &larr; Today
         </a>
         <h1 class="mb-6 text-2xl font-medium">Add plant</h1>
-        <AddPlantForm client:load />
+        <AddPlantForm client:load today={Astro.locals.today} />
       </div>
     </div>
   </div>

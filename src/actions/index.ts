@@ -1,8 +1,9 @@
 import { ActionError, defineAction, type ActionAPIContext } from "astro:actions";
 import { z } from "astro/zod";
 import { createClient } from "@/lib/supabase";
-import { isValidDateString, nextDue } from "@/lib/interval";
+import { nextDue } from "@/lib/interval";
 import { selectSeasonInterval } from "@/lib/season";
+import { getTodayInTimeZone } from "@/lib/timezone";
 
 const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
 
@@ -11,8 +12,6 @@ const PHOTO_MIME_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
   "image/webp": "webp",
 };
-
-const clientDateSchema = z.string().refine(isValidDateString, "Invalid date");
 
 const photoSchema = z
   .instanceof(File)
@@ -29,6 +28,12 @@ function requireSession(context: ActionAPIContext) {
   return { supabase, user: context.locals.user };
 }
 
+function getActionDate(context: ActionAPIContext): string {
+  // A mutation still needs a date if both timezone sources are unavailable; UTC is the
+  // only deterministic fallback when the request has no user timezone to resolve.
+  return context.locals.today ?? getTodayInTimeZone("UTC");
+}
+
 export const server = {
   addPlant: defineAction({
     accept: "form",
@@ -37,17 +42,17 @@ export const server = {
       growing_interval_days: z.coerce.number().int().min(1).max(365),
       dormancy_interval_days: z.coerce.number().int().min(1).max(365),
       alreadyWatered: z.preprocess((v) => v === "true", z.boolean()),
-      clientDate: clientDateSchema,
       photo: photoSchema.optional(),
     }),
     handler: async (input, context) => {
       const { supabase, user } = requireSession(context);
+      const actionDate = getActionDate(context);
       const activeInterval = selectSeasonInterval(
-        input.clientDate,
+        actionDate,
         input.growing_interval_days,
         input.dormancy_interval_days,
       );
-      const next_due_on = input.alreadyWatered ? nextDue(input.clientDate, activeInterval) : input.clientDate;
+      const next_due_on = input.alreadyWatered ? nextDue(actionDate, activeInterval) : actionDate;
       let photo_path: string | null = null;
 
       if (input.photo) {
@@ -98,14 +103,14 @@ export const server = {
     accept: "form",
     input: z.object({
       plantId: z.uuid(),
-      clientDate: clientDateSchema,
     }),
     handler: async (input, context) => {
       const { supabase } = requireSession(context);
+      const actionDate = getActionDate(context);
 
       const { data, error } = await supabase.rpc("mark_watered", {
         p_plant_id: input.plantId,
-        p_acted_on: input.clientDate,
+        p_acted_on: actionDate,
       });
 
       if (error) {
@@ -127,13 +132,13 @@ export const server = {
     accept: "form",
     input: z.object({
       plantId: z.uuid(),
-      clientDate: clientDateSchema,
     }),
     handler: async (input, context) => {
       const { supabase } = requireSession(context);
+      const actionDate = getActionDate(context);
       const { data, error } = await supabase.rpc("postpone_plant", {
         p_plant_id: input.plantId,
-        p_acted_on: input.clientDate,
+        p_acted_on: actionDate,
       });
 
       if (error) {

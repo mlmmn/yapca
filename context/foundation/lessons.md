@@ -15,3 +15,10 @@
 - **Problem**: An outdated or missing local seed impairs developer experience after migrations reset the database.
 - **Rule**: Ensure the local seed is kept up to date with migrations and the database shape. Never apply local seed data to production.
 - **Applies to**: plan, plan-review, implement, impl-review
+
+## Always verify command status codes
+
+- **Context**: Entire codebase
+- **Problem**: Automated checks, including CI, can fail even when command output appears successful if the command’s non-zero exit status is overlooked.
+- **Rule**: Always check the command’s status code and treat any non-zero result as an error.
+- **Applies to**: implement, impl-review

@@ -60,7 +60,13 @@ const { plants } = await loadPlants();
 
     <div class="flex flex-1 justify-center px-6 py-10">
       <div class="w-full max-w-xl">
-        {plants === null ? <TodayList client:load plants={[]} fetchError /> : <TodayList client:load plants={plants} />}
+        {
+          plants === null ? (
+            <TodayList client:load plants={[]} fetchError today={Astro.locals.today} timeZone={Astro.locals.timeZone} />
+          ) : (
+            <TodayList client:load plants={plants} today={Astro.locals.today} timeZone={Astro.locals.timeZone} />
+          )
+        }
       </div>
     </div>
   </div>

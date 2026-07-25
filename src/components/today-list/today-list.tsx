@@ -2,26 +2,12 @@ import { startTransition, useEffect, useRef, useState } from "react";
 import { actions } from "astro:actions";
 import { toast } from "sonner";
 import { Button, LinkButton } from "@/components/ui/button";
-import {
-  classifyDueStatus,
-  compareDueRecords,
-  formatDueLabel,
-  formatIntervalLabel,
-  formatShortDate,
-  msUntilNextLocalMidnight,
-  todayLocalDateString,
-} from "@/lib/date";
+import { classifyDueStatus, compareDueRecords, formatDueLabel, formatIntervalLabel, formatShortDate } from "@/lib/date";
 import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
+import { getBrowserTimeZone, getMillisecondsUntilNextMidnight, getTodayInTimeZone } from "@/lib/timezone";
 import { cn, prefersReducedMotion } from "@/lib/utils";
 import type { PlantListItem } from "@/types";
-import {
-  ANIMATION_MS,
-  BOOTSTRAP_ROW_COUNT,
-  formatOverdueDate,
-  getActionLabel,
-  getFailureMessage,
-  getSuccessMessage,
-} from "./utils";
+import { ANIMATION_MS, formatOverdueDate, getActionLabel, getFailureMessage, getSuccessMessage } from "./utils";
 import type { ActionKind, MutationResult, NoticeContext, TodayListProps } from "./types";
 
 type OptimisticPlant = PlantListItem & { leaving?: boolean };
@@ -38,8 +24,8 @@ function updateSet(ids: Set<string>, id: string, present: boolean): Set<string> 
   return next;
 }
 
-export default function TodayList({ plants, fetchError = false }: TodayListProps) {
-  const [today, setToday] = useState<string | null>(null);
+export default function TodayList({ plants, fetchError = false, today: initialToday, timeZone }: TodayListProps) {
+  const [today, setToday] = useState<string | null>(initialToday);
   const [basePlants, setBasePlants] = useState<PlantListItem[]>(plants);
   const [leavingIds, setLeavingIds] = useState<Set<string>>(new Set());
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
@@ -143,12 +129,10 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
       focusNextAction(plant.id, kind);
     }
 
-    const clientDate = todayLocalDateString();
     const formData = new FormData();
     const mutation = kind === "watered" ? actions.markWatered : actions.postponePlant;
 
     formData.set("plantId", plant.id);
-    formData.set("clientDate", clientDate);
 
     startTransition(async () => {
       try {
@@ -198,11 +182,10 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
           throw error;
         }
 
-        setToday(todayLocalDateString());
         setBasePlants((current) => {
           const restoredPlant = { ...context.plant, next_due_on: data.restored_due_on };
 
-          if (data.restored_due_on > todayLocalDateString()) {
+          if (today !== null && data.restored_due_on > today) {
             return current;
           }
 
@@ -235,31 +218,56 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
     ...plant,
     leaving: leavingIds.has(plant.id),
   }));
-  const dueList = today === null ? [] : optimisticPlants.filter((plant) => plant.next_due_on <= today);
+  const dueList = today === null ? optimisticPlants : optimisticPlants.filter((plant) => plant.next_due_on <= today);
   const activeDueList = dueList.filter((plant) => !plant.leaving);
   const nextUpcoming = today === null ? null : (basePlants.find((plant) => plant.next_due_on > today) ?? null);
 
   useEffect(() => {
-    // The Worker cannot know the browser's calendar date on the first request, so the
-    // client-local date is only known once this effect runs after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reveals the browser-local bootstrap contract
-    setToday(todayLocalDateString());
-
     let timer: ReturnType<typeof setTimeout>;
 
+    const refreshToday = () => {
+      const activeTimeZone = timeZone ?? getBrowserTimeZone();
+
+      if (activeTimeZone) {
+        setToday(getTodayInTimeZone(activeTimeZone));
+      }
+    };
+
     function scheduleRollover() {
+      const activeTimeZone = timeZone ?? getBrowserTimeZone();
+
+      if (!activeTimeZone) {
+        timer = setTimeout(scheduleRollover, 60_000);
+
+        return;
+      }
+
       timer = setTimeout(() => {
-        setToday(todayLocalDateString());
+        refreshToday();
         scheduleRollover();
-      }, msUntilNextLocalMidnight());
+      }, getMillisecondsUntilNextMidnight(activeTimeZone));
     }
 
+    function handlePageShow() {
+      refreshToday();
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        refreshToday();
+      }
+    }
+
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     scheduleRollover();
 
     return () => {
       clearTimeout(timer);
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [timeZone]);
 
   useEffect(() => {
     const timeouts = removalTimeouts.current;
@@ -287,31 +295,6 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
     );
   }
 
-  if (today === null) {
-    return (
-      <div>
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-medium">Today</h1>
-          <LinkButton href="/plants/new" size="sm">
-            Add plant
-          </LinkButton>
-        </div>
-        <ul aria-label="Loading plants">
-          {Array.from({ length: BOOTSTRAP_ROW_COUNT }).map((_, index) => (
-            <li key={index} className="border-border grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b py-3">
-              <div className="bg-muted size-12 shrink-0 animate-pulse rounded-lg md:size-14" />
-              <div className="min-w-0 flex-1 space-y-2">
-                <div className="bg-muted h-4 w-2/3 animate-pulse rounded" />
-                <div className="bg-muted h-3 w-1/3 animate-pulse rounded" />
-              </div>
-              <div className="bg-muted h-8 w-20 animate-pulse rounded-lg" />
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
   if (basePlants.length === 0) {
     return (
       <div className="py-16 text-center">
@@ -334,7 +317,7 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
           <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-medium outline-none">
             Today
           </h1>
-          {activeDueList.length > 0 && (
+          {today !== null && activeDueList.length > 0 && (
             <p className="text-muted-foreground text-sm">
               {activeDueList.length} plant{activeDueList.length === 1 ? "" : "s"}{" "}
               {activeDueList.length === 1 ? "needs" : "need"} water
@@ -363,10 +346,22 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
           {dueList.map((plant) => {
             const isLeaving = plant.leaving ?? false;
             const initial = plant.name.trim().charAt(0).toUpperCase() || "?";
-            const dueStatus = classifyDueStatus(plant.next_due_on, today);
-            const isOverdue = dueStatus !== "due-today";
+            const dueStatus = today === null ? null : classifyDueStatus(plant.next_due_on, today);
+            const isOverdue = dueStatus !== null && dueStatus !== "due-today";
             const isStrongOverdue = dueStatus === "overdue-strong";
             const pending = pendingIds.has(plant.id);
+            let metadataLabel = formatDueLabel(plant.next_due_on, null);
+
+            if (today !== null) {
+              const scheduleLabel = `${getShortSeasonLabel(getSeason(today))} · then ${formatIntervalLabel(
+                selectSeasonInterval(today, plant.growing_interval_days, plant.dormancy_interval_days),
+              )}`;
+
+              metadataLabel = isOverdue
+                ? `Overdue · Due ${formatOverdueDate(plant.next_due_on, today)} · ${scheduleLabel}`
+                : `${formatDueLabel(plant.next_due_on, today)} · ${scheduleLabel}`;
+            }
+
             const linkClasses = cn(
               "col-span-2 -m-3 flex gap-3 p-3 outline-0 focus-visible:after:border-ring focus-visible:after:ring-3 focus-visible:after:ring-ring/50 after:block after:absolute after:inset-0 after:content-[''] after:border after:border-transparent after:transition-all",
             );
@@ -403,24 +398,10 @@ export default function TodayList({ plants, fetchError = false }: TodayListProps
                           isStrongOverdue ? "border-warning-accent bg-warning-accent" : "border-warning-foreground",
                         )}
                       />
-                      <span className={metadataClasses}>
-                        Overdue · Due {formatOverdueDate(plant.next_due_on, today)}
-                      </span>
-                      <span className={metadataClasses}>·</span>
-                      <span className={cn("line-clamp-1", metadataClasses)}>
-                        {getShortSeasonLabel(getSeason(today))} · then{" "}
-                        {formatIntervalLabel(
-                          selectSeasonInterval(today, plant.growing_interval_days, plant.dormancy_interval_days),
-                        )}
-                      </span>
+                      <span className={cn("line-clamp-1", metadataClasses)}>{metadataLabel}</span>
                     </div>
                   ) : (
-                    <p className={metadataClasses}>
-                      {formatDueLabel(plant.next_due_on, today)} · {getShortSeasonLabel(getSeason(today))} · then{" "}
-                      {formatIntervalLabel(
-                        selectSeasonInterval(today, plant.growing_interval_days, plant.dormancy_interval_days),
-                      )}
-                    </p>
+                    <p className={metadataClasses}>{metadataLabel}</p>
                   )}
                 </div>
                 <div className="z-1 flex min-w-0 flex-col items-stretch gap-1 sm:flex-row">

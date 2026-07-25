@@ -37,3 +37,31 @@ export function getTodayInTimeZone(timeZone: string, now = new Date()): string {
 
   return `${year}-${month}-${day}`;
 }
+
+export function getBrowserTimeZone(): string | null {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  return isSupportedTimeZone(timeZone) ? timeZone : null;
+}
+
+export function getMillisecondsUntilNextMidnight(timeZone: string, now = new Date()): number {
+  const today = getTodayInTimeZone(timeZone, now);
+  let lowerBound = now.getTime();
+  let upperBound = lowerBound + 36 * 60 * 60 * 1000;
+
+  while (getTodayInTimeZone(timeZone, new Date(upperBound)) === today) {
+    upperBound += 24 * 60 * 60 * 1000;
+  }
+
+  for (let iteration = 0; iteration < 42; iteration += 1) {
+    const midpoint = Math.floor((lowerBound + upperBound) / 2);
+
+    if (getTodayInTimeZone(timeZone, new Date(midpoint)) === today) {
+      lowerBound = midpoint;
+    } else {
+      upperBound = midpoint;
+    }
+  }
+
+  return Math.max(1000, upperBound - now.getTime());
+}

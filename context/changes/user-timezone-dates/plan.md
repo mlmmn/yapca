@@ -360,36 +360,36 @@ Rollback is a straight revert — no schema, RPC, or stored-data changes to unwi
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm astro check`
-- [x] 2.2 Linting passes: `pnpm lint`
-- [x] 2.3 Production build succeeds: `pnpm build`
-- [x] 2.4 No `<script>` remains in `season-interval-summary.astro`
-- [x] 2.5 No `data-season` attributes remain in `src`
+- [x] 2.1 Type checking passes: `pnpm astro check` — 712f949
+- [x] 2.2 Linting passes: `pnpm lint` — 712f949
+- [x] 2.3 Production build succeeds: `pnpm build` — 712f949
+- [x] 2.4 No `<script>` remains in `season-interval-summary.astro` — 712f949
+- [x] 2.5 No `data-season` attributes remain in `src` — 712f949
 
 #### Manual
 
-- [x] 2.6 `/plants` agrees with the Today list at UTC+13 before noon
-- [x] 2.7 Final season/interval text is present in the initial HTML
-- [x] 2.8 Both pages render correct labels with JavaScript disabled
-- [x] 2.9 Cookie-less + JS-disabled renders exact dates only
-- [x] 2.10 No wrap or clip at 320px where heights were pinned
+- [x] 2.6 `/plants` agrees with the Today list at UTC+13 before noon — 712f949
+- [x] 2.7 Final season/interval text is present in the initial HTML — 712f949
+- [x] 2.8 Both pages render correct labels with JavaScript disabled — 712f949
+- [x] 2.9 Cookie-less + JS-disabled renders exact dates only — 712f949
+- [x] 2.10 No wrap or clip at 320px where heights were pinned — 712f949
 
 ### Phase 3: Islands and the Action Contract
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm astro check`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Production build succeeds: `pnpm build`
-- [ ] 3.4 No `set-state-in-effect` suppressions remain in `src`
-- [ ] 3.5 No `clientDate` references remain in `src`
+- [x] 3.1 Type checking passes: `pnpm astro check`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Production build succeeds: `pnpm build`
+- [x] 3.4 No `set-state-in-effect` suppressions remain in `src`
+- [x] 3.5 No `clientDate` references remain in `src`
 
 #### Manual
 
-- [ ] 3.6 Today list renders real rows in the initial HTML, no skeleton flash
-- [ ] 3.7 Mark watered + undo still work end to end
-- [ ] 3.8 Postpone + undo still work end to end
-- [ ] 3.9 Add plant "After the seasonal interval" is correct on first paint
-- [ ] 3.10 `/` and `/plants` agree on due plants at UTC+13
-- [ ] 3.11 Midnight rollover and wake-from-sleep refresh the day
-- [ ] 3.12 No layout regression at 320px on the three surfaces
+- [x] 3.6 Today list renders real rows in the initial HTML, no skeleton flash
+- [x] 3.7 Mark watered + undo still work end to end
+- [x] 3.8 Postpone + undo still work end to end
+- [x] 3.9 Add plant "After the seasonal interval" is correct on first paint
+- [x] 3.10 `/` and `/plants` agree on due plants at UTC+13
+- [x] 3.11 Midnight rollover and wake-from-sleep refresh the day
+- [x] 3.12 No layout regression at 320px on the three surfaces

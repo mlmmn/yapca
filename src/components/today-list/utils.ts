@@ -2,7 +2,6 @@ import { formatShortDate } from "@/lib/date";
 import type { ActionKind } from "./types";
 
 export const ANIMATION_MS = 190;
-export const BOOTSTRAP_ROW_COUNT = 3;
 
 export function getActionLabel(kind: ActionKind): string {
   return kind === "watered" ? "Watered" : "Postpone 2 days";
@@ -24,8 +23,8 @@ export function formatOverdueDate(dateString: string, today: string): string {
   const date = new Date(dueYear, dueMonth - 1, dueDay);
 
   if (dueYear === todayYear) {
-    return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" }).format(date);
+    return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(date);
   }
 
-  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(date);
 }

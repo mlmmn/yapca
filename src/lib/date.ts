@@ -51,9 +51,7 @@ export function parseLocalDateString(dateString: string): Date {
 }
 
 export function formatShortDate(dateString: string): string {
-  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" }).format(
-    parseLocalDateString(dateString),
-  );
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(parseLocalDateString(dateString));
 }
 
 export function formatDueLabel(dateString: string, today: string | null): string {

@@ -7,7 +7,6 @@ export type AddPlantInput = {
   growing_interval_days: number;
   dormancy_interval_days: number;
   alreadyWatered: boolean;
-  clientDate: string;
   photo?: File;
 };
 
@@ -15,7 +14,6 @@ export type AddPlantOutput = Plant;
 
 export type MarkWateredInput = {
   plantId: string;
-  clientDate: string;
 };
 
 export type MarkWateredOutput = {

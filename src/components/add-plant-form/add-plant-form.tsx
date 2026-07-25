@@ -8,9 +8,9 @@ import { NumberField, NumberFieldGroup, NumberFieldInput, NumberFieldSuffix } fr
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { todayLocalDateString } from "@/lib/date";
 import { getSeason, getSeasonLabel, selectSeasonInterval } from "@/lib/season";
 import { cn } from "@/lib/utils";
+import type { AddPlantFormProps } from "./types";
 
 const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
 const ALLOWED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -31,13 +31,12 @@ const addPlantSchema = z.object({
   firstAppearance: z.enum(["today", "after"]),
 });
 
-export default function AddPlantForm() {
+export default function AddPlantForm({ today }: AddPlantFormProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
-  const [localDate, setLocalDate] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -56,9 +55,6 @@ export default function AddPlantForm() {
       formData.set("name", value.name);
       formData.set("growing_interval_days", String(value.growingIntervalDays));
       formData.set("dormancy_interval_days", String(value.dormancyIntervalDays));
-      // Read the date at submit, not at mount, so a form left open across local midnight
-      // still schedules from the day the user actually saved.
-      formData.set("clientDate", todayLocalDateString());
 
       if (value.firstAppearance === "after") {
         formData.set("alreadyWatered", "true");
@@ -122,13 +118,6 @@ export default function AddPlantForm() {
       fileInputRef.current.value = "";
     }
   }
-
-  useEffect(() => {
-    // The Worker cannot know the browser's calendar date on the first request, so the
-    // active season is only known once this effect runs after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reveals the browser-local bootstrap contract
-    setLocalDate(todayLocalDateString());
-  }, []);
 
   useEffect(() => {
     if (window.matchMedia("(min-width: 768px)").matches) {
@@ -248,8 +237,8 @@ export default function AddPlantForm() {
                 const dormancyInterval =
                   Number.isInteger(dormancyIntervalDays) && dormancyIntervalDays > 0 ? dormancyIntervalDays : 1;
                 const activeInterval =
-                  localDate === null ? null : selectSeasonInterval(localDate, growingInterval, dormancyInterval);
-                const activeSeasonLabel = localDate === null ? null : getSeasonLabel(getSeason(localDate));
+                  today === null ? null : selectSeasonInterval(today, growingInterval, dormancyInterval);
+                const activeSeasonLabel = today === null ? null : getSeasonLabel(getSeason(today));
 
                 return (
                   <Field>
