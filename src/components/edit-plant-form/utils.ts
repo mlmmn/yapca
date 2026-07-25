@@ -11,6 +11,25 @@ type PreviewInput = {
   newDormancyIntervalDays: number | null;
 };
 
+export type SaveErrorState = "conflict" | "generic";
+
+export const SAVE_ERROR_MESSAGES: Record<SaveErrorState, string> = {
+  conflict: "This plant changed elsewhere. Reload it before saving again.",
+  generic: "We couldn't save these changes. Check your connection and try again.",
+};
+
+export function getSaveErrorState(code: string | undefined): SaveErrorState | "not-found" {
+  if (code === "CONFLICT") {
+    return "conflict";
+  }
+
+  if (code === "NOT_FOUND") {
+    return "not-found";
+  }
+
+  return "generic";
+}
+
 function getValidInterval(value: number | null): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 365;
 }

@@ -60,7 +60,7 @@ const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
             <>
               <a
                 href={`/plants/${plant.id}`}
-                class="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1 text-sm"
+                class="text-muted-foreground hover:text-foreground mb-6 inline-flex max-w-full items-center gap-1 text-sm break-words"
               >
                 &larr; Back to {plant.name}
               </a>
@@ -73,7 +73,7 @@ const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
                     <span class="font-medium">{initial}</span>
                   )}
                 </div>
-                <span class="min-w-0 truncate">{plant.name}</span>
+                <span class="min-w-0 break-words">{plant.name}</span>
               </div>
               <EditPlantForm
                 client:load

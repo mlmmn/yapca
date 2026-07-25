@@ -677,49 +677,49 @@ change remain valid inputs to the delta rule.
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm astro check`
-- [x] 2.2 Linting passes: `pnpm lint`
-- [x] 2.3 Production build succeeds: `pnpm build`
-- [x] 2.4 Owned edit route returns 200; unknown id returns 404
+- [x] 2.1 Type checking passes: `pnpm astro check` — 88b556a
+- [x] 2.2 Linting passes: `pnpm lint` — 88b556a
+- [x] 2.3 Production build succeeds: `pnpm build` — 88b556a
+- [x] 2.4 Owned edit route returns 200; unknown id returns 404 — 88b556a
 
 #### Manual
 
-- [x] 2.5 `Edit plant` visible, keyboard reachable, clearly secondary
-- [x] 2.6 Fields and photo prefill from the stored record
-- [x] 2.7 Active-interval change updates the preview with season and exact dates
-- [x] 2.8 Inactive-interval change names the inactive change and states the date does not move
-- [x] 2.9 Past-landing shift states the overdue consequence in words
-- [x] 2.10 Cleared interval shows the instruction, never a fabricated date
-- [x] 2.11 Photo replace, remove, undo, and replace-after-remove behave per brief
-- [x] 2.12 Cancel and browser Back leave the record and photo untouched
-- [x] 2.13 Successful save shows server values on detail with the journal unchanged
-- [x] 2.14 `Save changes` is disabled while invalid and while a save is in flight
-- [x] 2.15 Active-interval change shifts `next_due_on` by exactly the delta
-- [x] 2.16 Name-only save leaves `next_due_on` and the journal untouched
-- [x] 2.17 Inactive-season-only change persists but does not move the due date
-- [x] 2.18 Concurrent watering then interval save returns a conflict
-- [x] 2.19 Name-only save still succeeds after that concurrent watering
-- [x] 2.20 Photo replace leaves one object; failed row write leaves no orphan
+- [x] 2.5 `Edit plant` visible, keyboard reachable, clearly secondary — 88b556a
+- [x] 2.6 Fields and photo prefill from the stored record — 88b556a
+- [x] 2.7 Active-interval change updates the preview with season and exact dates — 88b556a
+- [x] 2.8 Inactive-interval change names the inactive change and states the date does not move — 88b556a
+- [x] 2.9 Past-landing shift states the overdue consequence in words — 88b556a
+- [x] 2.10 Cleared interval shows the instruction, never a fabricated date — 88b556a
+- [x] 2.11 Photo replace, remove, undo, and replace-after-remove behave per brief — 88b556a
+- [x] 2.12 Cancel and browser Back leave the record and photo untouched — 88b556a
+- [x] 2.13 Successful save shows server values on detail with the journal unchanged — 88b556a
+- [x] 2.14 `Save changes` is disabled while invalid and while a save is in flight — 88b556a
+- [x] 2.15 Active-interval change shifts `next_due_on` by exactly the delta — 88b556a
+- [x] 2.16 Name-only save leaves `next_due_on` and the journal untouched — 88b556a
+- [x] 2.17 Inactive-season-only change persists but does not move the due date — 88b556a
+- [x] 2.18 Concurrent watering then interval save returns a conflict — 88b556a
+- [x] 2.19 Name-only save still succeeds after that concurrent watering — 88b556a
+- [x] 2.20 Photo replace leaves one object; failed row write leaves no orphan — 88b556a
 
 ### Phase 3: Failure States and Accessibility Hardening
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm astro check`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Production build succeeds: `pnpm build`
-- [ ] 3.4 No new eslint suppression was added
+- [x] 3.1 Type checking passes: `pnpm astro check`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Production build succeeds: `pnpm build`
+- [x] 3.4 No new eslint suppression was added
 
 #### Manual
 
-- [ ] 3.5 Conflict state offers reload and safe exit, merges nothing
-- [ ] 3.6 Offline save preserves every value and stays submittable
-- [ ] 3.7 Invalid name, interval, and photo show exact messages with `aria-invalid`
-- [ ] 3.8 Rejected photo leaves the saved photo and unrelated fields untouched
-- [ ] 3.9 Failed submit moves focus to the first invalid control
-- [ ] 3.10 Preview does not announce per keystroke but announces the settled consequence
-- [ ] 3.11 320px and 200% zoom: no horizontal scrolling, all controls reachable
-- [ ] 3.12 Keyboard-only pass follows the documented tab order with visible focus
-- [ ] 3.13 Dark mode contrast holds; reduced motion removes any transition
-- [ ] 3.14 Long plant name wraps without truncation
-- [ ] 3.15 Already-overdue plant: exact shifted date on detail, overdue cue on the Today list
+- [x] 3.5 Conflict state offers reload and safe exit, merges nothing
+- [x] 3.6 Offline save preserves every value and stays submittable
+- [x] 3.7 Invalid name, interval, and photo show exact messages with `aria-invalid`
+- [x] 3.8 Rejected photo leaves the saved photo and unrelated fields untouched
+- [x] 3.9 Failed submit moves focus to the first invalid control
+- [x] 3.10 Preview does not announce per keystroke but announces the settled consequence
+- [x] 3.11 320px and 200% zoom: no horizontal scrolling, all controls reachable
+- [x] 3.12 Keyboard-only pass follows the documented tab order with visible focus
+- [x] 3.13 Dark mode contrast holds; reduced motion removes any transition
+- [x] 3.14 Long plant name wraps without truncation
+- [x] 3.15 Already-overdue plant: exact shifted date on detail, overdue cue on the Today list
