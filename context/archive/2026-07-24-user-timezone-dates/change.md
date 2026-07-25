@@ -1,10 +1,10 @@
 ---
 change_id: user-timezone-dates
 title: User timezone dates
-status: impl_reviewed
+status: archived
 created: 2026-07-24
 updated: 2026-07-25
-archived_at: null
+archived_at: 2026-07-25T14:32:18Z
 ---
 
 ## Notes

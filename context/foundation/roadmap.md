@@ -38,7 +38,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | done     |
 | S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | done     |
 | S-07 | delete-plant                 | delete a plant                                                | S-01          | FR-007                  | proposed |
-| S-08 | user-timezone-dates          | (correctness) see "Due today" mean today where *they* are, on every page | S-02          | FR-009, FR-011, NFR (deterministic math) | ready |
+| S-08 | user-timezone-dates          | (correctness) see "Due today" mean today where *they* are, on every page | S-02          | FR-009, FR-011, NFR (deterministic math) | done |
 | S-09 | design-review-and-polish     | (quality) have the whole app design/UI/UX-reviewed with impeccable, triaged, and fixed | F-01, S-01–S-04, S-06, S-07, S-08 | quality goal, a11y NFR, DESIGN.md/PRODUCT.md | proposed |
 
 ## Streams
@@ -181,7 +181,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - What does the very first request render, before the timezone cookie exists? — Owner: user. Block: no. Default: render the exact date (`Due 3 Aug`) and omit the "today" phrasing until the cookie lands — never guess a day.
 - **Risk:** Fixes a live bug, not a missing feature. `todayLocalDateString()` (`src/lib/date.ts:31`) reads the host machine's local date; on Cloudflare Workers that is always UTC, and two pages call it during SSR (`src/pages/plants/index.astro:54`, `src/pages/plants/[id].astro:74`) before passing it to `formatDueLabel`. For a user at UTC+13 the Worker's day and the user's day disagree from midnight until 12:59 — over half of every day — so `/plants` shows `Due 1 Mar` for a plant that is due today, and `Due today` for one that is already overdue. Today's list is unaffected because it hydrates from the browser (`today-list.tsx:241-245`), which is exactly why the two pages can contradict it. The approach: capture the browser's IANA timezone once into a cookie, read it in the existing `src/middleware.ts`, and expose `context.locals.today` so pages render a correct date server-side. Sequenced after S-02 (the surfaces must exist) and before the terminal design pass (S-09) so the review sees corrected labels. **Supersedes the workaround in S-05** — season-aware-intervals patches these two labels client-side because it would otherwise put two disagreeing clocks on one line; this slice removes that patch and fixes the class of bug instead. Risk if skipped: every future server-rendered date surface (S-06's edit preview first) repeats the same mistake, and the workaround calcifies into the pattern.
-- **Status:** ready
+- **Status:** done
 
 ### S-09: Design/UI/UX review + polish
 
@@ -238,3 +238,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-04: user can postpone a watering task by exactly 2 days, and undo a "Watered" or "Postpone" action after a misclick.** — Archived 2026-07-25 → `context/archive/2026-07-23-postpone-and-undo/`. Lesson: —.
 - **S-05: user can set two separate watering intervals per plant (growing season and dormancy season), and the app automatically applies the one matching the current calendar date.** — Archived 2026-07-25 → `context/archive/2026-07-23-season-aware-intervals/`. Lesson: —.
 - **S-06: user can edit a plant's name, intervals, and photo, and changing an interval correctly recalculates the plant's next due date.** — Archived 2026-07-25 → `context/archive/2026-07-25-edit-plant-and-recalc/`. Lesson: —.
+- **S-08: (correctness) see "Due today" mean today where *they* are, on every page** — Archived 2026-07-25 → `context/archive/2026-07-24-user-timezone-dates/`. Lesson: —.
