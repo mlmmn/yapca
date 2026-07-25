@@ -36,7 +36,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | S-03 | overdue-tasks-and-urgency    | see overdue tasks with a non-color-only urgency cue and clear them | S-01          | FR-009, FR-010          | done     |
 | S-04 | postpone-and-undo            | postpone a task 2 days; undo a Watered/Postpone misclick      | S-01, S-02    | FR-012, FR-013          | done     |
 | S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | done     |
-| S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | proposed |
+| S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | done     |
 | S-07 | delete-plant                 | delete a plant                                                | S-01          | FR-007                  | proposed |
 | S-08 | user-timezone-dates          | (correctness) see "Due today" mean today where *they* are, on every page | S-02          | FR-009, FR-011, NFR (deterministic math) | ready |
 | S-09 | design-review-and-polish     | (quality) have the whole app design/UI/UX-reviewed with impeccable, triaged, and fixed | F-01, S-01–S-04, S-06, S-07, S-08 | quality goal, a11y NFR, DESIGN.md/PRODUCT.md | proposed |
@@ -155,7 +155,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Edit lives on the plant detail view (S-02). Correct recalculation on interval change is an explicit PRD guardrail — the risk is a stale next-due date after an edit. If S-05 (season intervals) is already done, edit covers both intervals; if planned first, it covers the single interval and is revisited when S-05 lands.
-- **Status:** proposed
+- **Status:** done
 
 ### S-07: Delete plant
 
@@ -237,3 +237,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-03: user can see overdue tasks carried over from previous days alongside today's, distinguished by an urgency cue that does not rely on color alone, and clear them the same way as today's tasks.** — Archived 2026-07-25 → `context/archive/2026-07-20-overdue-tasks-and-urgency/`. Lesson: —.
 - **S-04: user can postpone a watering task by exactly 2 days, and undo a "Watered" or "Postpone" action after a misclick.** — Archived 2026-07-25 → `context/archive/2026-07-23-postpone-and-undo/`. Lesson: —.
 - **S-05: user can set two separate watering intervals per plant (growing season and dormancy season), and the app automatically applies the one matching the current calendar date.** — Archived 2026-07-25 → `context/archive/2026-07-23-season-aware-intervals/`. Lesson: —.
+- **S-06: user can edit a plant's name, intervals, and photo, and changing an interval correctly recalculates the plant's next due date.** — Archived 2026-07-25 → `context/archive/2026-07-25-edit-plant-and-recalc/`. Lesson: —.
