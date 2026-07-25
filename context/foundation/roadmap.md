@@ -35,7 +35,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | S-02 | plant-detail-and-journal     | open a plant and see its details + watering journal          | S-01          | FR-005, FR-014          | done     |
 | S-03 | overdue-tasks-and-urgency    | see overdue tasks with a non-color-only urgency cue and clear them | S-01          | FR-009, FR-010          | done     |
 | S-04 | postpone-and-undo            | postpone a task 2 days; undo a Watered/Postpone misclick      | S-01, S-02    | FR-012, FR-013          | done     |
-| S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | blocked  |
+| S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | done     |
 | S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | proposed |
 | S-07 | delete-plant                 | delete a plant                                                | S-01          | FR-007                  | proposed |
 | S-08 | user-timezone-dates          | (correctness) see "Due today" mean today where *they* are, on every page | S-02          | FR-009, FR-011, NFR (deterministic math) | ready |
@@ -143,7 +143,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - What are the calendar boundaries between growing and dormancy season, and are they fixed or user-configurable? — Owner: user. Block: yes.
 - **Risk:** Blocked until the season-boundary decision (ORQ-2) resolves — automatic date-based selection cannot be implemented correctly without knowing the boundary dates (and whether they're user-adjustable). Sequencing it here, after the single-interval loop (S-01), avoids prejudging the answer: the loop already works on one interval, so this slice is a clean extension rather than a rework.
-- **Status:** blocked
+- **Status:** done
 
 ### S-06: Edit plant + interval recalculation
 
@@ -236,3 +236,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-02: user can open a plant and see its details plus a per-plant watering journal (the history of Watered/Postpone actions).** — Archived 2026-07-25 → `context/archive/2026-07-20-plant-detail-and-journal/`. Lesson: —.
 - **S-03: user can see overdue tasks carried over from previous days alongside today's, distinguished by an urgency cue that does not rely on color alone, and clear them the same way as today's tasks.** — Archived 2026-07-25 → `context/archive/2026-07-20-overdue-tasks-and-urgency/`. Lesson: —.
 - **S-04: user can postpone a watering task by exactly 2 days, and undo a "Watered" or "Postpone" action after a misclick.** — Archived 2026-07-25 → `context/archive/2026-07-23-postpone-and-undo/`. Lesson: —.
+- **S-05: user can set two separate watering intervals per plant (growing season and dormancy season), and the app automatically applies the one matching the current calendar date.** — Archived 2026-07-25 → `context/archive/2026-07-23-season-aware-intervals/`. Lesson: —.

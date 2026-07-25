@@ -1,10 +1,10 @@
 ---
 change_id: season-aware-intervals
 title: Season aware intervals
-status: impl_reviewed
+status: archived
 created: 2026-07-23
-updated: 2026-07-24
-archived_at: null
+updated: 2026-07-25
+archived_at: 2026-07-25T14:06:31Z
 ---
 
 ## Notes
