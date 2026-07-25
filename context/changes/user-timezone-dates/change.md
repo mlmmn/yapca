@@ -1,7 +1,7 @@
 ---
 change_id: user-timezone-dates
 title: User timezone dates
-status: implementing
+status: implemented
 created: 2026-07-24
 updated: 2026-07-25
 archived_at: null

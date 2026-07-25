@@ -378,18 +378,18 @@ Rollback is a straight revert — no schema, RPC, or stored-data changes to unwi
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `pnpm astro check`
-- [x] 3.2 Linting passes: `pnpm lint`
-- [x] 3.3 Production build succeeds: `pnpm build`
-- [x] 3.4 No `set-state-in-effect` suppressions remain in `src`
-- [x] 3.5 No `clientDate` references remain in `src`
+- [x] 3.1 Type checking passes: `pnpm astro check` — ece0e5e
+- [x] 3.2 Linting passes: `pnpm lint` — ece0e5e
+- [x] 3.3 Production build succeeds: `pnpm build` — ece0e5e
+- [x] 3.4 No `set-state-in-effect` suppressions remain in `src` — ece0e5e
+- [x] 3.5 No `clientDate` references remain in `src` — ece0e5e
 
 #### Manual
 
-- [x] 3.6 Today list renders real rows in the initial HTML, no skeleton flash
-- [x] 3.7 Mark watered + undo still work end to end
-- [x] 3.8 Postpone + undo still work end to end
-- [x] 3.9 Add plant "After the seasonal interval" is correct on first paint
-- [x] 3.10 `/` and `/plants` agree on due plants at UTC+13
-- [x] 3.11 Midnight rollover and wake-from-sleep refresh the day
-- [x] 3.12 No layout regression at 320px on the three surfaces
+- [x] 3.6 Today list renders real rows in the initial HTML, no skeleton flash — ece0e5e
+- [x] 3.7 Mark watered + undo still work end to end — ece0e5e
+- [x] 3.8 Postpone + undo still work end to end — ece0e5e
+- [x] 3.9 Add plant "After the seasonal interval" is correct on first paint — ece0e5e
+- [x] 3.10 `/` and `/plants` agree on due plants at UTC+13 — ece0e5e
+- [x] 3.11 Midnight rollover and wake-from-sleep refresh the day — ece0e5e
+- [x] 3.12 No layout regression at 320px on the three surfaces — ece0e5e
