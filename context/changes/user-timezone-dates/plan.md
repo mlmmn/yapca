@@ -360,19 +360,19 @@ Rollback is a straight revert — no schema, RPC, or stored-data changes to unwi
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm astro check`
-- [ ] 2.2 Linting passes: `pnpm lint`
-- [ ] 2.3 Production build succeeds: `pnpm build`
-- [ ] 2.4 No `<script>` remains in `season-interval-summary.astro`
-- [ ] 2.5 No `data-season` attributes remain in `src`
+- [x] 2.1 Type checking passes: `pnpm astro check`
+- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.3 Production build succeeds: `pnpm build`
+- [x] 2.4 No `<script>` remains in `season-interval-summary.astro`
+- [x] 2.5 No `data-season` attributes remain in `src`
 
 #### Manual
 
-- [ ] 2.6 `/plants` agrees with the Today list at UTC+13 before noon
-- [ ] 2.7 Final season/interval text is present in the initial HTML
-- [ ] 2.8 Both pages render correct labels with JavaScript disabled
-- [ ] 2.9 Cookie-less + JS-disabled renders exact dates only
-- [ ] 2.10 No wrap or clip at 320px where heights were pinned
+- [x] 2.6 `/plants` agrees with the Today list at UTC+13 before noon
+- [x] 2.7 Final season/interval text is present in the initial HTML
+- [x] 2.8 Both pages render correct labels with JavaScript disabled
+- [x] 2.9 Cookie-less + JS-disabled renders exact dates only
+- [x] 2.10 No wrap or clip at 320px where heights were pinned
 
 ### Phase 3: Islands and the Action Contract
 

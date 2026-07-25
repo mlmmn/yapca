@@ -56,8 +56,8 @@ export function formatShortDate(dateString: string): string {
   );
 }
 
-export function formatDueLabel(dateString: string, today: string): string {
-  return dateString === today ? "Due today" : `Due ${formatShortDate(dateString)}`;
+export function formatDueLabel(dateString: string, today: string | null): string {
+  return today !== null && dateString === today ? "Due today" : `Due ${formatShortDate(dateString)}`;
 }
 
 export function formatIntervalLabel(intervalDays: number): string {

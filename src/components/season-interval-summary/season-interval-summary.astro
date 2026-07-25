@@ -1,5 +1,6 @@
 ---
-import { formatIntervalLabel, formatShortDate } from "@/lib/date";
+import { formatDueLabel, formatIntervalLabel } from "@/lib/date";
+import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
 
 type Props = {
   growingIntervalDays: number;
@@ -9,96 +10,23 @@ type Props = {
 };
 
 const { growingIntervalDays, dormancyIntervalDays, dueDate, mode } = Astro.props;
-// Without JavaScript the server cannot know the browser's date, so it states the truthful
-// pair rather than asserting a season. Punctuation matches the enhanced full-mode string so
-// the swap reads as a refinement, not a rewrite.
+const today = Astro.locals.today;
+const season = today === null ? null : getSeason(today);
+const activeInterval = today === null ? null : selectSeasonInterval(today, growingIntervalDays, dormancyIntervalDays);
+const seasonLabel = season === null ? null : getShortSeasonLabel(season);
 const fallbackSchedule = `Growing: ${formatIntervalLabel(growingIntervalDays)} · Dormancy: ${formatIntervalLabel(dormancyIntervalDays)}`;
-const fallbackDue = `Due ${formatShortDate(dueDate)}`;
+const schedule =
+  mode === "full"
+    ? [
+        `Growing: ${formatIntervalLabel(growingIntervalDays)}${season === "growing" ? " (active now)" : ""}`,
+        `Dormancy: ${formatIntervalLabel(dormancyIntervalDays)}${season === "dormancy" ? " (active now)" : ""}`,
+      ].join(" · ")
+    : `${seasonLabel} · then ${formatIntervalLabel(activeInterval ?? growingIntervalDays)}`;
+const summary = today === null ? fallbackSchedule : schedule;
+const dueLabel = formatDueLabel(dueDate, today);
 ---
 
-<div
-  class="text-muted-foreground min-w-0 space-y-1 text-sm"
-  data-season-summary
-  data-mode={mode}
-  data-growing-interval={growingIntervalDays}
-  data-dormancy-interval={dormancyIntervalDays}
-  data-due-date={dueDate}
->
-  <div data-season-due>{fallbackDue}</div>
-  <div
-    class:list={[
-      "text-xs leading-5",
-      // The enhancement replaces this slot's text, never its box, so the height is pinned
-      // rather than a minimum: one truncated line in list rows, two lines on detail where
-      // both intervals must stay readable at 320px.
-      mode === "active" ? "h-5 truncate" : "h-10",
-    ]}
-    data-season-summary-text
-  >
-    {fallbackSchedule}
-  </div>
+<div class="text-muted-foreground min-w-0 space-y-1 text-sm">
+  <div>{dueLabel}</div>
+  <div class="text-xs leading-5">{summary}</div>
 </div>
-
-<script>
-  import { formatDueLabel, formatIntervalLabel, msUntilNextLocalMidnight, todayLocalDateString } from "@/lib/date";
-  import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
-
-  function updateSummary(summary: HTMLElement, dateString: string): void {
-    const mode = summary.dataset.mode;
-    const growingInterval = Number(summary.dataset.growingInterval);
-    const dormancyInterval = Number(summary.dataset.dormancyInterval);
-    const dueDate = summary.dataset.dueDate;
-    const season = getSeason(dateString);
-    const activeInterval = selectSeasonInterval(dateString, growingInterval, dormancyInterval);
-    const seasonLabel = getShortSeasonLabel(season);
-    const summaryText = summary.querySelector<HTMLElement>("[data-season-summary-text]");
-    const dueText = summary.querySelector<HTMLElement>("[data-season-due]");
-
-    if (summaryText) {
-      if (mode === "full") {
-        summaryText.textContent = [
-          `Growing: ${formatIntervalLabel(growingInterval)}${season === "growing" ? " (active now)" : ""}`,
-          `Dormancy: ${formatIntervalLabel(dormancyInterval)}${season === "dormancy" ? " (active now)" : ""}`,
-        ].join(" · ");
-      } else {
-        summaryText.textContent = `${seasonLabel} · then ${formatIntervalLabel(activeInterval)}`;
-      }
-    }
-
-    if (dueText && dueDate) {
-      dueText.textContent = formatDueLabel(dueDate, dateString);
-    }
-  }
-
-  function refreshSummaries(): void {
-    // Queried on every run rather than captured once, so the refresh stays correct if the
-    // document is swapped under it (a client router) or restored from bfcache.
-    const summaries = document.querySelectorAll<HTMLElement>("[data-season-summary]");
-    const dateString = todayLocalDateString();
-
-    summaries.forEach((summary) => {
-      updateSummary(summary, dateString);
-    });
-  }
-
-  function scheduleMidnightRefresh(): void {
-    window.setTimeout(() => {
-      refreshSummaries();
-      scheduleMidnightRefresh();
-    }, msUntilNextLocalMidnight());
-  }
-
-  function handleVisibilityChange(): void {
-    if (document.visibilityState === "visible") {
-      refreshSummaries();
-    }
-  }
-
-  refreshSummaries();
-  scheduleMidnightRefresh();
-
-  // A bfcache restore or a resume from sleep can land past local midnight without the timer
-  // having fired on time, so re-read the date whenever the page becomes visible again.
-  window.addEventListener("pageshow", refreshSummaries);
-  document.addEventListener("visibilitychange", handleVisibilityChange);
-</script>
