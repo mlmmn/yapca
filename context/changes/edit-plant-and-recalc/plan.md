@@ -661,45 +661,45 @@ change remain valid inputs to the delta rule.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm astro check`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Production build succeeds: `pnpm build`
-- [x] 1.4 No photo constant defined outside the shared module
-- [x] 1.5 `src/lib/photo.ts` is the only definition of the signed-URL TTL
-- [x] 1.6 `src/lib/photo.ts` stays client-safe (no server-only imports)
+- [x] 1.1 Type checking passes: `pnpm astro check` — 9c66f15
+- [x] 1.2 Linting passes: `pnpm lint` — 9c66f15
+- [x] 1.3 Production build succeeds: `pnpm build` — 9c66f15
+- [x] 1.4 No photo constant defined outside the shared module — 9c66f15
+- [x] 1.5 `src/lib/photo.ts` is the only definition of the signed-URL TTL — 9c66f15
+- [x] 1.6 `src/lib/photo.ts` stays client-safe (no server-only imports) — 9c66f15
 
 #### Manual
 
-- [ ] 1.7 Adding a plant with a photo still works end to end
-- [ ] 1.8 Detail, Today shell, and plants list still render photos after the TTL repoint
+- [x] 1.7 Adding a plant with a photo still works end to end — 9c66f15
+- [x] 1.8 Detail, Today shell, and plants list still render photos after the TTL repoint — 9c66f15
 
 ### Phase 2: Edit Route, Form Island, and Detail Entry Point
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm astro check`
-- [ ] 2.2 Linting passes: `pnpm lint`
-- [ ] 2.3 Production build succeeds: `pnpm build`
-- [ ] 2.4 Owned edit route returns 200; unknown id returns 404
+- [x] 2.1 Type checking passes: `pnpm astro check`
+- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.3 Production build succeeds: `pnpm build`
+- [x] 2.4 Owned edit route returns 200; unknown id returns 404
 
 #### Manual
 
-- [ ] 2.5 `Edit plant` visible, keyboard reachable, clearly secondary
-- [ ] 2.6 Fields and photo prefill from the stored record
-- [ ] 2.7 Active-interval change updates the preview with season and exact dates
-- [ ] 2.8 Inactive-interval change names the inactive change and states the date does not move
-- [ ] 2.9 Past-landing shift states the overdue consequence in words
-- [ ] 2.10 Cleared interval shows the instruction, never a fabricated date
-- [ ] 2.11 Photo replace, remove, undo, and replace-after-remove behave per brief
-- [ ] 2.12 Cancel and browser Back leave the record and photo untouched
-- [ ] 2.13 Successful save shows server values on detail with the journal unchanged
-- [ ] 2.14 `Save changes` is disabled while invalid and while a save is in flight
-- [ ] 2.15 Active-interval change shifts `next_due_on` by exactly the delta
-- [ ] 2.16 Name-only save leaves `next_due_on` and the journal untouched
-- [ ] 2.17 Inactive-season-only change persists but does not move the due date
-- [ ] 2.18 Concurrent watering then interval save returns a conflict
-- [ ] 2.19 Name-only save still succeeds after that concurrent watering
-- [ ] 2.20 Photo replace leaves one object; failed row write leaves no orphan
+- [x] 2.5 `Edit plant` visible, keyboard reachable, clearly secondary
+- [x] 2.6 Fields and photo prefill from the stored record
+- [x] 2.7 Active-interval change updates the preview with season and exact dates
+- [x] 2.8 Inactive-interval change names the inactive change and states the date does not move
+- [x] 2.9 Past-landing shift states the overdue consequence in words
+- [x] 2.10 Cleared interval shows the instruction, never a fabricated date
+- [x] 2.11 Photo replace, remove, undo, and replace-after-remove behave per brief
+- [x] 2.12 Cancel and browser Back leave the record and photo untouched
+- [x] 2.13 Successful save shows server values on detail with the journal unchanged
+- [x] 2.14 `Save changes` is disabled while invalid and while a save is in flight
+- [x] 2.15 Active-interval change shifts `next_due_on` by exactly the delta
+- [x] 2.16 Name-only save leaves `next_due_on` and the journal untouched
+- [x] 2.17 Inactive-season-only change persists but does not move the due date
+- [x] 2.18 Concurrent watering then interval save returns a conflict
+- [x] 2.19 Name-only save still succeeds after that concurrent watering
+- [x] 2.20 Photo replace leaves one object; failed row write leaves no orphan
 
 ### Phase 3: Failure States and Accessibility Hardening
 
