@@ -34,7 +34,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | S-01 | core-watering-loop           | add a plant, see it due today, mark Watered → reschedules 1 interval later | F-01          | FR-004, FR-009, FR-011  | done     |
 | S-02 | plant-detail-and-journal     | open a plant and see its details + watering journal          | S-01          | FR-005, FR-014          | done     |
 | S-03 | overdue-tasks-and-urgency    | see overdue tasks with a non-color-only urgency cue and clear them | S-01          | FR-009, FR-010          | done     |
-| S-04 | postpone-and-undo            | postpone a task 2 days; undo a Watered/Postpone misclick      | S-01, S-02    | FR-012, FR-013          | proposed |
+| S-04 | postpone-and-undo            | postpone a task 2 days; undo a Watered/Postpone misclick      | S-01, S-02    | FR-012, FR-013          | done     |
 | S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | blocked  |
 | S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | proposed |
 | S-07 | delete-plant                 | delete a plant                                                | S-01          | FR-007                  | proposed |
@@ -130,7 +130,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Depends on S-02 because undo reverses journaled actions; without the journal, undo scope is ambiguous (the exact concern the PRD's FR-013 note raises). Postpone must shift a single task by 2 days without altering the plant's base interval — a subtle correctness boundary this slice must hold.
-- **Status:** proposed
+- **Status:** done
 
 ### S-05: Season-aware intervals
 
@@ -235,3 +235,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-01: user can add a plant (name, watering interval, optional photo), see it on today's due list, and mark it Watered so it reschedules exactly one interval later (today + interval).** — Archived 2026-07-25 → `context/archive/2026-07-19-core-watering-loop/`. Lesson: —.
 - **S-02: user can open a plant and see its details plus a per-plant watering journal (the history of Watered/Postpone actions).** — Archived 2026-07-25 → `context/archive/2026-07-20-plant-detail-and-journal/`. Lesson: —.
 - **S-03: user can see overdue tasks carried over from previous days alongside today's, distinguished by an urgency cue that does not rely on color alone, and clear them the same way as today's tasks.** — Archived 2026-07-25 → `context/archive/2026-07-20-overdue-tasks-and-urgency/`. Lesson: —.
+- **S-04: user can postpone a watering task by exactly 2 days, and undo a "Watered" or "Postpone" action after a misclick.** — Archived 2026-07-25 → `context/archive/2026-07-23-postpone-and-undo/`. Lesson: —.
