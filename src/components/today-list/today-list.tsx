@@ -36,6 +36,7 @@ function updateSet(ids: Set<string>, id: string, present: boolean): Set<string> 
 
 export default function TodayList({ plants, fetchError = false, today: initialToday }: TodayListProps) {
   const today = useBrowserToday(initialToday);
+  const todayRef = useRef(today);
   const [basePlants, setBasePlants] = useState<PlantListItem[]>(plants);
   const [leavingIds, setLeavingIds] = useState<Set<string>>(new Set());
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
@@ -217,9 +218,10 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
         }
 
         setBasePlants((current) => {
+          const currentToday = todayRef.current;
           const restoredPlant = { ...context.plant, next_due_on: data.restored_due_on };
 
-          if (today !== null && data.restored_due_on > today) {
+          if (currentToday !== null && data.restored_due_on > currentToday) {
             return current;
           }
 
@@ -255,6 +257,10 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
   const dueList = today === null ? [] : optimisticPlants.filter((plant) => plant.next_due_on <= today);
   const activeDueList = dueList.filter((plant) => !plant.leaving);
   const nextUpcoming = today === null ? null : (basePlants.find((plant) => plant.next_due_on > today) ?? null);
+
+  useEffect(() => {
+    todayRef.current = today;
+  }, [today]);
 
   useEffect(() => {
     const timeouts = removalTimeouts.current;

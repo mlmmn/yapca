@@ -54,6 +54,13 @@ Retain server-derived `today` as a hydration-stable seed, then centralize browse
 
 Restore a required `clientDate` field to Add, Update, Watered, and Postpone. The field is acquired afresh for every initial dispatch and retry, validated as a real date within ±1 UTC calendar day, and then passed unchanged into existing TypeScript schedule calculations and SQL RPC parameters. Remove the UTC fallback entirely.
 
+### Implementation Decision Addendum — 2026-07-26
+
+- Client-date rejection uses the dedicated `PRECONDITION_FAILED` error code and the shared `isClientDateRejection` predicate. This supersedes Phase 2 §1's planned `BAD_REQUEST` plus display-message matching, removing the coupling between error classification and user-facing copy.
+- The validation helper remains named `getActionDate`; the accepted change removed its UTC fallback rather than the helper itself. The helper now validates and returns only an accepted browser-supplied date.
+- `supabase/seed.sql` uses valid UUIDv4 fixture IDs because the seeded user and plant IDs cross strict `z.uuid()` Action boundaries during the manual matrix. This fixture-only correction preserves strict production input validation and requires no schema or migration change.
+- `supabase/tests/season-aware-intervals.sql` uses test-specific auth emails to avoid collisions when the local seed already exists. This changes only transaction-scoped fixture identity, not the boundary assertions or database behavior.
+
 ## Critical Implementation Details
 
 ### Timing & lifecycle
