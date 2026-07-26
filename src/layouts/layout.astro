@@ -10,43 +10,21 @@ const { title = "yapca" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" data-today={Astro.locals.today ?? ""}>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
     <script is:inline>
-      // Mirrors `TIME_ZONE_COOKIE` and `getDayFormatter`/`getTodayInTimeZone` from
-      // `src/lib/timezone.ts`, which an is:inline script cannot import. Change both together.
+      // Mirrors `TIME_ZONE_COOKIE` from `src/lib/timezone.ts`, which an is:inline script cannot import.
       try {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const secure = location.protocol === "https:" ? "; Secure" : "";
 
-        // Write the cookie first: it is what the server needs, and it must not be lost to a
-        // throw in the date computation below, which only feeds the reload comparison.
         document.cookie = `tz=${encodeURIComponent(timeZone)}; Path=/; SameSite=Lax; Max-Age=31536000${secure}`;
-
-        const now = new Date();
-        const parts = new Intl.DateTimeFormat("en-US", {
-          timeZone,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }).formatToParts(now);
-        const year = parts.find((part) => part.type === "year")?.value;
-        const month = parts.find((part) => part.type === "month")?.value;
-        const day = parts.find((part) => part.type === "day")?.value;
-        const browserToday = `${year}-${month}-${day}`;
-
-        if (browserToday !== document.documentElement.dataset.today) {
-          if (sessionStorage.getItem("tz-sync") !== timeZone) {
-            sessionStorage.setItem("tz-sync", timeZone);
-            location.reload();
-          }
-        }
       } catch {
-        // Cookie and storage APIs can be unavailable in privacy modes.
+        // Cookie APIs can be unavailable in privacy modes.
       }
     </script>
   </head>

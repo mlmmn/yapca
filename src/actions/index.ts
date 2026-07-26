@@ -5,6 +5,7 @@ import { nextDue } from "@/lib/interval";
 import { buildPhotoPath, isValidPhoto, PHOTO_GUIDANCE } from "@/lib/photo";
 import { selectSeasonInterval } from "@/lib/season";
 import { resolveScheduleChange } from "@/lib/schedule";
+import { CLIENT_DATE_ERROR_MESSAGE, isPlausibleClientDate } from "@/lib/date";
 import { getTodayInTimeZone } from "@/lib/timezone";
 
 const photoSchema = z.instanceof(File).refine(isValidPhoto, PHOTO_GUIDANCE);
@@ -19,10 +20,14 @@ function requireSession(context: ActionAPIContext) {
   return { supabase, user: context.locals.user };
 }
 
-function getActionDate(context: ActionAPIContext): string {
-  // A mutation still needs a date if both timezone sources are unavailable; UTC is the
-  // only deterministic fallback when the request has no user timezone to resolve.
-  return context.locals.today ?? getTodayInTimeZone("UTC");
+function getActionDate(clientDate: string | undefined): string {
+  const utcToday = getTodayInTimeZone("UTC");
+
+  if (!clientDate || !isPlausibleClientDate(clientDate, utcToday)) {
+    throw new ActionError({ code: "BAD_REQUEST", message: CLIENT_DATE_ERROR_MESSAGE });
+  }
+
+  return clientDate;
 }
 
 export const server = {
@@ -33,11 +38,12 @@ export const server = {
       growing_interval_days: z.coerce.number().int().min(1).max(365),
       dormancy_interval_days: z.coerce.number().int().min(1).max(365),
       alreadyWatered: z.preprocess((v) => v === "true", z.boolean()),
+      clientDate: z.string().optional(),
       photo: photoSchema.optional(),
     }),
     handler: async (input, context) => {
       const { supabase, user } = requireSession(context);
-      const actionDate = getActionDate(context);
+      const actionDate = getActionDate(input.clientDate);
       const activeInterval = selectSeasonInterval(
         actionDate,
         input.growing_interval_days,
@@ -98,10 +104,11 @@ export const server = {
       photo: photoSchema.optional(),
       removePhoto: z.preprocess((value) => value === "true", z.boolean()),
       updated_at: z.string().min(1),
+      clientDate: z.string().optional(),
     }),
     handler: async (input, context) => {
       const { supabase, user } = requireSession(context);
-      const actionDate = getActionDate(context);
+      const actionDate = getActionDate(input.clientDate);
       const { data: currentPlant, error: readError } = await supabase
         .from("plants")
         .select(
@@ -209,10 +216,11 @@ export const server = {
     accept: "form",
     input: z.object({
       plantId: z.uuid(),
+      clientDate: z.string().optional(),
     }),
     handler: async (input, context) => {
       const { supabase } = requireSession(context);
-      const actionDate = getActionDate(context);
+      const actionDate = getActionDate(input.clientDate);
 
       const { data, error } = await supabase.rpc("mark_watered", {
         p_plant_id: input.plantId,
@@ -238,10 +246,11 @@ export const server = {
     accept: "form",
     input: z.object({
       plantId: z.uuid(),
+      clientDate: z.string().optional(),
     }),
     handler: async (input, context) => {
       const { supabase } = requireSession(context);
-      const actionDate = getActionDate(context);
+      const actionDate = getActionDate(input.clientDate);
       const { data, error } = await supabase.rpc("postpone_plant", {
         p_plant_id: input.plantId,
         p_acted_on: actionDate,

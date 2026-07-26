@@ -1,7 +1,6 @@
-// This cookie name and the "en-US" 2-digit day formatting in `getDayFormatter` are duplicated
-// verbatim by the inline head script in `src/layouts/layout.astro`, which cannot import from here.
-// Drift makes that script's `data-today` comparison fail forever, costing every visitor an extra
-// document request per session. Change both together.
+// This cookie name is duplicated by the inline head script in `src/layouts/layout.astro`, which
+// cannot import from here. Change both together so browser timezone discovery continues to seed
+// future SSR requests.
 export const TIME_ZONE_COOKIE = "tz";
 
 const TIME_ZONE_PATTERN = /^[A-Za-z0-9._+-]+(?:\/[A-Za-z0-9._+-]+)*$/;

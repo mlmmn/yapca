@@ -61,9 +61,9 @@ const { plants } = await loadPlants();
       <div class="w-full max-w-xl">
         {
           plants === null ? (
-            <TodayList client:load plants={[]} fetchError today={Astro.locals.today} timeZone={Astro.locals.timeZone} />
+            <TodayList client:load plants={[]} fetchError today={Astro.locals.today} />
           ) : (
-            <TodayList client:load plants={plants} today={Astro.locals.today} timeZone={Astro.locals.timeZone} />
+            <TodayList client:load plants={plants} today={Astro.locals.today} />
           )
         }
       </div>

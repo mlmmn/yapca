@@ -107,9 +107,8 @@ describe("getBrowserRolloverState", () => {
   );
 });
 
-// `TIME_ZONE_COOKIE === "tz"` would only restate the constant. The drift that costs
-// something is the inline head script in layout.astro — which cannot import from here —
-// being renamed on its own, so this reads that file rather than asserting the value.
+// `TIME_ZONE_COOKIE === "tz"` would only restate the constant. The relevant drift is the inline
+// head script in layout.astro — which cannot import from here — being renamed on its own.
 describe("TIME_ZONE_COOKIE", () => {
   test("matches the cookie name written by the inline head script in layout.astro", () => {
     const layoutPath = fileURLToPath(new URL("../layouts/layout.astro", import.meta.url));

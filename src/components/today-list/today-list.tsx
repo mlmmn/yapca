@@ -2,10 +2,18 @@ import { startTransition, useEffect, useRef, useState } from "react";
 import { actions } from "astro:actions";
 import { toast } from "sonner";
 import { Button, LinkButton } from "@/components/ui/button";
-import { classifyDueStatus, compareDueRecords, formatDueLabel, formatIntervalLabel, formatShortDate } from "@/lib/date";
+import {
+  CLIENT_DATE_ERROR_MESSAGE,
+  classifyDueStatus,
+  compareDueRecords,
+  formatDueLabel,
+  formatIntervalLabel,
+  formatShortDate,
+} from "@/lib/date";
 import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
-import { getMillisecondsUntilNextMidnight, getTodayInTimeZone } from "@/lib/timezone";
+import { getBrowserToday } from "@/lib/timezone";
 import { cn, prefersReducedMotion } from "@/lib/utils";
+import { useBrowserToday } from "@/components/hooks/use-browser-today";
 import type { PlantListItem } from "@/types";
 import { ANIMATION_MS, formatOverdueDate, getActionLabel, getFailureMessage, getSuccessMessage } from "./utils";
 import type { ActionKind, MutationResult, NoticeContext, TodayListProps } from "./types";
@@ -24,8 +32,8 @@ function updateSet(ids: Set<string>, id: string, present: boolean): Set<string> 
   return next;
 }
 
-export default function TodayList({ plants, fetchError = false, today: initialToday, timeZone }: TodayListProps) {
-  const [today, setToday] = useState<string | null>(initialToday);
+export default function TodayList({ plants, fetchError = false, today: initialToday }: TodayListProps) {
+  const today = useBrowserToday(initialToday);
   const [basePlants, setBasePlants] = useState<PlantListItem[]>(plants);
   const [leavingIds, setLeavingIds] = useState<Set<string>>(new Set());
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
@@ -106,7 +114,13 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
     });
   }
 
-  function showActionFailure(kind: ActionKind, plant: PlantListItem) {
+  function showActionFailure(kind: ActionKind, plant: PlantListItem, clientDateRejected = false) {
+    if (clientDateRejected) {
+      toast.error(CLIENT_DATE_ERROR_MESSAGE);
+
+      return;
+    }
+
     toast.error(getFailureMessage(kind, plant.name), {
       action: {
         label: "Retry",
@@ -118,7 +132,22 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
   }
 
   function handleAction(plant: PlantListItem, kind: ActionKind, keyboard: boolean) {
+    const clientDate = getBrowserToday();
+
     if (pendingIds.has(plant.id)) {
+      return;
+    }
+
+    if (clientDate === null) {
+      toast.error("We couldn't determine your local date. Try again.", {
+        action: {
+          label: "Retry",
+          onClick: () => {
+            handleAction(plant, kind, false);
+          },
+        },
+      });
+
       return;
     }
 
@@ -133,6 +162,7 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
     const mutation = kind === "watered" ? actions.markWatered : actions.postponePlant;
 
     formData.set("plantId", plant.id);
+    formData.set("clientDate", clientDate);
 
     startTransition(async () => {
       try {
@@ -147,10 +177,18 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
           clearPending(plant.id);
           showUndoNotice(data as MutationResult, kind, plant, keyboard);
         });
-      } catch {
+      } catch (error) {
+        const clientDateRejected =
+          typeof error === "object" &&
+          error !== null &&
+          "code" in error &&
+          "message" in error &&
+          error.code === "BAD_REQUEST" &&
+          error.message === CLIENT_DATE_ERROR_MESSAGE;
+
         setLeavingIds((current) => updateSet(current, plant.id, false));
         clearPending(plant.id);
-        showActionFailure(kind, plant);
+        showActionFailure(kind, plant, clientDateRejected);
 
         if (keyboard) {
           requestAnimationFrame(() => {
@@ -218,52 +256,9 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
     ...plant,
     leaving: leavingIds.has(plant.id),
   }));
-  const dueList = today === null ? optimisticPlants : optimisticPlants.filter((plant) => plant.next_due_on <= today);
+  const dueList = today === null ? [] : optimisticPlants.filter((plant) => plant.next_due_on <= today);
   const activeDueList = dueList.filter((plant) => !plant.leaving);
   const nextUpcoming = today === null ? null : (basePlants.find((plant) => plant.next_due_on > today) ?? null);
-
-  useEffect(() => {
-    // No browser-zone fallback on purpose: the server records mutations against `locals.today`,
-    // which is null in exactly this case. Guessing a day here would disagree with what gets
-    // stored, so an unknown zone keeps rendering exact dates instead.
-    if (timeZone === null) {
-      return;
-    }
-
-    const activeTimeZone = timeZone;
-    let timer: ReturnType<typeof setTimeout>;
-
-    const refreshToday = () => {
-      setToday(getTodayInTimeZone(activeTimeZone));
-    };
-
-    function scheduleRollover() {
-      timer = setTimeout(() => {
-        refreshToday();
-        scheduleRollover();
-      }, getMillisecondsUntilNextMidnight(activeTimeZone));
-    }
-
-    function handlePageShow() {
-      refreshToday();
-    }
-
-    function handleVisibilityChange() {
-      if (document.visibilityState === "visible") {
-        refreshToday();
-      }
-    }
-
-    window.addEventListener("pageshow", handlePageShow);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    scheduleRollover();
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("pageshow", handlePageShow);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [timeZone]);
 
   useEffect(() => {
     const timeouts = removalTimeouts.current;
@@ -291,6 +286,18 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
     );
   }
 
+  if (today === null) {
+    return (
+      <div className="py-16 text-center">
+        <h1 ref={headingRef} tabIndex={-1} className="mb-4 text-2xl font-medium outline-none">
+          Today
+        </h1>
+        <p className="font-medium">Finding your local date…</p>
+        <p className="text-muted-foreground mt-1 text-sm">Your watering list will appear when it is ready.</p>
+      </div>
+    );
+  }
+
   if (basePlants.length === 0) {
     return (
       <div className="py-16 text-center">
@@ -313,7 +320,7 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
           <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-medium outline-none">
             Today
           </h1>
-          {today !== null && activeDueList.length > 0 && (
+          {activeDueList.length > 0 && (
             <p className="text-muted-foreground text-sm">
               {activeDueList.length} plant{activeDueList.length === 1 ? "" : "s"}{" "}
               {activeDueList.length === 1 ? "needs" : "need"} water
@@ -342,21 +349,16 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
           {dueList.map((plant) => {
             const isLeaving = plant.leaving ?? false;
             const initial = plant.name.trim().charAt(0).toUpperCase() || "?";
-            const dueStatus = today === null ? null : classifyDueStatus(plant.next_due_on, today);
-            const isOverdue = dueStatus !== null && dueStatus !== "due-today";
+            const dueStatus = classifyDueStatus(plant.next_due_on, today);
+            const isOverdue = dueStatus !== "due-today";
             const isStrongOverdue = dueStatus === "overdue-strong";
             const pending = pendingIds.has(plant.id);
-            let metadataLabel = formatDueLabel(plant.next_due_on, null);
-
-            if (today !== null) {
-              const scheduleLabel = `${getShortSeasonLabel(getSeason(today))} · then ${formatIntervalLabel(
-                selectSeasonInterval(today, plant.growing_interval_days, plant.dormancy_interval_days),
-              )}`;
-
-              metadataLabel = isOverdue
-                ? `Overdue · Due ${formatOverdueDate(plant.next_due_on, today)} · ${scheduleLabel}`
-                : `${formatDueLabel(plant.next_due_on, today)} · ${scheduleLabel}`;
-            }
+            const scheduleLabel = `${getShortSeasonLabel(getSeason(today))} · then ${formatIntervalLabel(
+              selectSeasonInterval(today, plant.growing_interval_days, plant.dormancy_interval_days),
+            )}`;
+            const metadataLabel = isOverdue
+              ? `Overdue · Due ${formatOverdueDate(plant.next_due_on, today)} · ${scheduleLabel}`
+              : `${formatDueLabel(plant.next_due_on, today)} · ${scheduleLabel}`;
 
             const linkClasses = cn(
               "col-span-2 -m-3 flex gap-3 p-3 outline-0 focus-visible:after:border-ring focus-visible:after:ring-3 focus-visible:after:ring-ring/50 after:block after:absolute after:inset-0 after:content-[''] after:border after:border-transparent after:transition-all",

@@ -1,7 +1,7 @@
 ---
 change_id: today-acquisition-defects
 title: Today acquisition defects
-status: impl_reviewed
+status: implementing
 created: 2026-07-26
 updated: 2026-07-26
 archived_at: null
@@ -27,3 +27,9 @@ archived_at: null
 
 The intended D-3 behaviour is unsettled. Decide its product contract before planning;
 asserting its current behaviour would encode the tautology warned about in the test plan.
+
+- Phase 2 seed-data correction: the original local fixture IDs were PostgreSQL-castable
+  UUID literals but did not satisfy Astro/Zod's versioned `z.uuid()` validation. The
+  seed now uses valid v4 UUIDs for the fixture user and plants; keep Action input
+  validation strict rather than weakening it for placeholder seed IDs. Existing local
+  databases need `pnpx supabase db reset` to receive the replacement fixture rows.

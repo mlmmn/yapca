@@ -1,4 +1,5 @@
 import { formatShortDate, toEpochDay } from "@/lib/date";
+import { CLIENT_DATE_ERROR_MESSAGE } from "@/lib/date";
 import { resolveScheduleChange } from "@/lib/schedule";
 import { getSeasonLabel } from "@/lib/season";
 
@@ -11,20 +12,25 @@ type PreviewInput = {
   newDormancyIntervalDays: number | null;
 };
 
-export type SaveErrorState = "conflict" | "generic";
+export type SaveErrorState = "conflict" | "client-date" | "generic";
 
 export const SAVE_ERROR_MESSAGES: Record<SaveErrorState, string> = {
   conflict: "This plant changed elsewhere. Reload it before saving again.",
+  "client-date": "Your device date could not be reconciled. Check your device clock and try again.",
   generic: "We couldn't save these changes. Check your connection and try again.",
 };
 
-export function getSaveErrorState(code: string | undefined): SaveErrorState | "not-found" {
+export function getSaveErrorState(code: string | undefined, message?: string): SaveErrorState | "not-found" {
   if (code === "CONFLICT") {
     return "conflict";
   }
 
   if (code === "NOT_FOUND") {
     return "not-found";
+  }
+
+  if (code === "BAD_REQUEST" && message === CLIENT_DATE_ERROR_MESSAGE) {
+    return "client-date";
   }
 
   return "generic";
@@ -42,7 +48,7 @@ export function buildSchedulePreview(input: PreviewInput): string {
   }
 
   if (input.today === null) {
-    return `Next due is ${oldDueLabel}. The applicable season will be resolved when you save.`;
+    return `Next due is ${oldDueLabel}. Your local date is still being determined, so saving is unavailable.`;
   }
 
   const scheduleChange = resolveScheduleChange({

@@ -1,39 +1,65 @@
 ---
-import { formatDueLabel, formatIntervalLabel } from "@/lib/date";
-import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
+import { getSummaryValues } from "./utils";
 
 type Props = {
   growingIntervalDays: number;
   dormancyIntervalDays: number;
   dueDate: string;
+  initialToday: string | null;
   mode: "active" | "full";
 };
 
-const { growingIntervalDays, dormancyIntervalDays, dueDate, mode } = Astro.props;
-const today = Astro.locals.today;
-const fallbackSchedule = `Growing: ${formatIntervalLabel(growingIntervalDays)} · Dormancy: ${formatIntervalLabel(dormancyIntervalDays)}`;
-
-// Only reachable with a known day — every season-dependent value needs one.
-function buildSchedule(activeDay: string): string {
-  const season = getSeason(activeDay);
-
-  if (mode === "full") {
-    return [
-      `Growing: ${formatIntervalLabel(growingIntervalDays)}${season === "growing" ? " (active now)" : ""}`,
-      `Dormancy: ${formatIntervalLabel(dormancyIntervalDays)}${season === "dormancy" ? " (active now)" : ""}`,
-    ].join(" · ");
-  }
-
-  const activeInterval = selectSeasonInterval(activeDay, growingIntervalDays, dormancyIntervalDays);
-
-  return `${getShortSeasonLabel(season)} · then ${formatIntervalLabel(activeInterval)}`;
-}
-
-const summary = today === null ? fallbackSchedule : buildSchedule(today);
-const dueLabel = formatDueLabel(dueDate, today);
+const { growingIntervalDays, dormancyIntervalDays, dueDate, initialToday, mode } = Astro.props;
+const fallback = getSummaryValues(mode, dueDate, growingIntervalDays, dormancyIntervalDays, null);
 ---
 
-<div class="text-muted-foreground min-w-0 space-y-1 text-sm">
-  <div>{dueLabel}</div>
-  <div class="text-xs leading-5">{summary}</div>
+<div
+  class="text-muted-foreground min-w-0 space-y-1 text-sm"
+  data-season-interval-summary
+  data-due-date={dueDate}
+  data-growing-interval-days={growingIntervalDays}
+  data-dormancy-interval-days={dormancyIntervalDays}
+  data-initial-today={initialToday ?? ""}
+  data-mode={mode}
+>
+  <div data-due-label>{fallback.dueLabel}</div>
+  <div class="text-xs leading-5" data-schedule>{fallback.schedule}</div>
 </div>
+
+<script>
+  import { subscribeToBrowserToday } from "@/lib/timezone";
+  import { getSummaryValues } from "./utils";
+
+  type SummaryElement = HTMLElement & {
+    dataset: DOMStringMap & {
+      dormancyIntervalDays: string;
+      dueDate: string;
+      growingIntervalDays: string;
+      mode: "active" | "full";
+    };
+  };
+
+  const summaries = [...document.querySelectorAll<SummaryElement>("[data-season-interval-summary]")];
+
+  subscribeToBrowserToday((today) => {
+    for (const summary of summaries) {
+      const dueLabel = summary.querySelector<HTMLElement>("[data-due-label]");
+      const schedule = summary.querySelector<HTMLElement>("[data-schedule]");
+      const values = getSummaryValues(
+        summary.dataset.mode,
+        summary.dataset.dueDate,
+        Number(summary.dataset.growingIntervalDays),
+        Number(summary.dataset.dormancyIntervalDays),
+        today,
+      );
+
+      if (dueLabel) {
+        dueLabel.textContent = values.dueLabel;
+      }
+
+      if (schedule) {
+        schedule.textContent = values.schedule;
+      }
+    }
+  });
+</script>

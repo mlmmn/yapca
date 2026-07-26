@@ -15,7 +15,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const cfTimeZone = typeof cfValue === "string" && isSupportedTimeZone(cfValue) ? cfValue : null;
   const timeZone = cookieTimeZone ?? cfTimeZone;
 
-  context.locals.timeZone = timeZone;
   context.locals.today = timeZone ? getTodayInTimeZone(timeZone) : null;
 
   const supabase = createClient(context.request.headers, context.cookies);

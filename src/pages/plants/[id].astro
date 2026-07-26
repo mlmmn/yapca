@@ -107,6 +107,7 @@ const initial = plant?.name.trim().charAt(0).toUpperCase() ?? "?";
                       growingIntervalDays={plant.growing_interval_days}
                       dormancyIntervalDays={plant.dormancy_interval_days}
                       dueDate={plant.next_due_on}
+                      initialToday={Astro.locals.today}
                     />
                   </div>
                 </div>

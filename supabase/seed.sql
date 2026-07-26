@@ -4,7 +4,7 @@
 
 do $$
 declare
-  v_user_id constant uuid := '00000000-0000-0000-0000-000000000001';
+  v_user_id constant uuid := 'a7c29f41-5ea8-4b6a-8f3d-d9e215c70401';
 begin
   insert into auth.users (
     instance_id,
@@ -24,7 +24,7 @@ begin
     updated_at
   )
   values (
-    '00000000-0000-0000-0000-000000000000',
+    'f3146e82-3bd4-4f0c-9a71-64c8d5e20100',
     v_user_id,
     'authenticated',
     'authenticated',
@@ -72,9 +72,9 @@ $$;
 
 insert into public.plants (id, user_id, name, growing_interval_days, dormancy_interval_days, next_due_on)
 values
-  ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000001', 'Monstera', 7, 30, current_date),
-  ('00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000001', 'Snake plant', 21, 21, current_date + 5),
-  ('00000000-0000-0000-0000-000000000103', '00000000-0000-0000-0000-000000000001', 'Peace lily', 4, 14, current_date - 1)
+  ('1f7a4d91-31c8-4d2e-8b63-5c9f01a2b101', 'a7c29f41-5ea8-4b6a-8f3d-d9e215c70401', 'Monstera', 7, 30, current_date),
+  ('2b8e5c62-4f17-4a9d-9c84-7e03b1d6f202', 'a7c29f41-5ea8-4b6a-8f3d-d9e215c70401', 'Snake plant', 21, 21, current_date + 5),
+  ('3c9f6d73-58a2-4bce-8d15-9f24c7e8a303', 'a7c29f41-5ea8-4b6a-8f3d-d9e215c70401', 'Peace lily', 4, 14, current_date - 1)
 on conflict (id) do update
   set user_id = excluded.user_id,
       name = excluded.name,

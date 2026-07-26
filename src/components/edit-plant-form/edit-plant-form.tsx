@@ -5,7 +5,9 @@ import { actions } from "astro:actions";
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { NumberField, NumberFieldGroup, NumberFieldInput, NumberFieldSuffix } from "@/components/ui/number-field";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useBrowserToday } from "@/components/hooks/use-browser-today";
 import { Input } from "@/components/ui/input";
+import { getBrowserToday } from "@/lib/timezone";
 import { buildSchedulePreview, getSaveErrorState, SAVE_ERROR_MESSAGES } from "./utils";
 import { isValidPhoto, PHOTO_ACCEPT, PHOTO_GUIDANCE } from "@/lib/photo";
 import { cn } from "@/lib/utils";
@@ -46,6 +48,7 @@ export default function EditPlantForm({
   const [photoIntent, setPhotoIntent] = useState<PhotoIntent>("keep");
   const [saveError, setSaveError] = useState<SaveErrorState | null>(null);
   const [announcedPreview, setAnnouncedPreview] = useState("");
+  const browserToday = useBrowserToday(today);
   const form = useForm({
     defaultValues: {
       name,
@@ -57,7 +60,15 @@ export default function EditPlantForm({
       onDynamic: editPlantSchema,
     },
     onSubmit: async ({ value }) => {
+      const clientDate = getBrowserToday();
+
       setSaveError(null);
+
+      if (clientDate === null) {
+        setSaveError("client-date");
+
+        return;
+      }
 
       const formData = new FormData();
 
@@ -67,6 +78,7 @@ export default function EditPlantForm({
       formData.set("dormancy_interval_days", String(value.dormancyIntervalDays));
       formData.set("removePhoto", String(photoIntent === "remove"));
       formData.set("updated_at", updatedAt);
+      formData.set("clientDate", clientDate);
 
       if (photoIntent === "replace" && photoFile) {
         formData.set("photo", photoFile);
@@ -76,7 +88,7 @@ export default function EditPlantForm({
         const { error } = await actions.updatePlant(formData);
 
         if (error) {
-          const errorState = getSaveErrorState(error.code);
+          const errorState = getSaveErrorState(error.code, error.message);
 
           if (errorState === "not-found") {
             window.location.assign(`/plants/${plantId}`);
@@ -108,7 +120,7 @@ export default function EditPlantForm({
 
     setAnnouncedPreview(
       buildSchedulePreview({
-        today,
+        today: browserToday,
         oldNextDue: nextDueOn,
         oldGrowingIntervalDays: growingIntervalDays,
         oldDormancyIntervalDays: dormancyIntervalDays,
@@ -342,7 +354,7 @@ export default function EditPlantForm({
         >
           {({ growingIntervalDays: currentGrowingIntervalDays, dormancyIntervalDays: currentDormancyIntervalDays }) => {
             const previewText = buildSchedulePreview({
-              today,
+              today: browserToday,
               oldNextDue: nextDueOn,
               oldGrowingIntervalDays: growingIntervalDays,
               oldDormancyIntervalDays: dormancyIntervalDays,
@@ -434,7 +446,7 @@ export default function EditPlantForm({
 
       <form.Subscribe selector={(state) => ({ valid: state.isValid, submitting: state.isSubmitting })}>
         {({ valid, submitting }) => {
-          const submitReady = valid && !submitting;
+          const submitReady = valid && !submitting && browserToday !== null;
 
           return (
             <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">

@@ -7,9 +7,12 @@ import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLab
 import { NumberField, NumberFieldGroup, NumberFieldInput, NumberFieldSuffix } from "@/components/ui/number-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
+import { useBrowserToday } from "@/components/hooks/use-browser-today";
+import { CLIENT_DATE_ERROR_MESSAGE } from "@/lib/date";
 import { Input } from "@/components/ui/input";
 import { getSeason, getSeasonLabel, selectSeasonInterval } from "@/lib/season";
 import { isValidPhoto, PHOTO_ACCEPT, PHOTO_GUIDANCE } from "@/lib/photo";
+import { getBrowserToday } from "@/lib/timezone";
 import { cn } from "@/lib/utils";
 import type { AddPlantFormProps } from "./types";
 
@@ -31,6 +34,7 @@ const addPlantSchema = z.object({
 export default function AddPlantForm({ today }: AddPlantFormProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const browserToday = useBrowserToday(today);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -47,11 +51,19 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
       onDynamic: addPlantSchema,
     },
     onSubmit: async ({ value }) => {
+      const clientDate = getBrowserToday();
       const formData = new FormData();
+
+      if (clientDate === null) {
+        toast.error(CLIENT_DATE_ERROR_MESSAGE);
+
+        return;
+      }
 
       formData.set("name", value.name);
       formData.set("growing_interval_days", String(value.growingIntervalDays));
       formData.set("dormancy_interval_days", String(value.dormancyIntervalDays));
+      formData.set("clientDate", clientDate);
 
       if (value.firstAppearance === "after") {
         formData.set("alreadyWatered", "true");
@@ -67,7 +79,9 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
         const { error } = await actions.addPlant(formData);
 
         if (error) {
-          toast.error(message);
+          toast.error(
+            error.code === "BAD_REQUEST" && error.message === CLIENT_DATE_ERROR_MESSAGE ? error.message : message,
+          );
 
           return;
         }
@@ -234,8 +248,8 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
                 const dormancyInterval =
                   Number.isInteger(dormancyIntervalDays) && dormancyIntervalDays > 0 ? dormancyIntervalDays : 1;
                 const activeInterval =
-                  today === null ? null : selectSeasonInterval(today, growingInterval, dormancyInterval);
-                const activeSeasonLabel = today === null ? null : getSeasonLabel(getSeason(today));
+                  browserToday === null ? null : selectSeasonInterval(browserToday, growingInterval, dormancyInterval);
+                const activeSeasonLabel = browserToday === null ? null : getSeasonLabel(getSeason(browserToday));
 
                 return (
                   <Field>
@@ -310,7 +324,7 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
 
       <form.Subscribe selector={(state) => state.isSubmitting}>
         {(submitting) => (
-          <Button type="submit" isDisabled={submitting} className={cn("w-full sm:w-fit")}>
+          <Button type="submit" isDisabled={submitting || browserToday === null} className={cn("w-full sm:w-fit")}>
             {submitting ? "Saving plant…" : "Save plant"}
           </Button>
         )}

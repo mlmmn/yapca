@@ -7,7 +7,6 @@ export type TodayListProps = {
   plants: PlantListItem[];
   fetchError?: boolean;
   today: string | null;
-  timeZone: string | null;
 };
 
 export type NoticeContext = {
