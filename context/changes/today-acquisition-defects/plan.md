@@ -347,11 +347,11 @@ Atomic deployment does not close the skew, because the surface that skews is the
 
 #### Automated
 
-- [x] 1.1 Date and timezone unit tests pass
-- [x] 1.2 Full unit suite passes in UTC
-- [x] 1.3 Full unit suite passes in a non-UTC process zone
-- [x] 1.4 Type checking passes
-- [x] 1.5 Linting passes
+- [x] 1.1 Date and timezone unit tests pass — 05e67a8
+- [x] 1.2 Full unit suite passes in UTC — 05e67a8
+- [x] 1.3 Full unit suite passes in a non-UTC process zone — 05e67a8
+- [x] 1.4 Type checking passes — 05e67a8
+- [x] 1.5 Linting passes — 05e67a8
 
 ### Phase 2: Browser Authority Across UI and Mutations
 
