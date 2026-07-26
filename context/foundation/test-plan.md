@@ -169,6 +169,13 @@ another boundary list; it includes the SQL-covered dates and a leap-day case. Ea
 row should state its expected result and a short reason, then be run through the
 public function under test. Assert observable contracts, not implementation details.
 
+Relative imports are the norm, with one deliberate exception: `src/lib/season.test.ts`
+imports its module under test as `@/lib/season`. That is the suite's only exercise of
+the `vite-tsconfig-paths` plugin, which derives the `@/*` alias from `tsconfig.json`.
+**Do not normalise it to a relative path** — doing so would leave the suite green while
+silently removing the only check that alias resolution still works. If that file ever
+stops using the alias, move the aliased import to another test rather than dropping it.
+
 ### 6.2 Adding an integration test
 
 TBD — see §3 Phase 2. Will cover the seeded-database harness and the

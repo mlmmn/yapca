@@ -24,6 +24,9 @@ describe("resolveScheduleChange", () => {
 
       expect(result.deltaDays).toBe(expectedDelta);
       expect(result.newNextDue).toBe(expectedDate);
+      // Literal rather than `baseInput.oldNextDue`, so a pass-through that silently
+      // returned some other field of the same input could not satisfy it.
+      expect(result.oldNextDue).toBe("2024-03-20");
     },
   );
 

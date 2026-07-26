@@ -19,7 +19,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+        with:
+          persist-credentials: false
+      # Third-party action in a job that later reads SUPABASE_* secrets, so it is pinned
+      # to a commit rather than the mutable `v4` tag. Bump deliberately, not implicitly.
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -27,6 +31,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec astro sync
       - run: pnpm lint
+      - run: pnpm check
       - run: pnpm test
       - run: TZ=America/New_York pnpm test
       - run: pnpm build

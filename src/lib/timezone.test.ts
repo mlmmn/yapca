@@ -1,5 +1,12 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { getMillisecondsUntilNextMidnight, getTodayInTimeZone, isSupportedTimeZone } from "./timezone";
+import {
+  TIME_ZONE_COOKIE,
+  getMillisecondsUntilNextMidnight,
+  getTodayInTimeZone,
+  isSupportedTimeZone,
+} from "./timezone";
 
 const warsaw = "Europe/Warsaw";
 const fixedNow = new Date("2026-02-14T10:00:00.000Z");
@@ -52,5 +59,17 @@ describe("getMillisecondsUntilNextMidnight", () => {
 
   test("throws on an unsupported zone", () => {
     expect(() => getMillisecondsUntilNextMidnight("Not/AZone", fixedNow)).toThrow(RangeError);
+  });
+});
+
+// `TIME_ZONE_COOKIE === "tz"` would only restate the constant. The drift that costs
+// something is the inline head script in layout.astro — which cannot import from here —
+// being renamed on its own, so this reads that file rather than asserting the value.
+describe("TIME_ZONE_COOKIE", () => {
+  test("matches the cookie name written by the inline head script in layout.astro", () => {
+    const layoutPath = fileURLToPath(new URL("../layouts/layout.astro", import.meta.url));
+    const layoutSource = readFileSync(layoutPath, "utf8");
+
+    expect(layoutSource).toContain(`${TIME_ZONE_COOKIE}=`);
   });
 });

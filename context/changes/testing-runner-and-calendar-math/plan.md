@@ -555,6 +555,20 @@ UTC leg would make Phase 2's DST cases decorative. Set `TZ` as a shell prefix on
 step, not through Vitest's `env` option, so it is in place before the worker initializes
 its default zone.
 
+**REVISED (Phase 3 review and full-plan impl-review): the shipped workflow deviates from
+the step list above in four recorded ways, all additive or tightening.** (1)
+`node-version-file: .nvmrc` replaces `node-version: 22` — `.nvmrc` holds `22.14.0`, so the
+effective major is unchanged and `.nvmrc` becomes the single source of truth shared with
+local dev (Phase 3 review F2). (2) `permissions: contents: read`, a `concurrency` group
+with `cancel-in-progress`, and `timeout-minutes: 15` were added in `7d03c96` (Phase 3
+review F1 and F4). (3) A `pnpm check` step (`astro check`) sits between `pnpm lint` and
+`pnpm test` — nothing in the original step list type-checked the repository, and a
+deliberate type error in a test file passed `lint`, `test` and `build` alike (full-plan
+review F1). (4) `pnpm/action-setup` is pinned to commit `b906aff` (`v4.3.0`) rather than
+the mutable `v4` tag, and `actions/checkout` runs with `persist-credentials: false`, since
+this job later reads `SUPABASE_*` secrets (full-plan review F3). The **pnpm version**
+itself is still unpinned, so the hazard noted below is unaffected.
+
 The ordering constraint
 and the pnpm-version-pinning hazard are in Critical Implementation Details. Retain the
 `SUPABASE_URL` / `SUPABASE_KEY` env block on the build step — both are `optional: true`

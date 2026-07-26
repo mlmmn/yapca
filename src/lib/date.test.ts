@@ -11,21 +11,25 @@ import {
   toEpochDay,
 } from "./date";
 
-// Paired rather than split: every assertion here exercises both directions.
-describe("toEpochDay and fromEpochDay", () => {
-  test.each(["1970-01-01", "2024-02-29", "2025-01-01"])("round-trips %s", (dateString) => {
+// The round-trip below only pins symmetry: a sign or offset error shared by both
+// functions cancels out. Each direction therefore also carries an absolute anchor.
+describe("toEpochDay", () => {
+  test("anchors the epoch-day scale to 1970-01-01", () => {
+    expect(toEpochDay("1970-01-01")).toBe(0);
+    expect(toEpochDay("1970-01-02")).toBe(1);
+    expect(toEpochDay("1969-12-31")).toBe(-1);
+  });
+});
+
+describe("fromEpochDay", () => {
+  test("anchors epoch day zero to 1970-01-01", () => {
+    expect(fromEpochDay(0)).toBe("1970-01-01");
+  });
+
+  test.each(["1970-01-01", "2024-02-29", "2025-01-01"])("round-trips %s back through toEpochDay", (dateString) => {
     const epochDay = toEpochDay(dateString);
 
     expect(fromEpochDay(epochDay)).toBe(dateString);
-  });
-
-  // The round-trips above only pin symmetry: a sign or offset error shared by
-  // both functions cancels out. These anchor the scale to an absolute origin.
-  test("anchors epoch day zero to 1970-01-01", () => {
-    expect(toEpochDay("1970-01-01")).toBe(0);
-    expect(fromEpochDay(0)).toBe("1970-01-01");
-    expect(toEpochDay("1970-01-02")).toBe(1);
-    expect(toEpochDay("1969-12-31")).toBe(-1);
   });
 });
 
