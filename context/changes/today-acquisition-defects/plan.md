@@ -357,22 +357,22 @@ Atomic deployment does not close the skew, because the surface that skews is the
 
 #### Automated
 
-- [x] 2.1 Full unit suite passes in UTC
-- [x] 2.2 Full unit suite passes in a non-UTC process zone
-- [x] 2.3 Type checking passes
-- [x] 2.4 Linting passes
-- [x] 2.5 Cloudflare production build succeeds
+- [x] 2.1 Full unit suite passes in UTC — 19f21e2
+- [x] 2.2 Full unit suite passes in a non-UTC process zone — 19f21e2
+- [x] 2.3 Type checking passes — 19f21e2
+- [x] 2.4 Linting passes — 19f21e2
+- [x] 2.5 Cloudflare production build succeeds — 19f21e2
 
 #### Manual
 
-- [x] 2.6 With no server date seed, Today shows the explanatory non-actionable state and never exposes future plants as due
-- [x] 2.7 In UTC− and UTC+ browser zones where the local day differs from UTC, Today, Add, Edit, `/plants`, and plant detail agree after hydration
-- [x] 2.8 Add, Update, Watered, and Postpone persist the fresh browser-local date and select the matching seasonal interval
-- [x] 2.9 Browser date acquisition failure blocks every dated mutation with a retryable explanation and sends no Action request
-- [x] 2.10 Add and Edit previews refresh after midnight, while an immediate cross-midnight submit follows the accepted fresh-date-without-reconfirmation contract
-- [x] 2.11 Midnight, `pageshow`, and visibility recovery update all relative surfaces without a document reload
-- [x] 2.12 Overdue labels, non-color urgency cues, focus recovery, undo, and reduced-motion behavior remain intact
-- [x] 2.13 A device clock set more than one calendar day from UTC is rejected by every dated mutation with clock-specific copy and no dedicated Retry action in the error notice, never the generic connection message; normal action controls remain available after correction
+- [x] 2.6 With no server date seed, Today shows the explanatory non-actionable state and never exposes future plants as due — 19f21e2
+- [x] 2.7 In UTC− and UTC+ browser zones where the local day differs from UTC, Today, Add, Edit, `/plants`, and plant detail agree after hydration — 19f21e2
+- [x] 2.8 Add, Update, Watered, and Postpone persist the fresh browser-local date and select the matching seasonal interval — 19f21e2
+- [x] 2.9 Browser date acquisition failure blocks every dated mutation with a retryable explanation and sends no Action request — 19f21e2
+- [x] 2.10 Add and Edit previews refresh after midnight, while an immediate cross-midnight submit follows the accepted fresh-date-without-reconfirmation contract — 19f21e2
+- [x] 2.11 Midnight, `pageshow`, and visibility recovery update all relative surfaces without a document reload — 19f21e2
+- [x] 2.12 Overdue labels, non-color urgency cues, focus recovery, undo, and reduced-motion behavior remain intact — 19f21e2
+- [x] 2.13 A device clock set more than one calendar day from UTC is rejected by every dated mutation with clock-specific copy and no dedicated Retry action in the error notice, never the generic connection message; normal action controls remain available after correction — 19f21e2
 
 ### Phase 3: Workerd Verification and Documentation Reconciliation
 
