@@ -92,3 +92,109 @@ export function getMillisecondsUntilNextMidnight(timeZone: string, now = new Dat
 
   return Math.max(1000, upperBound - now.getTime());
 }
+
+export type RolloverState = {
+  today: string;
+  delay: number;
+};
+
+export function getBrowserTimeZone(): string | null {
+  try {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    return isSupportedTimeZone(timeZone) ? timeZone : null;
+  } catch {
+    return null;
+  }
+}
+
+export function getBrowserToday(): string | null {
+  const timeZone = getBrowserTimeZone();
+
+  if (timeZone === null) {
+    return null;
+  }
+
+  try {
+    return getTodayInTimeZone(timeZone);
+  } catch {
+    return null;
+  }
+}
+
+// One instant produces both the observed day and the delay until it changes, so a
+// reschedule always derives from the day just emitted rather than the original seed.
+// Kept pure and `now`-injected because this is the rollover logic the Node runner
+// must reach; the subscription below is only wiring.
+export function getBrowserRolloverState(timeZone: string, now: Date): RolloverState {
+  return {
+    today: getTodayInTimeZone(timeZone, now),
+    delay: getMillisecondsUntilNextMidnight(timeZone, now),
+  };
+}
+
+function acquireBrowserRollover(): RolloverState | null {
+  const timeZone = getBrowserTimeZone();
+
+  if (timeZone === null) {
+    return null;
+  }
+
+  try {
+    return getBrowserRolloverState(timeZone, new Date());
+  } catch {
+    return null;
+  }
+}
+
+export function getNextBrowserToday(previousToday: string | null, acquiredToday: string | null): string | null {
+  return acquiredToday ?? previousToday;
+}
+
+export function subscribeToBrowserToday(
+  callback: (today: string | null) => void,
+  initialToday: string | null = null,
+): () => void {
+  let previousToday = initialToday;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  function refreshToday(): void {
+    const rollover = acquireBrowserRollover();
+
+    previousToday = getNextBrowserToday(previousToday, rollover?.today ?? null);
+    callback(previousToday);
+
+    if (timer !== undefined) {
+      clearTimeout(timer);
+    }
+
+    // Without a resolvable zone there is no midnight to schedule from; a later
+    // pageshow or visibility recovery retries acquisition.
+    if (rollover !== null) {
+      timer = setTimeout(refreshToday, rollover.delay);
+    }
+  }
+
+  function handlePageShow(): void {
+    refreshToday();
+  }
+
+  function handleVisibilityChange(): void {
+    if (document.visibilityState === "visible") {
+      refreshToday();
+    }
+  }
+
+  refreshToday();
+  window.addEventListener("pageshow", handlePageShow);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+
+  return () => {
+    if (timer !== undefined) {
+      clearTimeout(timer);
+    }
+
+    window.removeEventListener("pageshow", handlePageShow);
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+  };
+}

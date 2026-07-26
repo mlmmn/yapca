@@ -6,6 +6,7 @@ import {
   formatIntervalLabel,
   formatShortDate,
   fromEpochDay,
+  isPlausibleClientDate,
   isValidDateString,
   parseLocalDateString,
   toEpochDay,
@@ -39,6 +40,25 @@ describe("isValidDateString", () => {
     expect(isValidDateString("2026-02-30")).toBe(false);
     expect(isValidDateString("2026-13-01")).toBe(false);
     expect(isValidDateString("2026-2-01")).toBe(false);
+  });
+});
+
+describe("isPlausibleClientDate", () => {
+  test.each([
+    ["2026-03-01", "2026-03-01", true],
+    ["2026-02-28", "2026-03-01", true],
+    ["2026-03-02", "2026-03-01", true],
+    ["2026-02-27", "2026-03-01", false],
+    ["2026-03-03", "2026-03-01", false],
+    ["2025-12-31", "2026-01-01", true],
+    ["2026-01-01", "2025-12-31", true],
+    ["2024-02-29", "2024-03-01", true],
+    ["2024-03-02", "2024-02-29", false],
+    ["2026-02-30", "2026-03-01", false],
+    ["not-a-date", "2026-03-01", false],
+    ["2026-03-01", "not-a-date", false],
+  ])("accepts %s relative to %s: %s", (candidate, utcToday, plausible) => {
+    expect(isPlausibleClientDate(candidate, utcToday)).toBe(plausible);
   });
 });
 

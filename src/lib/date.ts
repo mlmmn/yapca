@@ -1,5 +1,7 @@
 const DATE_STRING_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+export const CLIENT_DATE_ERROR_MESSAGE =
+  "The device date could not be reconciled. Check your device clock and try again.";
 // Hoisted because SSR calls this once per plant row per request, and constructing an
 // Intl.DateTimeFormat is the expensive half of formatting.
 const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
@@ -29,6 +31,16 @@ export function isValidDateString(value: string): boolean {
   const parsed = new Date(epochMs);
 
   return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
+}
+
+export function isPlausibleClientDate(candidate: string, utcToday: string): boolean {
+  if (!isValidDateString(candidate) || !isValidDateString(utcToday)) {
+    return false;
+  }
+
+  const dayDifference = Math.abs(toEpochDay(candidate) - toEpochDay(utcToday));
+
+  return dayDifference <= 1;
 }
 
 export function parseLocalDateString(dateString: string): Date {

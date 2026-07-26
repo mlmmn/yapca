@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import {
   TIME_ZONE_COOKIE,
+  getBrowserRolloverState,
+  getNextBrowserToday,
   getMillisecondsUntilNextMidnight,
   getTodayInTimeZone,
   isSupportedTimeZone,
@@ -18,6 +20,17 @@ describe("isSupportedTimeZone", () => {
     expect(isSupportedTimeZone("")).toBe(false);
     expect(isSupportedTimeZone("a".repeat(101))).toBe(false);
     expect(isSupportedTimeZone("Europe/Warsaw!invalid")).toBe(false);
+  });
+});
+
+describe("getNextBrowserToday", () => {
+  test("keeps the previously emitted day when a later acquisition fails", () => {
+    expect(getNextBrowserToday("2026-03-08", null)).toBe("2026-03-08");
+    expect(getNextBrowserToday(null, null)).toBeNull();
+  });
+
+  test("emits a newly acquired day after the original seed", () => {
+    expect(getNextBrowserToday("2026-03-08", "2026-03-09")).toBe("2026-03-09");
   });
 });
 
@@ -60,6 +73,38 @@ describe("getMillisecondsUntilNextMidnight", () => {
   test("throws on an unsupported zone", () => {
     expect(() => getMillisecondsUntilNextMidnight("Not/AZone", fixedNow)).toThrow(RangeError);
   });
+});
+
+describe("getBrowserRolloverState", () => {
+  // Chained on purpose: a delay computed once from the seed would still satisfy a
+  // single-tick assertion, so the second tick must be taken at the instant the first
+  // one scheduled and produce the day after it.
+  test("reschedules from the newly observed day rather than the original seed", () => {
+    const seed = new Date("2026-03-09T10:00:00.000Z");
+    const first = getBrowserRolloverState(warsaw, seed);
+    const firstMidnight = new Date(seed.getTime() + first.delay);
+    const second = getBrowserRolloverState(warsaw, firstMidnight);
+    const secondMidnight = new Date(firstMidnight.getTime() + second.delay);
+
+    expect(first.today).toBe("2026-03-09");
+    expect(second.today).toBe("2026-03-10");
+    expect(getTodayInTimeZone(warsaw, secondMidnight)).toBe("2026-03-11");
+    // Each delay must land on the boundary itself, not merely somewhere in the next
+    // day — otherwise a fixed 24 h reschedule would satisfy the assertions above.
+    expect(getTodayInTimeZone(warsaw, new Date(firstMidnight.getTime() - 1))).toBe("2026-03-09");
+    expect(getTodayInTimeZone(warsaw, new Date(secondMidnight.getTime() - 1))).toBe("2026-03-10");
+  });
+
+  test.each([new Date("2026-03-29T00:30:00.000Z"), new Date("2026-10-25T00:30:00.000Z")])(
+    "keeps DST rollover calculation anchored to the observed instant: %s",
+    (now) => {
+      const { today, delay } = getBrowserRolloverState(warsaw, now);
+      const scheduled = new Date(now.getTime() + delay);
+
+      expect(today).toBe(getTodayInTimeZone(warsaw, now));
+      expect(getTodayInTimeZone(warsaw, scheduled)).not.toBe(today);
+    },
+  );
 });
 
 // `TIME_ZONE_COOKIE === "tz"` would only restate the constant. The drift that costs
