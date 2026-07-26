@@ -756,11 +756,11 @@ Not applicable — no schema or data changes. The only migration-shaped concern 
 
 #### Automated
 
-- [x] 4.1 No "TBD — see §3 Phase 1" remains in test-plan.md
-- [x] 4.2 `today-acquisition-defects/change.md` exists with valid frontmatter
-- [ ] 4.3 `pnpm lint` and `pnpm test` pass; CI green on the final push
+- [x] 4.1 No "TBD — see §3 Phase 1" remains in test-plan.md — 06e63e3
+- [x] 4.2 `today-acquisition-defects/change.md` exists with valid frontmatter — 06e63e3
+- [x] 4.3 `pnpm lint` and `pnpm test` pass; CI green on the final push — 06e63e3
 
 #### Manual
 
-- [x] 4.4 §6.1 is sufficient for a newcomer to write a unit test
-- [x] 4.5 D-1–D-3 carry enough detail to plan from without re-reading research.md
+- [x] 4.4 §6.1 is sufficient for a newcomer to write a unit test — 06e63e3
+- [x] 4.5 D-1–D-3 carry enough detail to plan from without re-reading research.md — 06e63e3
