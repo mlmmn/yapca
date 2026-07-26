@@ -160,6 +160,16 @@ const shadcnUiConfig = tseslint.config({
   },
 });
 
+const testConfig = tseslint.config({
+  // Test files intentionally use assertion-focused idioms that are not production code patterns.
+  files: ["**/*.test.ts", "**/*.test.tsx"],
+  rules: {
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/unbound-method": "off",
+    "react/no-multi-comp": "off",
+  },
+});
+
 const astroConfig = tseslint.config({
   files: ["**/*.astro"],
   rules: {
@@ -193,5 +203,6 @@ export default tseslint.config(
   astroConfig,
   ambientTypesConfig,
   shadcnUiConfig,
+  testConfig,
   eslintPluginPrettier,
 );

@@ -11,7 +11,9 @@
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier --write .",
-    "sync-agents": "./scripts/sync-agents.sh"
+    "sync-agents": "./scripts/sync-agents.sh",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
@@ -62,6 +64,7 @@
     "supabase": "^2.109.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.64.0",
+    "vitest": "^4.1.10",
     "wrangler": "^4.112.0"
   },
   "overrides": {
