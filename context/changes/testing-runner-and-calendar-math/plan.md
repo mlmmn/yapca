@@ -673,10 +673,10 @@ Not applicable — no schema or data changes. The only migration-shaped concern 
 
 #### Automated
 
-- [ ] 2.1 `pnpm test` exits 0 across all five `src/lib/` modules
-- [ ] 2.2 `TZ=America/New_York pnpm test` exits 0
-- [ ] 2.3 `pnpm lint` passes at zero warnings across all new files
-- [ ] 2.4 `pnpm build` still succeeds
+- [x] 2.1 `pnpm test` exits 0 across all five `src/lib/` modules
+- [x] 2.2 `TZ=America/New_York pnpm test` exits 0
+- [x] 2.3 `pnpm lint` passes at zero warnings across all new files
+- [x] 2.4 `pnpm build` still succeeds
 
 #### Manual
 
