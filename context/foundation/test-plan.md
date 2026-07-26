@@ -61,6 +61,16 @@ excludes the attacker. The product has authentication and per-account data,
 the PRD names isolation as a requirement, and nothing currently proves it
 holds.
 
+**Known accepted gap on Risk #7.** Integration starts at the HTTP boundary
+and therefore assumes a well-formed request. If the client island drops the
+file *before* the request is sent, no test in this rollout sees it — the
+user gets a silent no-op. Closing that gap needs a browser runner, which
+this rollout does not buy: Risk #7 is the lowest impact × likelihood pair in
+the map, and §7 excludes the UI while the design is unsettled. A browser
+layer would carry real HEIC / EXIF fixtures perfectly well (Playwright ships
+WebKit); the argument against it here is cost and UI churn, not capability.
+Revisit per §8.
+
 ### Risk Response Guidance
 
 | Risk | What would prove protection                                                                                                                                 | Must challenge                                                                                                                                            | Context `/10x-research` must ground                                                                                                       | Likely cheapest layer                                              | Anti-pattern to avoid                                                                                             |
@@ -71,7 +81,7 @@ holds.
 | #4   | Postpone shifts exactly +2 days and the task still appears on the list; undo restores the *previous* due date, and journal and schedule agree afterward      | That a 2xx from the mutation means the resulting state is correct. Also that undo is idempotent — a double undo must not walk backwards twice              | The mutation surface's contract, what the journal records, how undo identifies the event to reverse, whether postpone mutates the base interval | integration (mutation → re-read state + journal)                    | Testing postpone and undo in isolation only — the defect lives in the *sequence* (water → undo → postpone → undo)    |
 | #5   | User B, authenticated, cannot read or mutate User A's plant, task, or photo when addressing it by direct id rather than through the UI                       | That RLS existing means RLS is correct. Per-operation policies can permit one verb while another path bypasses them. Authentication is not authorization  | Which policies exist per table / operation / role, whether mutations run under the user's session or a service key, how ownership is asserted | contract / integration (two seeded users, direct-id access)        | Testing isolation through the UI only — the UI never offers the other user's id, so the test cannot fail            |
 | #6   | On each of Feb 28, Feb 29 (leap year), Mar 1, Oct 31, and Nov 1 the app selects the documented interval — growing Mar 1–Oct 31, dormancy Nov 1–end of Feb    | That "the season is right" implies "the due date is right" — the PRD states that crossing a boundary must never rewrite an existing due date              | Whether season is evaluated at schedule-creation time or at read time, and which of the two intervals an in-flight schedule keeps            | unit (table-driven over boundary dates, including a leap year)     | Testing only mid-season dates, where every implementation passes                                                    |
-| #7   | A phone-shaped upload (large, HEIC / EXIF-rotated) either persists and is retrievable afterward, or fails with a message the user actually sees — never silently succeeds without the file | That a 2xx from the form means the file landed in storage. Verify the object is *retrievable*, not that the request succeeded                             | The upload boundary (direct-to-storage vs through the Worker), size and type limits, what happens to the plant record when the upload fails   | integration for the persist / retrieve path, plus a manual device smoke | Mocking the storage client — that tests the mock, not the boundary the user's phone actually hits                   |
+| #7   | A phone-shaped upload (large, HEIC / EXIF-rotated) either persists and is retrievable afterward, or fails with a message the user actually sees — never silently succeeds without the file | That a 2xx from the form means the file landed in storage — verify the object is *retrievable*, not that the request succeeded. Also that calling the upload helper directly is "integration": a direct call never meets the Worker's request body-size ceiling, which is exactly what a 12MB phone photo hits | The upload boundary (direct-to-storage vs through the Worker), size and type limits, what happens to the plant record when the upload fails   | integration **at the real HTTP boundary** — multipart request against the running Worker, using a real HEIC / EXIF-rotated fixture at phone-realistic size — plus a documented manual device smoke | Mocking the storage client — that tests the mock, not the boundary the user's phone actually hits. Equally: asserting below the HTTP layer, which silently skips multipart encoding and the body-size limit |
 | #8   | Applying the full migration chain to a database holding representative rows leaves those rows intact and queryable                                           | That "the migration ran without error" means no data was lost — a destructive migration succeeds loudly and correctly                                     | Gate design only; there is no current code under test                                                                                        | CI gate (apply migrations to a seeded database, assert row survival) | Writing a unit test for a migration; the signal exists only when it runs against real data                          |
 
 ## 3. Phased Rollout
@@ -202,4 +212,12 @@ Refresh (`/10x-test-plan --refresh`) when:
 - a new top-3 risk surfaces from the roadmap or archive,
 - a recommended tool's `checked:` date is older than three months,
 - the project's tech stack changes (new framework, new test runner),
-- §7 negative-space no longer matches what the team believes.
+- §7 negative-space no longer matches what the team believes,
+- **roadmap slice S-09 (design-review-and-polish) lands.** The UI exclusion
+  in §7 was agreed while the design was unsettled. Once it settles,
+  re-evaluate a browser layer for two things it would buy: a behavioural
+  flow test for Risk #2 (sign in → plant due on the list → mark watered →
+  disappears), which asserts product behaviour rather than design and so
+  survives a restyle; and the client-side submit path for Risk #7's known
+  accepted gap above. A browser runner is expensive to buy for Risk #7
+  alone — but nearly free once Risk #2 justifies it.
