@@ -1,7 +1,7 @@
 ---
 change_id: today-acquisition-defects
 title: Today acquisition defects
-status: impl_reviewed
+status: implemented
 created: 2026-07-26
 updated: 2026-07-26
 archived_at: null
