@@ -733,7 +733,7 @@ Not applicable — no schema or data changes. The only migration-shaped concern 
 
 #### Automated
 
-- [ ] 3.1 CI's command sequence, including both test legs, each exits 0 locally
+- [x] 3.1 CI's command sequence, including both test legs, each exits 0 locally
 - [ ] 3.2 `gh run list --workflow=ci.yml` reports at least one run and no `master` trigger remains
 
 #### Manual
