@@ -173,12 +173,26 @@ cannot resolve the pnpm store path. Do **not** pin a pnpm version in the workflo
 `pnpm/action-setup@v4` reads `packageManager: "pnpm@11.13.1"` from `package.json`, and
 two sources of truth drift.
 
-**Fallback if `getViteConfig()` misbehaves.** It resolves the real `astro.config.mjs`,
-which loads the Cloudflare adapter. If that proves slow or fails under the test runner,
-fall back to `defineConfig` from `vitest/config` with an explicit
-`resolve.alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) }`, importing
-`fileURLToPath` from `node:url`. Prefer `getViteConfig()` — it is Astro's official path
-and avoids duplicating alias config — but do not spend the phase fighting it.
+**RESOLVED (Phase 1, confirmed by impl-review): `getViteConfig()` does not work here;
+`defineConfig` + `vite-tsconfig-paths` is the shipped path.** `getViteConfig()` resolves
+the real `astro.config.mjs`, which loads the Cloudflare adapter and forces a workers
+runner. The suite then dies at startup with `ReferenceError: exports is not defined`
+(`workers/runner-worker/index.js:107:3`) before any test file loads — reproduced
+directly, not inferred. **Do not "restore" `getViteConfig()` in a later phase** — this
+question is settled.
+
+`vitest.config.ts` therefore uses `defineConfig` from `vitest/config` with the
+`vite-tsconfig-paths` plugin, which **derives** the `@/*` alias from `tsconfig.json`'s
+`compilerOptions.paths` at resolve time. This keeps `tsconfig.json` the single source of
+truth and recovers the "no duplicated alias config" property that was the original reason
+to prefer `getViteConfig()` — a hand-written `resolve.alias` would have been a second
+place to edit and could drift silently. The plugin's `enforce: "pre"` ordering means it
+resolves before other plugins; no `resolve.alias` block is needed or wanted.
+
+Note the package is **`vite-tsconfig-paths`** (actively maintained, 6.1.1), not
+`vitest-tsconfig-paths` — the latter is a fork last published in 2022 and must not be
+used. Verified end-to-end in both directions: an `@/lib/...` import resolves with the
+plugin, and fails with `Cannot find package '@/lib/interval'` when the plugin is removed.
 
 ## Phase 1: Runner bootstrap and test-file lint contract
 
@@ -195,9 +209,9 @@ wiring end-to-end with one real test that is observed both passing and failing.
 
 **Intent**: Add the runner and the two commands that will be used locally and in CI.
 
-**Contract**: `vitest@^4.1.10` as a **devDependency**. Scripts `"test": "vitest run"`
-and `"test:watch": "vitest"`. No change to `lint-staged` — it already sweeps `*.ts`,
-which is the intended behaviour for test files.
+**Contract**: `vitest@^4.1.10` and `vite-tsconfig-paths@^6.1.1` as **devDependencies**.
+Scripts `"test": "vitest run"` and `"test:watch": "vitest"`. No change to `lint-staged` —
+it already sweeps `*.ts`, which is the intended behaviour for test files.
 
 #### 2. Vitest configuration
 
@@ -207,11 +221,13 @@ which is the intended behaviour for test files.
 duplication, restrict discovery to `src/**/*.test.ts`, run on Node, and default `TZ` to
 UTC as a safety net while honoring an explicit shell override.
 
-**Contract**: default-exports `getViteConfig({ test: { include: ["src/**/*.test.ts"],
-environment: "node", env: { TZ: process.env.TZ ?? "UTC" } } })`. Uses the type-only
-import from `vitest/config` documented in Critical Implementation Details; if the
-`test` key fails to typecheck through it, fall back to the triple-slash directive with
-the pre-authorized one-line eslint-disable and a Why-comment. No `globals: true`: tests
+**Contract** *(revised in Phase 1 — see the RESOLVED note in Critical Implementation
+Details)*: default-exports `defineConfig({ plugins: [tsconfigPaths()], test: { include:
+["src/**/*.test.ts"], environment: "node", env: { TZ: process.env.TZ ?? "UTC" } } })`,
+importing `defineConfig` from `vitest/config` and `tsconfigPaths` from
+`vite-tsconfig-paths`. The plugin derives `@/*` from `tsconfig.json`, so there is **no**
+`resolve.alias` block. `getViteConfig()` was tried first and fails; no triple-slash
+directive and no eslint-disable turned out to be necessary. No `globals: true`: tests
 import `describe` / `it` / `expect` explicitly,
 which avoids both an ESLint globals entry and a tsconfig `types` array (adding `types`
 to a tsconfig that lacks one suppresses automatic `@types` inclusion and would risk
@@ -363,6 +379,14 @@ failure mode requires the non-UTC leg.
 
 **Intent**: Drive the boundary fixture through the season rule table-style, and cover
 the label helpers and the validation path.
+
+**Import the fixture through the `@/` alias, not a relative path** —
+`import { … } from "@/lib/season-boundaries.fixture"`. Alias resolution under Vitest
+depends on the `vite-tsconfig-paths` plugin (see Critical Implementation Details), and
+nothing else in the suite exercises it. One aliased import keeps that wiring covered, so
+if the plugin is ever dropped from `vitest.config.ts` the suite fails loudly with
+`Cannot find package '@/lib/...'` rather than silently losing a capability. The remaining
+test files may keep relative imports.
 
 **Contract**: table-driven over `season-boundaries.fixture`, asserting `getSeason`;
 `selectSeasonInterval` returning the growing interval inside Mar 1–Oct 31 and the
@@ -635,15 +659,15 @@ Not applicable — no schema or data changes. The only migration-shaped concern 
 
 #### Automated
 
-- [x] 1.1 `pnpm install` resolves vitest with no peer warning
-- [x] 1.2 `pnpm test` exits 0 with at least one passing test
-- [x] 1.3 `pnpm lint` passes at zero warnings including vitest.config.ts
-- [x] 1.4 `pnpm build` still succeeds
+- [x] 1.1 `pnpm install` resolves vitest with no peer warning — 31cde19
+- [x] 1.2 `pnpm test` exits 0 with at least one passing test — 31cde19
+- [x] 1.3 `pnpm lint` passes at zero warnings including vitest.config.ts — 31cde19
+- [x] 1.4 `pnpm build` still succeeds — 31cde19
 
 #### Manual
 
-- [x] 1.5 Deliberate break makes `pnpm test` exit non-zero; revert
-- [x] 1.6 `pnpm test:watch` starts and re-runs on save
+- [x] 1.5 Deliberate break makes `pnpm test` exit non-zero; revert — 31cde19
+- [x] 1.6 `pnpm test:watch` starts and re-runs on save — 31cde19
 
 ### Phase 2: Calendar, season, and timezone unit tests
 
@@ -659,6 +683,7 @@ Not applicable — no schema or data changes. The only migration-shaped concern 
 - [ ] 2.5 No assertion in `timezone.test.ts` encodes the binary-search internals
 - [ ] 2.6 Every SQL boundary date has a corresponding fixture row; differences are noted
 - [ ] 2.7 Breaking one fixture boundary case turns the suite red; revert
+- [ ] 2.8 At least one test imports through the `@/` alias, keeping the `vite-tsconfig-paths` wiring covered
 
 ### Phase 3: CI repair
 
