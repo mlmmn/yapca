@@ -8,7 +8,7 @@ import { NumberField, NumberFieldGroup, NumberFieldInput, NumberFieldSuffix } fr
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useBrowserToday } from "@/components/hooks/use-browser-today";
-import { CLIENT_DATE_ERROR_MESSAGE } from "@/lib/date";
+import { CLIENT_DATE_ERROR_MESSAGE, CLIENT_DATE_UNAVAILABLE_MESSAGE, isClientDateRejection } from "@/lib/date";
 import { Input } from "@/components/ui/input";
 import { getSeason, getSeasonLabel, selectSeasonInterval } from "@/lib/season";
 import { isValidPhoto, PHOTO_ACCEPT, PHOTO_GUIDANCE } from "@/lib/photo";
@@ -52,13 +52,14 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
     },
     onSubmit: async ({ value }) => {
       const clientDate = getBrowserToday();
-      const formData = new FormData();
 
       if (clientDate === null) {
-        toast.error(CLIENT_DATE_ERROR_MESSAGE);
+        toast.error(CLIENT_DATE_UNAVAILABLE_MESSAGE);
 
         return;
       }
+
+      const formData = new FormData();
 
       formData.set("name", value.name);
       formData.set("growing_interval_days", String(value.growingIntervalDays));
@@ -79,9 +80,7 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
         const { error } = await actions.addPlant(formData);
 
         if (error) {
-          toast.error(
-            error.code === "BAD_REQUEST" && error.message === CLIENT_DATE_ERROR_MESSAGE ? error.message : message,
-          );
+          toast.error(isClientDateRejection(error) ? CLIENT_DATE_ERROR_MESSAGE : message);
 
           return;
         }

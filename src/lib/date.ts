@@ -1,7 +1,14 @@
 const DATE_STRING_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+// A dedicated code, not the display copy, is the machine-readable marker for a rejected
+// device date: Astro Actions also returns BAD_REQUEST for schema failures, and editing the
+// copy below must never silently reclassify a clock rejection as a generic failure.
+export const CLIENT_DATE_ERROR_CODE = "PRECONDITION_FAILED";
 export const CLIENT_DATE_ERROR_MESSAGE =
   "The device date could not be reconciled. Check your device clock and try again.";
+// Distinct from the rejection above: the browser could not read a local date at all, which
+// a plain retry can resolve, so the copy must not send the user to their clock settings.
+export const CLIENT_DATE_UNAVAILABLE_MESSAGE = "We couldn't determine your local date. Try again.";
 // Hoisted because SSR calls this once per plant row per request, and constructing an
 // Intl.DateTimeFormat is the expensive half of formatting.
 const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
@@ -41,6 +48,10 @@ export function isPlausibleClientDate(candidate: string, utcToday: string): bool
   const dayDifference = Math.abs(toEpochDay(candidate) - toEpochDay(utcToday));
 
   return dayDifference <= 1;
+}
+
+export function isClientDateRejection(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error && error.code === CLIENT_DATE_ERROR_CODE;
 }
 
 export function parseLocalDateString(dateString: string): Date {

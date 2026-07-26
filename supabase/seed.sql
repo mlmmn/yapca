@@ -24,7 +24,9 @@ begin
     updated_at
   )
   values (
-    'f3146e82-3bd4-4f0c-9a71-64c8d5e20100',
+    -- GoTrue scopes single-instance lookups to the nil instance_id. Unlike the ids
+    -- below it never crosses an Action boundary, so z.uuid() does not apply here.
+    '00000000-0000-0000-0000-000000000000',
     v_user_id,
     'authenticated',
     'authenticated',

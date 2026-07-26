@@ -1,5 +1,10 @@
-import { formatShortDate, toEpochDay } from "@/lib/date";
-import { CLIENT_DATE_ERROR_MESSAGE } from "@/lib/date";
+import {
+  CLIENT_DATE_ERROR_CODE,
+  CLIENT_DATE_ERROR_MESSAGE,
+  CLIENT_DATE_UNAVAILABLE_MESSAGE,
+  formatShortDate,
+  toEpochDay,
+} from "@/lib/date";
 import { resolveScheduleChange } from "@/lib/schedule";
 import { getSeasonLabel } from "@/lib/season";
 
@@ -12,15 +17,16 @@ type PreviewInput = {
   newDormancyIntervalDays: number | null;
 };
 
-export type SaveErrorState = "conflict" | "client-date" | "generic";
+export type SaveErrorState = "conflict" | "client-date-unavailable" | "client-date-rejected" | "generic";
 
 export const SAVE_ERROR_MESSAGES: Record<SaveErrorState, string> = {
   conflict: "This plant changed elsewhere. Reload it before saving again.",
-  "client-date": "Your device date could not be reconciled. Check your device clock and try again.",
+  "client-date-unavailable": CLIENT_DATE_UNAVAILABLE_MESSAGE,
+  "client-date-rejected": CLIENT_DATE_ERROR_MESSAGE,
   generic: "We couldn't save these changes. Check your connection and try again.",
 };
 
-export function getSaveErrorState(code: string | undefined, message?: string): SaveErrorState | "not-found" {
+export function getSaveErrorState(code: string | undefined): SaveErrorState | "not-found" {
   if (code === "CONFLICT") {
     return "conflict";
   }
@@ -29,8 +35,8 @@ export function getSaveErrorState(code: string | undefined, message?: string): S
     return "not-found";
   }
 
-  if (code === "BAD_REQUEST" && message === CLIENT_DATE_ERROR_MESSAGE) {
-    return "client-date";
+  if (code === CLIENT_DATE_ERROR_CODE) {
+    return "client-date-rejected";
   }
 
   return "generic";

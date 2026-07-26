@@ -65,7 +65,7 @@ export default function EditPlantForm({
       setSaveError(null);
 
       if (clientDate === null) {
-        setSaveError("client-date");
+        setSaveError("client-date-unavailable");
 
         return;
       }
@@ -88,7 +88,7 @@ export default function EditPlantForm({
         const { error } = await actions.updatePlant(formData);
 
         if (error) {
-          const errorState = getSaveErrorState(error.code, error.message);
+          const errorState = getSaveErrorState(error.code);
 
           if (errorState === "not-found") {
             window.location.assign(`/plants/${plantId}`);

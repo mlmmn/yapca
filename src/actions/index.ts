@@ -5,7 +5,7 @@ import { nextDue } from "@/lib/interval";
 import { buildPhotoPath, isValidPhoto, PHOTO_GUIDANCE } from "@/lib/photo";
 import { selectSeasonInterval } from "@/lib/season";
 import { resolveScheduleChange } from "@/lib/schedule";
-import { CLIENT_DATE_ERROR_MESSAGE, isPlausibleClientDate } from "@/lib/date";
+import { CLIENT_DATE_ERROR_CODE, CLIENT_DATE_ERROR_MESSAGE, isPlausibleClientDate } from "@/lib/date";
 import { getTodayInTimeZone } from "@/lib/timezone";
 
 const photoSchema = z.instanceof(File).refine(isValidPhoto, PHOTO_GUIDANCE);
@@ -24,7 +24,7 @@ function getActionDate(clientDate: string | undefined): string {
   const utcToday = getTodayInTimeZone("UTC");
 
   if (!clientDate || !isPlausibleClientDate(clientDate, utcToday)) {
-    throw new ActionError({ code: "BAD_REQUEST", message: CLIENT_DATE_ERROR_MESSAGE });
+    throw new ActionError({ code: CLIENT_DATE_ERROR_CODE, message: CLIENT_DATE_ERROR_MESSAGE });
   }
 
   return clientDate;

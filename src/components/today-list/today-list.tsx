@@ -4,11 +4,13 @@ import { toast } from "sonner";
 import { Button, LinkButton } from "@/components/ui/button";
 import {
   CLIENT_DATE_ERROR_MESSAGE,
+  CLIENT_DATE_UNAVAILABLE_MESSAGE,
   classifyDueStatus,
   compareDueRecords,
   formatDueLabel,
   formatIntervalLabel,
   formatShortDate,
+  isClientDateRejection,
 } from "@/lib/date";
 import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
 import { getBrowserToday } from "@/lib/timezone";
@@ -132,14 +134,14 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
   }
 
   function handleAction(plant: PlantListItem, kind: ActionKind, keyboard: boolean) {
-    const clientDate = getBrowserToday();
-
     if (pendingIds.has(plant.id)) {
       return;
     }
 
+    const clientDate = getBrowserToday();
+
     if (clientDate === null) {
-      toast.error("We couldn't determine your local date. Try again.", {
+      toast.error(CLIENT_DATE_UNAVAILABLE_MESSAGE, {
         action: {
           label: "Retry",
           onClick: () => {
@@ -178,13 +180,7 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
           showUndoNotice(data as MutationResult, kind, plant, keyboard);
         });
       } catch (error) {
-        const clientDateRejected =
-          typeof error === "object" &&
-          error !== null &&
-          "code" in error &&
-          "message" in error &&
-          error.code === "BAD_REQUEST" &&
-          error.message === CLIENT_DATE_ERROR_MESSAGE;
+        const clientDateRejected = isClientDateRejection(error);
 
         setLeavingIds((current) => updateSet(current, plant.id, false));
         clearPending(plant.id);
@@ -347,33 +343,32 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
       ) : (
         <ul>
           {dueList.map((plant) => {
-            const isLeaving = plant.leaving ?? false;
+            const leaving = plant.leaving ?? false;
             const initial = plant.name.trim().charAt(0).toUpperCase() || "?";
             const dueStatus = classifyDueStatus(plant.next_due_on, today);
-            const isOverdue = dueStatus !== "due-today";
-            const isStrongOverdue = dueStatus === "overdue-strong";
+            const overdue = dueStatus !== "due-today";
+            const stronglyOverdue = dueStatus === "overdue-strong";
             const pending = pendingIds.has(plant.id);
             const scheduleLabel = `${getShortSeasonLabel(getSeason(today))} · then ${formatIntervalLabel(
               selectSeasonInterval(today, plant.growing_interval_days, plant.dormancy_interval_days),
             )}`;
-            const metadataLabel = isOverdue
+            const metadataLabel = overdue
               ? `Overdue · Due ${formatOverdueDate(plant.next_due_on, today)} · ${scheduleLabel}`
               : `${formatDueLabel(plant.next_due_on, today)} · ${scheduleLabel}`;
 
             const linkClasses = cn(
               "col-span-2 -m-3 flex gap-3 p-3 outline-0 focus-visible:after:border-ring focus-visible:after:ring-3 focus-visible:after:ring-ring/50 after:block after:absolute after:inset-0 after:content-[''] after:border after:border-transparent after:transition-all",
             );
-            const metadataClasses = cn("text-sm", isOverdue ? "text-warning-foreground" : "text-muted-foreground");
+            const metadataClasses = cn("text-sm", overdue ? "text-warning-foreground" : "text-muted-foreground");
 
             return (
               <li
                 key={plant.id}
                 className={cn(
                   "border-border relative -mx-4 grid grid-cols-[auto_1fr_auto] items-center gap-3 overflow-hidden border-b px-4 transition-[opacity,max-height,padding,background-color] duration-200 ease-out motion-reduce:transition-none",
-                  isLeaving ? "max-h-0 py-0 opacity-0" : "max-h-40 py-3 opacity-100",
-                  isOverdue &&
-                    (isStrongOverdue ? "bg-warning hover:bg-warning/80" : "bg-warning/20 hover:bg-warning/30"),
-                  !isOverdue && "hover:bg-muted",
+                  leaving ? "max-h-0 py-0 opacity-0" : "max-h-40 py-3 opacity-100",
+                  overdue && (stronglyOverdue ? "bg-warning hover:bg-warning/80" : "bg-warning/20 hover:bg-warning/30"),
+                  !overdue && "hover:bg-muted",
                 )}
               >
                 <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg md:size-14">
@@ -387,13 +382,13 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
                   <a href={`/plants/${plant.id}`} className={linkClasses}>
                     <p className="line-clamp-2 font-medium">{plant.name}</p>
                   </a>
-                  {isOverdue ? (
+                  {overdue ? (
                     <div className="flex flex-wrap items-center gap-1">
                       <span
                         aria-hidden="true"
                         className={cn(
                           "size-4 shrink-0 rounded-full border-2",
-                          isStrongOverdue ? "border-warning-accent bg-warning-accent" : "border-warning-foreground",
+                          stronglyOverdue ? "border-warning-accent bg-warning-accent" : "border-warning-foreground",
                         )}
                       />
                       <span className={cn("line-clamp-1", metadataClasses)}>{metadataLabel}</span>

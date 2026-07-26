@@ -10,7 +10,7 @@ type Props = {
 };
 
 const { growingIntervalDays, dormancyIntervalDays, dueDate, initialToday, mode } = Astro.props;
-const fallback = getSummaryValues(mode, dueDate, growingIntervalDays, dormancyIntervalDays, null);
+const fallback = getSummaryValues(mode, dueDate, growingIntervalDays, dormancyIntervalDays, initialToday);
 ---
 
 <div
@@ -35,13 +35,17 @@ const fallback = getSummaryValues(mode, dueDate, growingIntervalDays, dormancyIn
       dormancyIntervalDays: string;
       dueDate: string;
       growingIntervalDays: string;
+      initialToday: string;
       mode: "active" | "full";
     };
   };
 
   const summaries = [...document.querySelectorAll<SummaryElement>("[data-season-interval-summary]")];
+  // Every summary on a page shares one SSR seed, so the first instance carries it
+  // for the single page-level subscription.
+  const initialToday = summaries[0]?.dataset.initialToday || null;
 
-  subscribeToBrowserToday((today) => {
+  const unsubscribe = subscribeToBrowserToday((today) => {
     for (const summary of summaries) {
       const dueLabel = summary.querySelector<HTMLElement>("[data-due-label]");
       const schedule = summary.querySelector<HTMLElement>("[data-schedule]");
@@ -61,5 +65,10 @@ const fallback = getSummaryValues(mode, dueDate, growingIntervalDays, dormancyIn
         schedule.textContent = values.schedule;
       }
     }
-  });
+  }, initialToday);
+
+  // Hoisted scripts re-run on every swap once a ClientRouter is added, and `summaries`
+  // is a snapshot of the outgoing document. Without this the old subscription keeps its
+  // listeners and timer alive against a detached subtree, once per navigation.
+  document.addEventListener("astro:before-swap", unsubscribe, { once: true });
 </script>
