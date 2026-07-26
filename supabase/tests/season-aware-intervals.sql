@@ -12,8 +12,8 @@ begin
   -- `supabase/seed.sql` has run, and the rollback discards whatever it created.
   insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at)
   values
-    (v_owner_id, 'authenticated', 'authenticated', 'test@yapca.local', crypt('password', gen_salt('bf')), now()),
-    (v_other_id, 'authenticated', 'authenticated', 'other@yapca.local', crypt('password', gen_salt('bf')), now())
+    (v_owner_id, 'authenticated', 'authenticated', 'season-owner@yapca.local', crypt('password', gen_salt('bf')), now()),
+    (v_other_id, 'authenticated', 'authenticated', 'season-other@yapca.local', crypt('password', gen_salt('bf')), now())
   on conflict (id) do nothing;
 
   insert into public.plants (

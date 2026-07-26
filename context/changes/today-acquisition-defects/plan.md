@@ -378,14 +378,14 @@ Atomic deployment does not close the skew, because the surface that skews is the
 
 #### Automated
 
-- [ ] 3.1 Exact CI validation sequence passes locally
-- [ ] 3.2 Plan and deployment documentation format cleanly
-- [ ] 3.3 Database season-boundary verification passes
+- [x] 3.1 Exact CI validation sequence passes locally
+- [x] 3.2 Plan and deployment documentation format cleanly
+- [x] 3.3 Database season-boundary verification passes
 
 #### Manual
 
-- [ ] 3.4 Local workerd verification covers cookie-less first paint, hydrated correction, and no corrective document reload
-- [ ] 3.5 In current-date UTC− and UTC+ browser scenarios where the local day differs from UTC, every relative surface and dated mutation agrees on the browser-local day
-- [ ] 3.6 Persisted plants and journal rows confirm all four dated mutations use the browser-local action date
-- [ ] 3.7 Test-plan wording clearly separates automated pure-math coverage from manual runtime coverage debt
-- [ ] 3.8 Deployment documentation describes the current app while keeping production deployment outside this change
+- [x] 3.4 Local workerd verification covers cookie-less first paint, hydrated correction, and no corrective document reload
+- [x] 3.5 In current-date UTC− and UTC+ browser scenarios where the local day differs from UTC, every relative surface and dated mutation agrees on the browser-local day
+- [x] 3.6 Persisted plants and journal rows confirm all four dated mutations use the browser-local action date
+- [x] 3.7 Test-plan wording clearly separates automated pure-math coverage from manual runtime coverage debt
+- [x] 3.8 Deployment documentation describes the current app while keeping production deployment outside this change

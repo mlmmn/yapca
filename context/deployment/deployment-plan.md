@@ -1,34 +1,50 @@
-# First Deployment — YAPCA on Cloudflare Workers
+# Deployment Record — YAPCA on Cloudflare Workers
 
 ## Context
 
-YAPCA is scaffolded and ready but has never been deployed. `context/foundation/infrastructure.md`
-selects **Cloudflare Workers** as the target and its "Getting Started" section is the runbook;
-`tech-stack.md` confirms Astro 6 + `@astrojs/cloudflare` on workerd with Supabase auth.
+`context/foundation/infrastructure.md` selects **Cloudflare Workers** as the
+target and its "Getting Started" section is the runbook; `tech-stack.md`
+confirms Astro 6 + `@astrojs/cloudflare` on workerd with Supabase auth.
 
 Goal: get the app live on a `*.workers.dev` URL via a **manual** `wrangler deploy`, backed by the
 user's **hosted Supabase** project so auth works. Per decision: **no GitHub Actions / CI wiring**
 this pass — deploy stays manual.
 
-Current state (verified):
+## Historical first-deploy baseline
+
+The following describes the initial deployment plan and the application state
+at that time. It is retained as an operational record, not a description of
+the current app.
 - Adapter/config correct: `output: "server"`, `@astrojs/cloudflare` v13, and `wrangler.jsonc`
   already has `compatibility_flags: ["nodejs_compat"]` + `compatibility_date: "2026-05-08"` and
   `observability.enabled` — the load-bearing baseline from the risk register is present.
 - Cloudflare authenticated (`wrangler whoami` OK); GitHub repo `mlmmn/yapca` exists.
-- App is a skeleton: `src/pages/index.astro` renders "yapca"; auth API routes
+- App was a skeleton: `src/pages/index.astro` rendered "yapca"; auth API routes
   (`src/pages/api/auth/{signin,signup,signout}.ts`) exist; `PROTECTED_ROUTES` is empty; no
   migrations. `src/lib/supabase.ts` returns `null` when env is unset (graceful).
 
-Only real gap for a working deploy: the Worker name is still the starter default, and the hosted
-Supabase secrets aren't set on the Worker.
+The remaining gap for that first deploy was the starter Worker name and the
+hosted Supabase secrets.
 
-## Out of scope (this pass)
+## Verified current state — 2026-07-26
 
-- `.github/workflows/ci.yml` — currently targets `master` (repo default is `main`) and uses
-  `npm`. It won't trigger and is harmless. Left untouched per "no GitHub Actions for now." Noted
-  here as a known follow-up.
-- Preview/PR deploy jobs, Cloudflare API token, GitHub secrets.
-- Schema/migrations (none exist; skeleton app).
+The current production app is deployed at
+`https://yapca.mlmmn.workers.dev`. It includes the current UI, protected
+routes, applied migrations, and middleware date resolution. The historical
+skeleton description above must not be used to assess the live app.
+
+Production deployment remains a manual `pnpx wrangler deploy` operation.
+Rollback remains code-only with `pnpx wrangler rollback [<version-id>]`; it
+does not revert database changes. Automated deployment is intentionally out
+of scope for this record.
+
+## Out of scope
+
+- `.github/workflows/ci.yml` — currently targets `master` (repo default is
+  `main`) and uses `npm`. It will not trigger and remains untouched because
+  no GitHub Actions work is in scope.
+- Automated deploy jobs, preview deploys, Cloudflare API tokens, and GitHub
+  deployment secrets.
 
 ## Phase 1 — Prep & config
 
@@ -66,9 +82,9 @@ Supabase secrets aren't set on the Worker.
       Positive cookie-set path left for a real test user.)_
 - [x] `pnpx wrangler tail` shows no `nodejs_compat`/`@supabase/ssr` runtime errors on first requests.
 
-## Notes / risks (from infrastructure.md)
+## Operational notes / risks (from infrastructure.md)
 
 - Rollback is `pnpx wrangler rollback [<version-id>]` (last 100 versions) — code only, not DB.
 - Retained logs aren't on by default; `wrangler tail` is live-only.
-- Follow-up (not now): fix + wire `ci.yml` for auto-deploy-on-merge (branch `main`, pnpm, deploy
-  job + CF API token) when CI is wanted.
+- Future deployment automation requires a separate, explicitly authorised
+  change.

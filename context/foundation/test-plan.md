@@ -75,7 +75,7 @@ Revisit per §8.
 
 | Risk | What would prove protection                                                                                                                                 | Must challenge                                                                                                                                            | Context `/10x-research` must ground                                                                                                       | Likely cheapest layer                                              | Anti-pattern to avoid                                                                                             |
 | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| #1   | Given a user in a non-UTC zone at a boundary hour (e.g. 23:30 local, already the next day in UTC), every surface agrees on the same "today" and the same due / not-due verdict | That one canonical date helper exists — the lessons register says it did not. Also: "it works in the dev server" does not imply "it works on workerd" (`Date`/`Intl` differ) | Where the calendar date is authoritative (browser vs Worker), how the user's timezone reaches the server, which surfaces compute it independently | unit (pure date functions, fixed clock + fixed timezone)           | Running tests in the machine's ambient timezone — the test then passes only in the author's zone and proves nothing |
+| #1   | Given a user in a non-UTC zone at a boundary hour (e.g. 23:30 local, already the next day in UTC), every surface agrees on the same "today" and the same due / not-due verdict | That one canonical date helper exists — the lessons register says it did not. Also: "it works in the dev server" does not imply "it works on workerd" (`Date`/`Intl` differ) | Where the calendar date is authoritative (browser vs Worker), how the user's timezone reaches the server, which surfaces compute it independently | unit for pure calendar rules; manual workerd matrix for current-date runtime wiring | Treating pure unit coverage as proof that middleware, hydration, Actions, and workerd agree; or running tests in the machine's ambient timezone |
 | #2   | Given plants due today, overdue by 1 day, and overdue by 30 days, all three appear on the list; given a plant not yet due, it does not                       | That an empty list means "nothing due" — it may mean the query silently filtered everything out. Assert the expected set is present, not merely that no error was thrown | How the due / overdue set is derived (database predicate vs in-memory filter), what the boundary comparison is, whether overdue has an upper bound | integration (seeded database → derived list)                        | Asserting the list equals whatever the current implementation returns — a tautology that green-lights the bug        |
 | #3   | After editing name, both intervals, and photo, re-reading the plant returns every edited field intact, and the next-due date matches the documented recalculation from the last actual watering | That a successful save means nothing was lost — a dropped field also saves successfully. Assert the full record, not just the field you changed          | What recalculation rule applies on interval change, whether a partial update can null unedited columns, how "replace photo" differs from "keep photo" | integration (edit → full re-read)                                   | Asserting only the changed field; the data-loss defect lives in the fields you did not touch                        |
 | #4   | Postpone shifts exactly +2 days and the task still appears on the list; undo restores the *previous* due date, and journal and schedule agree afterward      | That a 2xx from the mutation means the resulting state is correct. Also that undo is idempotent — a double undo must not walk backwards twice              | The mutation surface's contract, what the journal records, how undo identifies the event to reverse, whether postpone mutates the base interval | integration (mutation → re-read state + journal)                    | Testing postpone and undo in isolation only — the defect lives in the *sequence* (water → undo → postpone → undo)    |
@@ -107,6 +107,22 @@ reuse that seeded-database harness instead of building a bespoke one.
 Phase 4 carries the lowest impact × likelihood pair and part of its signal
 is genuinely manual, so it earns the least budget. Phase 5 is meaningless
 before there are tests to gate on.
+
+### Risk #1 coverage status
+
+Phase 1's unit suite protects pure calendar rules, including fixed-clock
+TypeScript checks for historical season boundaries. The existing SQL
+season-boundary suite is the database-side counterpart for those historical
+dates. Neither proves that middleware, hydration, Astro Actions, and workerd
+agree on a browser-local current day.
+
+The current-date runtime wiring is protected by the manual workerd matrix in
+`context/changes/today-acquisition-defects/`: cookie-less first paint,
+hydrated correction, no corrective reload, UTC− and UTC+ agreement across
+relative surfaces, and persisted Action dates. A historical
+browser-to-Action-to-database boundary run remains deferred integration
+coverage. Browser lifecycle coverage is accepted CI debt until the existing
+freshness trigger justifies introducing a browser layer.
 
 ## 4. Stack
 
@@ -221,7 +237,7 @@ should respect these unless the underlying assumption changes.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-07-25
+- Strategy (§1–§5) last reviewed: 2026-07-26
 - Stack versions last verified: 2026-07-25
 - AI-native tool references last verified: 2026-07-25
 

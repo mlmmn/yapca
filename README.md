@@ -72,4 +72,4 @@ pnpm build
 pnpx wrangler deploy
 ```
 
-Set `SUPABASE_URL` and `SUPABASE_KEY` as Worker secrets via `npx wrangler secret put` or the Cloudflare dashboard.
+Set `SUPABASE_URL` and `SUPABASE_KEY` as Worker secrets via `pnpx wrangler secret put` or the Cloudflare dashboard.
