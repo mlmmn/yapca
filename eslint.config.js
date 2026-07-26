@@ -9,6 +9,7 @@ import eslintPluginReactHooks from "eslint-plugin-react-hooks";
 import path from "node:path";
 import tseslint from "typescript-eslint";
 import stylistic from "@stylistic/eslint-plugin";
+import vitestPlugin from "@vitest/eslint-plugin";
 
 const gitignorePath = path.resolve(import.meta.dirname, ".gitignore");
 
@@ -163,10 +164,14 @@ const shadcnUiConfig = tseslint.config({
 const testConfig = tseslint.config({
   // Test files intentionally use assertion-focused idioms that are not production code patterns.
   files: ["**/*.test.ts", "**/*.test.tsx"],
+  plugins: {
+    vitest: vitestPlugin,
+  },
   rules: {
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/unbound-method": "off",
     "react/no-multi-comp": "off",
+    "vitest/consistent-test-it": ["error", { fn: "test", withinDescribe: "test" }],
   },
 });
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
   classifyDueStatus,
   compareDueRecords,
@@ -11,38 +11,70 @@ import {
   toEpochDay,
 } from "./date";
 
-describe("date primitives", () => {
-  it.each(["1970-01-01", "2024-02-29", "2025-01-01"])("round-trips %s", (dateString) => {
+// Paired rather than split: every assertion here exercises both directions.
+describe("toEpochDay and fromEpochDay", () => {
+  test.each(["1970-01-01", "2024-02-29", "2025-01-01"])("round-trips %s", (dateString) => {
     const epochDay = toEpochDay(dateString);
 
     expect(fromEpochDay(epochDay)).toBe(dateString);
   });
 
-  it("validates calendar dates rather than only their shape", () => {
+  // The round-trips above only pin symmetry: a sign or offset error shared by
+  // both functions cancels out. These anchor the scale to an absolute origin.
+  test("anchors epoch day zero to 1970-01-01", () => {
+    expect(toEpochDay("1970-01-01")).toBe(0);
+    expect(fromEpochDay(0)).toBe("1970-01-01");
+    expect(toEpochDay("1970-01-02")).toBe(1);
+    expect(toEpochDay("1969-12-31")).toBe(-1);
+  });
+});
+
+describe("isValidDateString", () => {
+  test("validates calendar dates rather than only their shape", () => {
     expect(isValidDateString("2028-02-29")).toBe(true);
     expect(isValidDateString("2026-02-30")).toBe(false);
     expect(isValidDateString("2026-13-01")).toBe(false);
     expect(isValidDateString("2026-2-01")).toBe(false);
   });
+});
 
-  it("formats dates and due labels", () => {
+describe("parseLocalDateString", () => {
+  // 2026-03-08 is the America/New_York spring-forward date: this is the one
+  // function in the module that builds an ambient-local Date, so it is the only
+  // place a parse could drift by a day. Inert under TZ=UTC by construction; it
+  // earns its keep on the America/New_York test leg.
+  test("names the same calendar day it was given", () => {
     const localDate = parseLocalDateString("2026-03-08");
 
     expect(localDate.getFullYear()).toBe(2026);
     expect(localDate.getMonth()).toBe(2);
     expect(localDate.getDate()).toBe(8);
+  });
+});
+
+describe("formatShortDate", () => {
+  test("names the same calendar day it was given", () => {
     expect(formatShortDate("2026-03-08")).toBe("8 Mar");
+  });
+});
+
+describe("formatDueLabel", () => {
+  test("says 'today' only when the due date is today", () => {
     expect(formatDueLabel("2026-03-08", null)).toBe("Due 8 Mar");
     expect(formatDueLabel("2026-03-08", "2026-03-08")).toBe("Due today");
     expect(formatDueLabel("2026-03-08", "2026-03-07")).toBe("Due 8 Mar");
   });
+});
 
-  it("formats interval labels in singular and plural", () => {
+describe("formatIntervalLabel", () => {
+  test("formats interval labels in singular and plural", () => {
     expect(formatIntervalLabel(1)).toBe("Every 1 day");
     expect(formatIntervalLabel(2)).toBe("Every 2 days");
   });
+});
 
-  it("orders due records by date and then name", () => {
+describe("compareDueRecords", () => {
+  test("orders due records by date and then name", () => {
     const first = { next_due_on: "2026-03-08", name: "Fern" };
     const second = { next_due_on: "2026-03-08", name: "Aloe" };
     const later = { next_due_on: "2026-03-09", name: "Aloe" };
@@ -51,7 +83,16 @@ describe("date primitives", () => {
     expect(compareDueRecords(second, later)).toBeLessThan(0);
   });
 
-  it.each([
+  // Without the tie case, a swapped localeCompare plus a sign flip survives.
+  test("treats identical date and name as equal", () => {
+    const record = { next_due_on: "2026-03-08", name: "Aloe" };
+
+    expect(compareDueRecords(record, { ...record })).toBe(0);
+  });
+});
+
+describe("classifyDueStatus", () => {
+  test.each([
     ["2026-03-08", "2026-03-08", "due-today"],
     ["2026-03-07", "2026-03-08", "overdue"],
     ["2026-03-06", "2026-03-08", "overdue"],
@@ -61,7 +102,7 @@ describe("date primitives", () => {
     expect(classifyDueStatus(dueDate, today)).toBe(status);
   });
 
-  it("rejects future and invalid due dates", () => {
+  test("rejects future and invalid due dates", () => {
     expect(() => classifyDueStatus("2026-03-09", "2026-03-08")).toThrow(RangeError);
     expect(() => classifyDueStatus("2026-02-30", "2026-03-08")).toThrow(RangeError);
     expect(() => classifyDueStatus("2026-03-08", "bad-date")).toThrow(RangeError);

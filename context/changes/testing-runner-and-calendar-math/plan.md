@@ -82,11 +82,11 @@ runs `--max-warnings=0`, and lint-staged (`package.json:70-77`) sweeps
 `pnpm test` runs a green suite covering all five pure `src/lib/` modules and exits
 non-zero when an assertion is broken. The same command runs in GitHub Actions on every
 pull request to `main`, in a workflow that has been observed both passing and failing.
-The season boundary dates live in one exported fixture that is authoritative for the
-TypeScript season rule. Test-plan Phase 2 must reconcile
-`supabase/tests/season-aware-intervals.sql` against it — either by importing the
-fixture into a TypeScript harness or deriving the SQL cases from it — rather than
-adding a third copy. `context/foundation/test-plan.md` §6.1 tells the next contributor
+The season boundary dates live in one table that is authoritative for the TypeScript
+season rule — the `SEASON_BOUNDARIES` constant in `src/lib/season.test.ts`. Test-plan
+Phase 2 must reconcile `supabase/tests/season-aware-intervals.sql` against it — by
+lifting the table into a TypeScript harness or deriving the SQL cases from it — rather
+than adding a third copy. `context/foundation/test-plan.md` §6.1 tells the next contributor
 how to add a unit test here, and the three plumbing defects research surfaced have
 their own change folder rather than decaying inside an appendix.
 
@@ -228,7 +228,7 @@ importing `defineConfig` from `vitest/config` and `tsconfigPaths` from
 `vite-tsconfig-paths`. The plugin derives `@/*` from `tsconfig.json`, so there is **no**
 `resolve.alias` block. `getViteConfig()` was tried first and fails; no triple-slash
 directive and no eslint-disable turned out to be necessary. No `globals: true`: tests
-import `describe` / `it` / `expect` explicitly,
+import `describe` / `test` / `expect` explicitly,
 which avoids both an ESLint globals entry and a tsconfig `types` array (adding `types`
 to a tsconfig that lacks one suppresses automatic `@types` inclusion and would risk
 Astro's ambient types).
@@ -250,6 +250,21 @@ the final `tseslint.config(...)` call after `shadcnUiConfig`. Carries a comment
 explaining the rationale, following the `shadcnUiConfig` precedent at
 `eslint.config.js:153-161`.
 
+**EXTENDED (Phase 2, at the maintainer's explicit request during impl-review triage):
+the block also *enables* one rule.** `@vitest/eslint-plugin` was added as a devDependency
+and registered on this block alone, carrying
+`"vitest/consistent-test-it": ["error", { fn: "test", withinDescribe: "test" }]` — the
+maintainer prefers `test` over `it`. This goes beyond the "three explicitly granted
+rules" boundary in What We're NOT Doing, which forbade *relaxations*; this is an added
+restriction, requested directly on 2026-07-26. **This note is the record of that
+authorization** — AGENTS.md forbids unilateral ESLint config changes, and the maintainer
+chose to keep the justification here rather than as a comment in `eslint.config.js`.
+
+`withinDescribe` is **not** optional here. It defaults to `"it"`, and every test in this
+repo lives inside a `describe`, so setting only `fn` would have enforced the opposite of
+the intent. Verified in both directions: reintroducing `it` in `interval.test.ts` fails
+`pnpm lint` at exit **1**, and the revert returns it to exit 0.
+
 #### 4. Smoke test
 
 **File**: `src/lib/interval.test.ts` (new)
@@ -257,7 +272,7 @@ explaining the rationale, following the `shadcnUiConfig` precedent at
 **Intent**: Prove the wiring with a genuinely useful assertion rather than a throwaway
 — `nextDue` across a month end. Phase 2 expands this file rather than replacing it.
 
-**Contract**: explicit `import { describe, it, expect } from "vitest"`; imports
+**Contract**: explicit `import { describe, test, expect } from "vitest"`; imports
 `nextDue` from `./interval`. Co-located flat beside the module it tests — the AGENTS.md
 "one folder per component" rule governs components, not `src/lib/` helpers, which are
 already flat siblings. Kebab-case is satisfied.
@@ -293,7 +308,8 @@ existing SQL boundary cases.
 
 #### 1. Shared season boundary fixture
 
-**File**: `src/lib/season-boundaries.fixture.ts` (new)
+**File**: `src/lib/season.test.ts` — a module-level constant, not a separate file
+*(see the INLINED note at the end of this item)*
 
 **Intent**: Make the fixture the authoritative table for the TypeScript season rule.
 Test-plan Phase 2 must reconcile `supabase/tests/season-aware-intervals.sql` against it
@@ -326,9 +342,28 @@ mirror the SQL cases and would catch a future day-level boundary — but say in 
 that they guard a *possible* day-granular rule rather than exercising distinct branches
 today, so a later reader does not mistake row count for branch coverage.
 
-Not a `*.test.ts` file, so it is excluded from Vitest's `include` and from the test-file
-ESLint override — keep it a plain typed constant that passes the standard config.
 Names follow the AGENTS.md rule that non-function names never start with a verb.
+
+**INLINED (Phase 2, by impl-review triage): the table is a module-level constant in
+`src/lib/season.test.ts`, not a file of its own.** Two earlier drafts placed it in a
+separate module — first flat as `src/lib/season-boundaries.fixture.ts`, then in a
+`src/lib/fixtures/` directory. Both were rejected: the table has exactly one consumer and
+no expectation of a second, and `tsconfig.json`'s `include: ["**/*"]` typechecks any such
+file as ordinary app code, so a standalone module carried a shipping risk that a
+test-local constant does not have. Living inside a `*.test.ts` file also puts it under the
+test-file ESLint override rather than the strict config, which is the correct scope for
+test data.
+
+Two consequences to carry forward:
+
+- **Criterion 2.8 needs a different anchor.** The fixture's `@/`-aliased import was the
+  suite's only exercise of the `vite-tsconfig-paths` wiring. `season.test.ts` therefore
+  imports the module under test as `@/lib/season` rather than `./season`, with a comment
+  saying why, so dropping the plugin still fails the suite loudly.
+- **Test-plan Phase 2 must lift the table out when it needs it.** The reconciliation
+  obligation is unchanged — that phase reconciles `season-aware-intervals.sql` against
+  this table by moving it into a shared harness or deriving the SQL cases from it, never
+  by adding a third copy. A comment above the constant records this.
 
 #### 2. Date primitives and formatting
 
@@ -362,16 +397,23 @@ Phase 3 adds.
 local-time arithmetic.
 
 **Contract**: `nextDue` across a month end, across leap-day Feb 29, across a year wrap,
-at interval 1 and 365, and across a DST spring-forward date — the last being the
+at interval 1 and 365, and across a DST **fall-back** date — the last being the
 property `interval.ts:3-6` claims in its doc comment and nothing currently proves.
 
-**The DST case only has teeth in a DST-having zone.** `nextDue` is a single epoch-day
-addition (`interval.ts:8`), so the assertion passes unconditionally today; the regression
-it guards against is someone rewriting it onto local-time `Date` objects, and that
-rewrite would still pass under `TZ=UTC`. Phase 3's `TZ=America/New_York` leg is what
-makes this case real — pick a spring-forward date in *that* zone
-(e.g. `2026-03-08`), and note in a comment that the case is a regression guard whose
-failure mode requires the non-UTC leg.
+**The DST case only has teeth in a DST-having zone, and only on fall-back.** `nextDue` is
+a single epoch-day addition (`interval.ts:8`), so the assertion passes unconditionally
+today; the regression it guards against is someone rewriting it onto local-time `Date`
+objects, and that rewrite would still pass under `TZ=UTC`. Phase 3's
+`TZ=America/New_York` leg is what makes this case real.
+
+**CORRECTED (Phase 2, confirmed by impl-review): the date must be a fall-back date, not
+spring-forward.** An earlier draft said `2026-03-08` (spring-forward). Reproduced directly
+against the naive local-time rewrite under `TZ=America/New_York`: `2026-03-08 +1` yields
+`2026-03-09` and **passes**, because a 23-hour day makes millisecond addition overshoot
+past the next local midnight onto the correct date. Only a 25-hour fall-back day pulls the
+result back into the same calendar day: `2026-11-01 +1` yields `2026-11-01` and **fails**,
+detecting the bug. Use `2026-11-01`; note in a comment that the case is a regression guard
+whose failure mode requires both the non-UTC leg and a fall-back date.
 
 #### 4. Season selection
 
@@ -380,15 +422,17 @@ failure mode requires the non-UTC leg.
 **Intent**: Drive the boundary fixture through the season rule table-style, and cover
 the label helpers and the validation path.
 
-**Import the fixture through the `@/` alias, not a relative path** —
-`import { … } from "@/lib/season-boundaries.fixture"`. Alias resolution under Vitest
-depends on the `vite-tsconfig-paths` plugin (see Critical Implementation Details), and
-nothing else in the suite exercises it. One aliased import keeps that wiring covered, so
-if the plugin is ever dropped from `vitest.config.ts` the suite fails loudly with
+**Import the module under test through the `@/` alias, not a relative path** —
+`import { … } from "@/lib/season"`. Alias resolution under Vitest depends on the
+`vite-tsconfig-paths` plugin (see Critical Implementation Details), and nothing else in
+the suite exercises it. One aliased import keeps that wiring covered, so if the plugin is
+ever dropped from `vitest.config.ts` the suite fails loudly with
 `Cannot find package '@/lib/...'` rather than silently losing a capability. The remaining
-test files may keep relative imports.
+test files may keep relative imports. *(An earlier draft anchored this on the fixture's
+import; the fixture is now inline — see the INLINED note in item 1 — so the anchor moved
+to the module import.)*
 
-**Contract**: table-driven over `season-boundaries.fixture`, asserting `getSeason`;
+**Contract**: table-driven over the inline `SEASON_BOUNDARIES` constant, asserting `getSeason`;
 `selectSeasonInterval` returning the growing interval inside Mar 1–Oct 31 and the
 dormancy interval outside it, with **distinguishable** interval values so a swapped
 return cannot pass; `getSeasonLabel` / `getShortSeasonLabel`; and `RangeError` on an
@@ -544,7 +588,7 @@ three places the plan describes Phase 1 as unfinished.
 **Contract**: §6.1 replaces "TBD — see §3 Phase 1" with the concrete pattern — file
 placement and naming, explicit `vitest` imports over globals, passing `now`/date strings
 explicitly rather than relying on ambient `TZ`, the table-driven boundary form, and a
-pointer to `season-boundaries.fixture.ts`. §3 Phase 1 Status moves to its completed
+pointer to the `SEASON_BOUNDARIES` table in `src/lib/season.test.ts`. §3 Phase 1 Status moves to its completed
 value. §4's unit+integration row names `vitest 4.1.10` with a `checked:` date. §5's
 `unit` gate row reflects that it is now genuinely enforced.
 
@@ -616,7 +660,7 @@ against, so intent must be decided before it is planned.
 
 None in this change. The TS↔SQL parity assertion, `postpone = +2`, and the undo
 staleness guard are handed to test-plan Phase 2. That phase must reconcile
-`season-aware-intervals.sql` with `season-boundaries.fixture.ts` — either by importing
+`season-aware-intervals.sql` with the `SEASON_BOUNDARIES` table in `src/lib/season.test.ts` — either by importing
 the fixture into a TypeScript harness or deriving the SQL cases from it — rather than
 adding a third boundary table.
 
@@ -673,17 +717,17 @@ Not applicable — no schema or data changes. The only migration-shaped concern 
 
 #### Automated
 
-- [x] 2.1 `pnpm test` exits 0 across all five `src/lib/` modules
-- [x] 2.2 `TZ=America/New_York pnpm test` exits 0
-- [x] 2.3 `pnpm lint` passes at zero warnings across all new files
-- [x] 2.4 `pnpm build` still succeeds
+- [x] 2.1 `pnpm test` exits 0 across all five `src/lib/` modules — a6233c2
+- [x] 2.2 `TZ=America/New_York pnpm test` exits 0 — a6233c2
+- [x] 2.3 `pnpm lint` passes at zero warnings across all new files — a6233c2
+- [x] 2.4 `pnpm build` still succeeds — a6233c2
 
 #### Manual
 
-- [ ] 2.5 No assertion in `timezone.test.ts` encodes the binary-search internals
-- [ ] 2.6 Every SQL boundary date has a corresponding fixture row; differences are noted
-- [ ] 2.7 Breaking one fixture boundary case turns the suite red; revert
-- [ ] 2.8 At least one test imports through the `@/` alias, keeping the `vite-tsconfig-paths` wiring covered
+- [x] 2.5 No assertion in `timezone.test.ts` encodes the binary-search internals — a6233c2
+- [x] 2.6 Every SQL boundary date has a corresponding fixture row; differences are noted — a6233c2
+- [x] 2.7 Breaking one fixture boundary case turns the suite red; revert — a6233c2
+- [x] 2.8 At least one test imports through the `@/` alias, keeping the `vite-tsconfig-paths` wiring covered — a6233c2
 
 ### Phase 3: CI repair
 

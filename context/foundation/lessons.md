@@ -22,3 +22,10 @@
 - **Problem**: Automated checks, including CI, can fail even when command output appears successful if the command’s non-zero exit status is overlooked.
 - **Rule**: Always check the command’s status code and treat any non-zero result as an error.
 - **Applies to**: implement, impl-review
+
+## Name test describe blocks after the function under test, not the module
+
+- **Context**: Unit tests for utility/helper modules under `src`. Not component tests.
+- **Problem**: A top-level `describe` named after the module repeats what the filename already says: it adds a level to every reporter line and every failure name while discriminating nothing. In a file covering several exports it also flattens distinct functions into one undifferentiated list of `it`s.
+- **Rule**: Name `describe` blocks after the function under test. A file covering several exports has several **sibling top-level** `describe`s — one per function — and no module-level wrapper around them. Reserve nesting for grouping cases *within* one function, never for the module.
+- **Applies to**: plan, plan-review, implement, impl-review
