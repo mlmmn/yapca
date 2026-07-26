@@ -1,7 +1,7 @@
 ---
 change_id: testing-runner-and-calendar-math
 title: Testing runner and calendar math
-status: implementing
+status: impl_reviewed
 created: 2026-07-26
 updated: 2026-07-26
 archived_at: null

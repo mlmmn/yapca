@@ -515,6 +515,15 @@ implementer must confirm which one before starting:
   extra commits and a red run in `main`'s history. That is an acceptable price only if
   the user accepts it up front.
 
+**AUTHORIZED (Phase 3): the maintainer chose the pull-request path on 2026-07-26**,
+explicitly authorizing branch `testing-runner-and-calendar-math-ci-repair`. This note is
+the record of that authorization — AGENTS.md forbids creating a branch unilaterally, and
+the Prerequisite above states this plan is not itself that permission. PR #2 carried the
+repair plus the deliberate break (`0679a30`) and its revert (`b9b33f2`), so `main`'s
+history never held a knowingly-red commit; the branch tree that CI observed green is
+byte-identical to `7dfebe6` on `main`. The PR was closed rather than merged and the
+branch deleted after the commits landed on `main` directly.
+
 **What this phase does not buy: deployment gating.** There is no deploy job in
 `.github/workflows/` — deployment is driven outside GitHub Actions, so a red CI run does
 not block it. Making a failing check actually prevent a deploy needs branch protection /
