@@ -733,15 +733,15 @@ Not applicable — no schema or data changes. The only migration-shaped concern 
 
 #### Automated
 
-- [x] 3.1 CI's command sequence, including both test legs, each exits 0 locally
-- [x] 3.2 `gh run list --workflow=ci.yml` reports at least one run and no `master` trigger remains
+- [x] 3.1 CI's command sequence, including both test legs, each exits 0 locally — 7dfebe6
+- [x] 3.2 `gh run list --workflow=ci.yml` reports at least one run and no `master` trigger remains — 7dfebe6
 
 #### Manual
 
-- [x] 3.3 The first push (PR or direct to `main`) shows CI checks running
-- [x] 3.4 `setup-node` resolves the pnpm cache without a lockfile error
-- [x] 3.5 Deliberate break turns the job red at `pnpm test`; revert to green
-- [x] 3.6 `lint` and `build` pass in CI for the first time
+- [x] 3.3 The first push (PR or direct to `main`) shows CI checks running — 7dfebe6
+- [x] 3.4 `setup-node` resolves the pnpm cache without a lockfile error — 7dfebe6
+- [x] 3.5 Deliberate break turns the job red at `pnpm test`; revert to green — 7dfebe6
+- [x] 3.6 `lint` and `build` pass in CI for the first time — 7dfebe6
 
 ### Phase 4: Documentation and defect hand-off
 
