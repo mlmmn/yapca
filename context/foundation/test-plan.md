@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-07-25
+> Last updated: 2026-07-26
 
 ## 1. Strategy
 
@@ -92,7 +92,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | #   | Phase name                     | Goal (one line)                                                                                            | Risks covered | Test types                                    | Status      | Change folder |
 | --- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------- | ----------- | ------------- |
-| 1   | Runner bootstrap + calendar math | Every surface agrees on "today"; boundary dates select the documented interval                             | #1, #6        | test-runner setup, unit                       | change opened | `context/changes/testing-runner-and-calendar-math/` |
+| 1   | Runner bootstrap + calendar math | Every surface agrees on "today"; boundary dates select the documented interval                             | #1, #6        | test-runner setup, unit                       | completed | `context/changes/testing-runner-and-calendar-math/` |
 | 2   | Task-list and mutation integrity | No due or overdue task is silently dropped; water / postpone / undo sequences leave schedule and journal consistent; edits lose nothing | #2, #3, #4    | integration                                   | not started | —             |
 | 3   | Per-account isolation          | User B cannot reach User A's data by direct id, on any operation                                            | #5            | contract / integration                        | not started | —             |
 | 4   | Photo upload boundary          | A phone-shaped upload is retrievable afterward, or fails visibly                                            | #7            | integration, documented manual device smoke   | not started | —             |
@@ -115,7 +115,7 @@ The classic test base for this project. AI-native tools (if any) carry a
 
 | Layer                | Tool                                              | Version | Notes                                                                                                                     |
 | -------------------- | ------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------- |
-| unit + integration   | none yet — see §3 Phase 1                         | —       | Recommended: Vitest configured via `getViteConfig()` from `astro/config`, the official Astro path; loads the real Astro config so the `@/*` alias and `astro:env` resolve in tests without duplication. checked: 2026-07-25 |
+| unit + integration   | Vitest                                             | 4.1.10  | Configured for Node with `vite-tsconfig-paths`, which derives the `@/*` alias from `tsconfig.json`; the suite runs in UTC and in `America/New_York` in CI. checked: 2026-07-26 |
 | Astro component render | none yet — optional, no phase claims it          | —       | Astro Container API (`experimental_AstroContainer`) exists if `.astro` components ever need rendering. Not scheduled — §7 excludes the UI layer. checked: 2026-07-25 |
 | integration substrate | local Supabase stack (`pnpx supabase start`)     | CLI 2.x | Already a devDependency. Requires Docker. The seeded-database harness for §3 Phases 2–4.                                    |
 | API mocking          | none — deliberate                                  | —       | The external boundary here is Supabase, and the local stack is real. Mocking it would test the mock (see §2 Risk #7 anti-pattern). |
@@ -139,7 +139,7 @@ phase lands; before that, the gate is planned.
 | Gate                          | Where                | Required?                    | Catches                                                          |
 | ----------------------------- | -------------------- | ---------------------------- | ---------------------------------------------------------------- |
 | lint + typecheck              | local (husky) + CI   | required — already wired      | syntactic and type drift                                          |
-| unit                          | local + CI           | required after §3 Phase 1     | calendar and interval math regressions                            |
+| unit                          | local + CI           | required — enforced           | calendar and interval math regressions                            |
 | integration                   | local + CI           | required after §3 Phase 2     | task-list omissions, mutation and recalculation defects           |
 | per-account isolation         | CI on PR             | required after §3 Phase 3     | cross-user data access                                            |
 | migration safety              | CI on PR             | required after §3 Phase 5     | migrations that drop or orphan existing rows                      |
@@ -153,10 +153,21 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.1 Adding a unit test
 
-TBD — see §3 Phase 1. Will cover the pattern for asserting a calendar or
-interval outcome under a fixed clock and a fixed timezone (Risk #1), and
-the table-driven form for season-boundary dates including a leap year
-(Risk #6).
+Place pure-library tests beside the module they cover, using the
+`src/lib/<module>.test.ts` name. Import `describe`, `expect`, and `test`
+explicitly from `vitest`; globals are intentionally disabled. Name each top-level
+`describe` after the function under test, not after the module.
+
+Pass date strings and injectable `now` values explicitly. Do not depend on the
+process timezone or the current clock: the Vitest configuration defaults to UTC as
+a safety net, while CI also runs the suite with `TZ=America/New_York` to exercise
+ambient-local formatting and DST-sensitive regressions.
+
+Use table-driven cases for rules with boundaries. For season selection, extend the
+authoritative `SEASON_BOUNDARIES` table in `src/lib/season.test.ts` instead of adding
+another boundary list; it includes the SQL-covered dates and a leap-day case. Each
+row should state its expected result and a short reason, then be run through the
+public function under test. Assert observable contracts, not implementation details.
 
 ### 6.2 Adding an integration test
 
