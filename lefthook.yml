@@ -1,0 +1,11 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{ts,tsx,js,jsx,astro}"
+      run: pnpm run eslint --fix --max-warnings=0 {staged_files} && git add {staged_files}
+    typecheck:
+      run: pnpm run check
+    test:
+      glob: "*.{ts,tsx,astro}"
+      run: pnpm run vitest related {staged_files} --run

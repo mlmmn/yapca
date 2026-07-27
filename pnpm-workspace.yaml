@@ -2,6 +2,7 @@ allowBuilds:
   esbuild: true
   sharp: true
   workerd: true
+  lefthook: true
 minimumReleaseAgeExclude:
   - esbuild@0.28.1
 overrides:
