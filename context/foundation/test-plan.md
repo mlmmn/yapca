@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-07-26
+> Last updated: 2026-07-27
 
 ## 1. Strategy
 
@@ -132,6 +132,7 @@ The classic test base for this project. AI-native tools (if any) carry a
 | Layer                | Tool                                              | Version | Notes                                                                                                                     |
 | -------------------- | ------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------- |
 | unit + integration   | Vitest                                             | 4.1.10  | Configured for Node with `vite-tsconfig-paths`, which derives the `@/*` alias from `tsconfig.json`; the suite runs in UTC and in `America/New_York` in CI. checked: 2026-07-26 |
+| test-quality audit   | Stryker + `@stryker-mutator/vitest-runner`         | 9.6.1   | `pnpm test:mutants`. **Advisory, not a gate** (`break: null` — a low score never fails a run) and not wired into CI. Its purpose is to detect the anti-pattern §2 names most often: an assertion whose expected value was lifted from the implementation under test. A tautological assertion produces a survived mutant by construction. Per `AGENTS.md`: narrow with `--mutate "path/to/file.ts:start-end"`, never chase 100%, review survivors one by one and add an assertion only when the mutant is a user-visible or business-relevant bug. Note the config's `mutate` glob spans all of `src/`, while the only suite today is Phase 1's `src/lib/` units — an unnarrowed run reports a near-zero score that is noise, not a finding. checked: 2026-07-27 |
 | Astro component render | none yet — optional, no phase claims it          | —       | Astro Container API (`experimental_AstroContainer`) exists if `.astro` components ever need rendering. Not scheduled — §7 excludes the UI layer. checked: 2026-07-25 |
 | integration substrate | local Supabase stack (`pnpx supabase start`)     | CLI 2.x | Already a devDependency. Requires Docker. The seeded-database harness for §3 Phases 2–4.                                    |
 | API mocking          | none — deliberate                                  | —       | The external boundary here is Supabase, and the local stack is real. Mocking it would test the mock (see §2 Risk #7 anti-pattern). |
@@ -160,6 +161,7 @@ phase lands; before that, the gate is planned.
 | per-account isolation         | CI on PR             | required after §3 Phase 3     | cross-user data access                                            |
 | migration safety              | CI on PR             | required after §3 Phase 5     | migrations that drop or orphan existing rows                      |
 | manual device photo smoke     | before release       | recommended after §3 Phase 4  | real-phone upload formats no automated test reproduces            |
+| mutation audit (Stryker)      | local only — not in CI | advisory, never blocking     | assertions copied from the implementation under test (tautological tests that can never fail for the right reason) |
 
 ## 6. Cookbook Patterns
 
@@ -238,7 +240,7 @@ should respect these unless the underlying assumption changes.
 ## 8. Freshness Ledger
 
 - Strategy (§1–§5) last reviewed: 2026-07-26
-- Stack versions last verified: 2026-07-25
+- Stack versions last verified: 2026-07-27 (Stryker 9.6.1 added to §4/§5)
 - AI-native tool references last verified: 2026-07-25
 
 Refresh (`/10x-test-plan --refresh`) when:

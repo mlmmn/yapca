@@ -25,3 +25,7 @@ pnpm-debug.log*
 .idea/
 
 .pnpm-store
+
+# stryker temp files
+.stryker-tmp
+reports
