@@ -7,7 +7,6 @@
 .claude/commands
 .claude/rules
 .claude/skills
-.codex
 
 # from 10x-astro-starter
 dist/

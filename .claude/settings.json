@@ -28,5 +28,32 @@
       "Read(./.env)",
       "Read(./.env.production)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r \".tool_response.filePath // .tool_input.file_path\" | { read -r f; case \"$f\" in *.ts|*.tsx|*.js|*.jsx|*.mjs|*.astro) out=$(\"${CLAUDE_PROJECT_DIR:-.}/node_modules/.bin/eslint\" --fix --max-warnings=0 --no-warn-ignored \"$f\" 2>&1); rc=$?; [ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\" | grep -v projectService >&2; exit 2; };; esac; }",
+            "timeout": 30,
+            "statusMessage": "Linting (eslint --fix)"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set -o pipefail; input=$(cat); [ \"$(printf \"%s\" \"$input\" | jq -r \".stop_hook_active // false\")\" = \"true\" ] && exit 0; cd \"${CLAUDE_PROJECT_DIR:-.}\" || exit 0; out=$(./node_modules/.bin/astro check --minimumSeverity error 2>&1 | perl -pe \"s/\\e\\[[0-9;]*m//g\") || { printf \"%s\\n\" \"$out\" >&2; exit 2; }",
+            "timeout": 120,
+            "statusMessage": "Type-checking (astro check)"
+          }
+        ]
+      }
+    ]
   }
 }

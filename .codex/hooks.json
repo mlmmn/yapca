@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/miloslaw.politowski/.agents/skills/impeccable/scripts/hook.mjs\"",
+            "timeout": 5,
+            "statusMessage": "Checking UI changes"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0; jq -r '.tool_input.command // \"\"' | awk '/^\\*\\*\\* (Add|Update) File: / { sub(/^\\*\\*\\* (Add|Update) File: /, \"\"); if (!seen[$0]++) print } /^\\*\\*\\* Move to: / { sub(/^\\*\\*\\* Move to: /, \"\"); if (!seen[$0]++) print }' | while IFS= read -r f; do case \"$f\" in *.ts|*.tsx|*.js|*.jsx|*.mjs|*.astro) case \"$f\" in /*) path=$f;; *) path=$root/$f;; esac; [ -f \"$path\" ] || continue; out=$(\"$root/node_modules/.bin/eslint\" --fix --max-warnings=0 --no-warn-ignored \"$path\" 2>&1); rc=$?; [ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\" | /usr/bin/grep -v projectService >&2; exit 2; };; esac; done",
+            "timeout": 30,
+            "statusMessage": "Linting (eslint --fix)"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set -o pipefail; input=$(cat); [ \"$(printf \"%s\" \"$input\" | jq -r '.stop_hook_active // false')\" = \"true\" ] && { printf '{\"continue\":true}\\n'; exit 0; }; root=$(git rev-parse --show-toplevel 2>/dev/null) || { printf '{\"continue\":true}\\n'; exit 0; }; out=$(\"$root/node_modules/.bin/astro\" check --minimumSeverity error 2>&1 | perl -pe 's/\\e\\[[0-9;]*m//g') || { printf \"%s\\n\" \"$out\" >&2; exit 2; }; printf '{\"continue\":true}\\n'",
+            "timeout": 120,
+            "statusMessage": "Type-checking (astro check)"
+          }
+        ]
+      }
+    ]
+  }
+}
