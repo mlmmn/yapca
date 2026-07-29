@@ -912,17 +912,17 @@ No schema migration in this phase. `globalSetup` uses prefix-scoped `DELETE`, ne
 
 #### Automated
 
-- [x] 2.1 `pnpm test:integration` passes with the stack running
-- [x] 2.2 `pnpm test` still passes with the stack stopped
-- [x] 2.3 The unauthenticated case yields `UNAUTHORIZED`, not a successful write
-- [x] 2.4 `pnpm lint` and `pnpm check` pass
+- [x] 2.1 `pnpm test:integration` passes with the stack running — f7db49e
+- [x] 2.2 `pnpm test` still passes with the stack stopped — f7db49e
+- [x] 2.3 The unauthenticated case yields `UNAUTHORIZED`, not a successful write — f7db49e
+- [x] 2.4 `pnpm lint` and `pnpm check` pass — f7db49e
 
 #### Manual
 
-- [x] 2.5 Running the integration suite twice in a row passes both times (idempotent fixtures)
-- [x] 2.6 Deliberately breaking an assertion makes the test fail, confirming it executes
-- [x] 2.7 `auth.users` does not accumulate unbounded across repeated runs
-- [x] 2.8 No Storage objects owned by namespaced test users remain after the suite
+- [x] 2.5 Running the integration suite twice in a row passes both times (idempotent fixtures) — f7db49e
+- [x] 2.6 Deliberately breaking an assertion makes the test fail, confirming it executes — f7db49e
+- [x] 2.7 `auth.users` does not accumulate unbounded across repeated runs — f7db49e
+- [x] 2.8 No Storage objects owned by namespaced test users remain after the suite — f7db49e
 
 ### Phase 3: Risk #2 — Extract and Prove the Due Derivation
 
