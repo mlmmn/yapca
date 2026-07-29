@@ -55,7 +55,11 @@ export default defineConfig({
           include: ["src/**/*.integration.test.{ts,tsx}"],
           environment: "node",
           env: { TZ: process.env.TZ ?? "UTC" },
-          setupFiles: ["test/setup/load-env.ts"],
+          globalSetup: [path.resolve(rootDirectory, "test/setup/global-setup.ts")],
+          setupFiles: [
+            path.resolve(rootDirectory, "test/setup/load-env.ts"),
+            path.resolve(rootDirectory, "test/setup/reset-integration-slots.ts"),
+          ],
           testTimeout: 15000,
           maxWorkers: 2,
         },

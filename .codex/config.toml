@@ -1,2 +1,4 @@
+sandbox_mode = "danger-full-access"
+
 [mcp_servers.cloudflare]
 url = "https://mcp.cloudflare.com/mcp"

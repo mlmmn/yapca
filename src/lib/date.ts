@@ -72,6 +72,12 @@ export function formatIntervalLabel(intervalDays: number): string {
   return `Every ${intervalDays} day${intervalDays === 1 ? "" : "s"}`;
 }
 
+// Composed from the epoch-day pair above rather than `Date.setUTCDate`, so day arithmetic has
+// one implementation and DST is structurally out of reach.
+export function addDays(dateString: string, days: number): string {
+  return fromEpochDay(toEpochDay(dateString) + days);
+}
+
 export type DueRecord = {
   next_due_on: string;
   name: string;

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  addDays,
   classifyDueStatus,
   compareDueRecords,
   formatDueLabel,
@@ -31,6 +32,23 @@ describe("fromEpochDay", () => {
     const epochDay = toEpochDay(dateString);
 
     expect(fromEpochDay(epochDay)).toBe(dateString);
+  });
+});
+
+describe("addDays", () => {
+  // Expected values are literal calendar dates, not `toEpochDay` arithmetic — deriving them
+  // from the same primitives the function composes would assert nothing.
+  test.each([
+    ["2026-07-30", 0, "2026-07-30"],
+    ["2026-07-30", 1, "2026-07-31"],
+    ["2026-07-30", -1, "2026-07-29"],
+    ["2026-07-31", 1, "2026-08-01"],
+    ["2026-12-31", 1, "2027-01-01"],
+    ["2027-01-01", -1, "2026-12-31"],
+    ["2028-02-28", 1, "2028-02-29"],
+    ["2026-07-01", 30, "2026-07-31"],
+  ])("shifts %s by %i days to %s", (dateString, days, expected) => {
+    expect(addDays(dateString, days)).toBe(expected);
   });
 });
 
