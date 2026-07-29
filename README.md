@@ -24,14 +24,21 @@ cp .env.example .env          # Node
 pnpx supabase start           # prints SUPABASE_URL + anon key on first run
 ```
 
-Copy the printed `SUPABASE_URL` and anon `SUPABASE_KEY` into `.env`:
+Copy the printed `SUPABASE_URL` and anon `SUPABASE_KEY` into `.env`, and add the direct
+postgres URL:
 
 ```
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=<anon key from CLI output>
+SUPABASE_DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
 For a hosted project instead, use its Project URL and `anon` public key (dashboard → Settings → API).
+
+`SUPABASE_DB_URL` is required only by the integration test suite (`pnpm test:integration`),
+which uses it to mint fixture users directly. The app itself never reads it. If your `.env`
+predates this variable, add it — `cp .env.example .env` is a one-time bootstrap step, so an
+existing `.env` will not pick it up and the suite will fail with `Missing: SUPABASE_DB_URL`.
 
 Email confirmation is enabled by default locally (production-parity). Confirmation links redirect to `/auth/signin`. To sign in immediately after sign-up during local dev, disable email confirmation temporarily in Studio (`http://localhost:54323`) → **Authentication → Email → Confirm email** (remember to restore it before Phase 3 verification).
 

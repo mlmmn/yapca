@@ -8,4 +8,4 @@ pre-commit:
       run: pnpm run check
     test:
       glob: "*.{ts,tsx,astro}"
-      run: pnpm vitest related {staged_files} --run
+      run: pnpm vitest related {staged_files} --run --project unit
