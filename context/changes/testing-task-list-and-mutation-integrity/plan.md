@@ -897,16 +897,16 @@ No schema migration in this phase. `globalSetup` uses prefix-scoped `DELETE`, ne
 
 #### Automated
 
-- [x] 1.1 `pnpm test` passes with the Supabase stack stopped
-- [x] 1.2 `pnpm lint` passes with `--max-warnings=0`
-- [x] 1.3 `pnpm check` passes
-- [x] 1.4 A throwaway integration test importing `src/actions/index.ts` resolves both virtual modules without error (retained as a permanent shim regression guard)
-- [x] 1.7 `pnpm test:mutants --mutate "src/lib/season.ts" --force` exits 0 (multi-project config resolves without `--project`)
+- [x] 1.1 `pnpm test` passes with the Supabase stack stopped — b708f3c
+- [x] 1.2 `pnpm lint` passes with `--max-warnings=0` — b708f3c
+- [x] 1.3 `pnpm check` passes — b708f3c
+- [x] 1.4 A throwaway integration test importing `src/actions/index.ts` resolves both virtual modules without error (retained as a permanent shim regression guard) — b708f3c
+- [x] 1.7 `pnpm test:mutants --mutate "src/lib/season.ts" --force` exits 0 (multi-project config resolves without `--project`) — b708f3c
 
 #### Manual
 
-- [x] 1.5 Committing an unrelated `.ts` file with Docker stopped completes the pre-commit hook
-- [x] 1.6 The shim comment explaining the Astro-internal coupling is present and accurate
+- [x] 1.5 Committing an unrelated `.ts` file with Docker stopped completes the pre-commit hook — b708f3c
+- [x] 1.6 The shim comment explaining the Astro-internal coupling is present and accurate — b708f3c
 
 ### Phase 2: Fixture Layer
 
