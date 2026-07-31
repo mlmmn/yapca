@@ -11,6 +11,7 @@ export type CreatePlantFixtureInput = {
   dormancyIntervalDays?: number;
   growingIntervalDays?: number;
   name?: string;
+  photoPath?: string | null;
   referenceDay?: string;
   userFixture: IntegrationUserFixture;
 };
@@ -25,6 +26,7 @@ export async function createPlantFixture({
   dormancyIntervalDays = 30,
   growingIntervalDays = 7,
   name,
+  photoPath = null,
   referenceDay = getTodayInTimeZone("UTC"),
   userFixture,
 }: CreatePlantFixtureInput) {
@@ -39,6 +41,7 @@ export async function createPlantFixture({
       id: plantId,
       name: plantName,
       next_due_on: nextDueOn,
+      photo_path: photoPath,
       user_id: userFixture.userId,
     })
     .select()
