@@ -77,12 +77,18 @@ async function expectPhotoRetrievable(path: string) {
   expect(data?.size).toBeGreaterThan(0);
 }
 
+// Asserts absence positively, by listing, rather than by expecting `download` to fail: *any*
+// storage error satisfies "the download failed", so an expired or broken fixture session would
+// read as "photo correctly deleted". A listing that succeeds and omits the object cannot.
 async function expectPhotoAbsent(path: string) {
   const userFixture = await getIntegrationUserFixture();
-  const { data, error } = await userFixture.client.storage.from("plant-photos").download(path);
+  const separatorIndex = path.lastIndexOf("/");
+  const folder = path.slice(0, separatorIndex);
+  const objectName = path.slice(separatorIndex + 1);
+  const { data, error } = await userFixture.client.storage.from("plant-photos").list(folder);
 
-  expect(error).not.toBeNull();
-  expect(data).toBeNull();
+  expect(error).toBeNull();
+  expect(data?.map((entry) => entry.name)).not.toContain(objectName);
 }
 
 describe("server.updatePlant", () => {

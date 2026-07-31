@@ -6,7 +6,7 @@
   "testFiles": ["src/**/*.test.{ts,tsx}", "!src/**/*.integration.test.{ts,tsx}"],
   "ignorePatterns": [".agents", ".claude", ".cursor", ".codex", "dist"],
   "testRunner": "vitest",
-  "vitest": { "configFile": "vitest-mutation.config.ts" },
+  "vitest": { "configFile": "vitest.config.ts" },
   "coverageAnalysis": "perTest",
   "plugins": ["@stryker-mutator/vitest-runner"],
   "concurrency": 4,

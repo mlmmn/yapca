@@ -107,6 +107,10 @@ describe("schedule mutation sequences", () => {
     const originalDueOn = addDays(clientDate, -3);
     const userFixture = await getIntegrationUserFixture();
     const plant = await createPlantFixture({
+      // Both intervals pinned so the reschedule assertion below is season-independent — mark_watered
+      // selects the interval from the season of acted_on, so a growing-only value would make this
+      // test fail from 1 Nov. Matches harness.integration.test.ts.
+      dormancyIntervalDays: 7,
       dueOffsetDays: -3,
       growingIntervalDays: 7,
       referenceDay: clientDate,
@@ -173,7 +177,14 @@ describe("schedule mutation sequences", () => {
 
     const state = await readPlantState(userFixture, plant.id);
 
-    // PRD §FR-012 says "2 days forward", but the deliberate contract is action date + 2.
+    // Known PRD divergence, pinned deliberately. The PRD's prose says the task moves "exactly 2 days
+    // forward" (`context/foundation/prd.md:56`) / "forward by two days" (`:141`), which reads as
+    // prev_due_on + 2; FR-012 itself (`:111`) is neutral — "postpone a watering task by 2 days". The
+    // shipped contract is *action date* + 2, chosen deliberately so postponing an overdue task cannot
+    // leave it still overdue in Today (`context/archive/2026-07-23-postpone-and-undo/plan.md:34`), and
+    // the UI copy says only "Postpone 2 days" (`src/components/today-list/utils.ts:14`), so nothing
+    // user-facing promises the other reading. The assertion below discriminates: this plant is overdue
+    // by 10, so prev_due_on + 2 would be -8. Awaiting a product decision — see the plan's Open Risks.
     expect(state.plant.next_due_on).toBe(addDays(clientDate, 2));
     expect(state.plant.next_due_on).not.toBe(addDays(plant.next_due_on, 2));
     expect(state.plant.growing_interval_days).toBe(plant.growing_interval_days);
@@ -229,15 +240,50 @@ describe("schedule mutation sequences", () => {
   // V1 defect: undo must reject an out-of-order event when new_due_on collides; the value-based
   // guard currently accepts it and strands the second event. Expected correction is tracked by
   // context/changes/undo-integrity-defects/.
+  //
+  // Two same-day postpones write E1{prev: D0, new: T+2} and E2{prev: T+2, new: T+2} — the second's
+  // prev and new are equal, because the plant was already at T+2. Undo's currency guard compares
+  // `plants.next_due_on = event.new_due_on` by *value*, so E1 passes it despite E2 being the later
+  // event: undoing E1 sets the plant to D0 and deletes E1, leaving E2 claiming a transition from
+  // T+2 that no longer holds and permanently un-undoable with P0003. The same collision occurs for
+  // any plant whose interval is 2.
+  //
+  // The body below encodes the *corrected* behaviour, so un-skipping it fails today: undo is
+  // last-in-first-out, and unwinding in that order strands nothing.
   test.skip("rejects an out-of-order undo when same-day postpones share a due date", async () => {
     const clientDate = getTodayInTimeZone("UTC");
+    const originalDueOn = addDays(clientDate, -3);
+    const postponedDueOn = addDays(clientDate, 2);
     const userFixture = await getIntegrationUserFixture();
     const plant = await createPlantFixture({ dueOffsetDays: -3, referenceDay: clientDate, userFixture });
     const firstEvent = await postponePlant(plant.id, clientDate);
+    const secondEvent = await postponePlant(plant.id, clientDate);
+    const postponedState = await readPlantState(userFixture, plant.id);
 
-    await postponePlant(plant.id, clientDate);
+    // The colliding journal shape itself — this is what makes the value-based guard ambiguous.
+    expect(postponedState.plant.next_due_on).toBe(postponedDueOn);
+    expect(postponedState.wateringEvents).toEqual([
+      expect.objectContaining({ id: firstEvent.event_id, new_due_on: postponedDueOn, prev_due_on: originalDueOn }),
+      expect.objectContaining({ id: secondEvent.event_id, new_due_on: postponedDueOn, prev_due_on: postponedDueOn }),
+    ]);
 
+    // Out of order: E2 is the current transition, so undoing E1 must be refused rather than
+    // silently accepted on a value match.
     await expect(undoWateringEvent(firstEvent.event_id)).rejects.toMatchObject({ code: "CONFLICT" });
+
+    const refusedState = await readPlantState(userFixture, plant.id);
+
+    expect(refusedState.plant.next_due_on).toBe(postponedDueOn);
+    expect(refusedState.wateringEvents).toHaveLength(2);
+
+    // In order: E2 then E1 — neither is stranded, and the plant returns to where it started.
+    await undoWateringEvent(secondEvent.event_id);
+    await undoWateringEvent(firstEvent.event_id);
+
+    const unwoundState = await readPlantState(userFixture, plant.id);
+
+    expect(unwoundState.plant.next_due_on).toBe(originalDueOn);
+    expect(unwoundState.wateringEvents).toEqual([]);
   });
 
   // V3 defect: a schedule-changing edit must preserve the active undo transition; currently the

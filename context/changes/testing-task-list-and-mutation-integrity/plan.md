@@ -862,9 +862,12 @@ criteria for every test written here:
 Database round trips make this suite materially slower than Phase 1's units. Two
 mitigations are structural rather than tuning: two integration workers retain file
 parallelism while a worker-scoped session pool bounds Auth calls, and keeping
-integration in a separate Vitest project means the fast unit suite still gates the
+integration in a separate Vitest config means the fast unit suite still gates the
 pre-commit hook. Vitest's default 5000 ms `testTimeout` is too low for round trips and
-is raised in the integration project only.
+is raised in the integration config only. _(Amended 2026-07-31: this shipped as two
+Vitest **projects**, then became two separate config files — `vitest.config.ts` for
+units, `vitest.integration.config.ts` for integration — during impl-review triage of F5.
+See `mutation-audit.md` for why.)_
 
 `supabase/config.toml:189` permits 30 sign-ins per 5 minutes per IP. Two workers with
 two lazy slots each perform at most four sign-ins per run and eight across the required
@@ -876,6 +879,29 @@ recalculate that bound rather than minting users per test or changing Auth confi
 No schema migration in this phase. `globalSetup` uses prefix-scoped `DELETE`, never
 `TRUNCATE`, so it does not remove `supabase/seed.sql`'s fixed user
 (`a7c29f41-…-d9e215c70401`) that the dev workflow and `README.md` depend on.
+
+## Open Risks
+
+_Added 2026-07-31 during impl-review triage (F7). Phase 5 required the postpone divergence
+to be flagged here for a product decision; the section was missing when the phase closed._
+
+- **Postpone semantics diverge from the PRD's prose, and no product decision has been
+  recorded.** The PRD says a postpone moves the task "exactly 2 days forward"
+  (`context/foundation/prd.md:56`) and "forward by two days" (`:141`) — both of which read
+  as `prev_due_on + 2`. FR-012 itself (`:111`) is neutral: "User can postpone a watering
+  task by 2 days". The shipped behaviour is **action date + 2**, chosen deliberately so
+  postponing an overdue task cannot leave it still overdue in Today
+  (`context/archive/2026-07-23-postpone-and-undo/plan.md:34`).
+
+  Current state: the behaviour is pinned by
+  `src/actions/watering-sequence.integration.test.ts:165-192`, whose overdue-by-10 fixture
+  discriminates the two readings. User-facing copy promises neither reading — it says only
+  "Postpone 2 days" (`src/components/today-list/utils.ts:14`).
+
+  Decision needed: either reword `prd.md:56`/`:141` to match the shipped contract, or
+  change the contract. This plan deliberately changed neither the PRD nor the UI copy.
+  Until it is decided, the test comment is the only place the divergence is visible from
+  the code.
 
 ## References
 

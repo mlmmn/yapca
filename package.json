@@ -13,9 +13,9 @@
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier --write .",
     "sync-agents": "./scripts/sync-agents.sh",
-    "test": "vitest run --project unit",
-    "test:watch": "vitest --project unit",
-    "test:integration": "vitest run --project integration",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:sql": "psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 -f supabase/tests/season-aware-intervals.sql",
     "test:mutants": "stryker run"
   },

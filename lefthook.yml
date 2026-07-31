@@ -8,4 +8,6 @@ pre-commit:
       run: pnpm run check
     test:
       glob: "*.{ts,tsx,astro}"
-      run: pnpm vitest related {staged_files} --run --project unit
+      # No --config: vitest.config.ts is the unit suite. The integration suite needs the local
+      # Supabase stack and is deliberately out of the pre-commit path.
+      run: pnpm vitest related {staged_files} --run

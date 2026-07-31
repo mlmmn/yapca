@@ -1,7 +1,7 @@
 ---
 change_id: testing-task-list-and-mutation-integrity
 title: Task-list and mutation integrity rollout phase
-status: implemented
+status: impl_reviewed
 created: 2026-07-28
 updated: 2026-07-31
 archived_at: null

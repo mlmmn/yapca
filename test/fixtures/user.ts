@@ -283,9 +283,9 @@ async function signInFixtureUser(email: string, cookieJar: CookieJar) {
 async function listStoragePaths(client: IntegrationSupabaseClient, userId: string) {
   const objectPaths: string[] = [];
   let offset = 0;
-  let hasMore = true;
+  let moreAvailable = true;
 
-  while (hasMore) {
+  while (moreAvailable) {
     const { data, error } = await client.storage.from(SUPABASE_STORAGE_BUCKET).list(userId, {
       limit: 1000,
       offset,
@@ -302,7 +302,7 @@ async function listStoragePaths(client: IntegrationSupabaseClient, userId: strin
       }
     });
 
-    hasMore = data.length === 1000;
+    moreAvailable = data.length === 1000;
     offset += data.length;
   }
 
@@ -412,7 +412,6 @@ async function ensureUserSlot(slotNumber: number) {
       client,
       cookieJar,
       email,
-      lastPreparedTestName: null,
       slotNumber,
       user,
       userId: user.id,

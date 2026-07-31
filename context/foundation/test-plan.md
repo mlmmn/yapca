@@ -104,6 +104,9 @@ layer (pure functions, no database). Phase 2 takes the three
 highest-impact risks, which need both the runner and a seeded database.
 Phase 3 is logically independent but sequenced after Phase 2 so it can
 reuse that seeded-database harness instead of building a bespoke one.
+**Phase 3 is unblocked as of 2026-07-31**: Phase 2 is complete and the harness it
+was waiting on exists — fixture users, per-worker slots and the seeded-database
+setup are in `test/fixtures/` and `test/setup/`, documented in the cookbook.
 Phase 4 carries the lowest impact × likelihood pair and part of its signal
 is genuinely manual, so it earns the least budget. Phase 5 is meaningless
 before there are tests to gate on.
