@@ -7,7 +7,12 @@ pre-commit:
     typecheck:
       run: pnpm run check
     test:
-      glob: "*.{ts,tsx,astro}"
+      # The whole unit suite, not `vitest related {staged_files}`. `related` resolves staged files
+      # through the unit config's module graph, so a commit touching only test/ fixtures, configs or
+      # integration tests selected nothing and passed with "No test files found" — a green gate
+      # carrying no signal. The suite runs in well under a second; there is nothing to optimise here.
+      #
       # No --config: vitest.config.ts is the unit suite. The integration suite needs the local
-      # Supabase stack and is deliberately out of the pre-commit path.
-      run: pnpm vitest related {staged_files} --run
+      # Supabase stack and is deliberately out of the pre-commit path — `pnpm test:integration`
+      # covers it, and CI is where it belongs as a blocking gate.
+      run: pnpm test
