@@ -957,15 +957,15 @@ No schema migration in this phase. `globalSetup` uses prefix-scoped `DELETE`, ne
 
 #### Automated
 
-- [ ] 5.1 `pnpm test:integration` passes, with V1 and V3 reported as skipped rather than failing
-- [ ] 5.2 `pnpm test` still passes with the stack stopped
-- [ ] 5.3 `pnpm lint` and `pnpm check` pass
-- [ ] 5.4 Un-skipping V1 or V3 makes the suite fail, confirming the assertions are real
+- [x] 5.1 `pnpm test:integration` passes, with V1 and V3 reported as skipped rather than failing
+- [x] 5.2 `pnpm test` still passes with the stack stopped
+- [x] 5.3 `pnpm lint` and `pnpm check` pass
+- [x] 5.4 Un-skipping V1 or V3 makes the suite fail, confirming the assertions are real
 
 #### Manual
 
-- [ ] 5.5 A follow-up change folder exists with both defects described and the skipped tests referenced by path
-- [ ] 5.6 Each skipped test's comment states the expected correct behaviour, not just "broken"
+- [x] 5.5 A follow-up change folder exists with both defects described and the skipped tests referenced by path
+- [x] 5.6 Each skipped test's comment states the expected correct behaviour, not just "broken"
 
 ### Phase 6: SQL Gate, Mutation Audit, and Cookbook
 
