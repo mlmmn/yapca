@@ -971,13 +971,13 @@ No schema migration in this phase. `globalSetup` uses prefix-scoped `DELETE`, ne
 
 #### Automated
 
-- [x] 6.1 `pnpm test:sql` passes and exits non-zero when an assertion is broken
-- [x] 6.2 `pnpm test` and `pnpm test:integration` pass
-- [x] 6.3 `pnpm lint` and `pnpm check` pass
-- [x] 6.4 Every SQL `acted_on` input appears in `SEASON_BOUNDARIES`
+- [x] 6.1 `pnpm test:sql` passes and exits non-zero when an assertion is broken — 3318618
+- [x] 6.2 `pnpm test` and `pnpm test:integration` pass — 3318618
+- [x] 6.3 `pnpm lint` and `pnpm check` pass — 3318618
+- [x] 6.4 Every SQL `acted_on` input appears in `SEASON_BOUNDARIES` — 3318618
 
 #### Manual
 
-- [x] 6.5 The Stryker survivor review is written down with an accept/fix decision per survivor
-- [x] 6.6 §6.2 and §6.3 are specific enough that a contributor can add an integration test without re-reading this plan
-- [x] 6.7 §3 Phase 2 Status reads complete and Phase 3 is unblocked
+- [x] 6.5 The Stryker survivor review is written down with an accept/fix decision per survivor — 3318618
+- [x] 6.6 §6.2 and §6.3 are specific enough that a contributor can add an integration test without re-reading this plan — 3318618
+- [x] 6.7 §3 Phase 2 Status reads complete and Phase 3 is unblocked — 3318618
