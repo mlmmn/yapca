@@ -12,6 +12,7 @@ import {
   formatShortDate,
   isClientDateRejection,
 } from "@/lib/date";
+import { findNextUpcoming, isDueOn, selectDueRecords } from "@/lib/due";
 import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
 import { getBrowserToday } from "@/lib/timezone";
 import { cn, prefersReducedMotion } from "@/lib/utils";
@@ -221,7 +222,7 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
           const currentToday = todayRef.current;
           const restoredPlant = { ...context.plant, next_due_on: data.restored_due_on };
 
-          if (currentToday !== null && data.restored_due_on > currentToday) {
+          if (currentToday !== null && !isDueOn(restoredPlant, currentToday)) {
             return current;
           }
 
@@ -254,9 +255,9 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
     ...plant,
     leaving: leavingIds.has(plant.id),
   }));
-  const dueList = today === null ? [] : optimisticPlants.filter((plant) => plant.next_due_on <= today);
+  const dueList = today === null ? [] : selectDueRecords(optimisticPlants, today);
   const activeDueList = dueList.filter((plant) => !plant.leaving);
-  const nextUpcoming = today === null ? null : (basePlants.find((plant) => plant.next_due_on > today) ?? null);
+  const nextUpcoming = today === null ? null : findNextUpcoming(basePlants, today);
 
   useEffect(() => {
     todayRef.current = today;

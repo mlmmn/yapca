@@ -928,16 +928,16 @@ No schema migration in this phase. `globalSetup` uses prefix-scoped `DELETE`, ne
 
 #### Automated
 
-- [ ] 3.1 `pnpm test` passes — new unit tests green, existing suite unaffected
-- [ ] 3.2 `pnpm test:integration` passes
-- [ ] 3.3 `pnpm lint` and `pnpm check` pass
-- [ ] 3.4 No `next_due_on` comparison remains inline in `today-list.tsx`
+- [x] 3.1 `pnpm test` passes — new unit tests green, existing suite unaffected
+- [x] 3.2 `pnpm test:integration` passes
+- [x] 3.3 `pnpm lint` and `pnpm check` pass
+- [x] 3.4 No `next_due_on` comparison remains inline in `today-list.tsx`
 
 #### Manual
 
-- [ ] 3.5 The daily list renders identically before and after the refactor: a plant due today, one overdue, one upcoming, and the undo re-insert path all behave unchanged
-- [ ] 3.6 The `today === null` placeholder ("Finding your local date…") still appears when the `tz` cookie is absent
-- [ ] 3.7 Removal animation timing is visually unchanged
+- [x] 3.5 The daily list renders identically before and after the refactor: a plant due today, one overdue, one upcoming, and the undo re-insert path all behave unchanged
+- [x] 3.6 The `today === null` placeholder ("Finding your local date…") still appears when the `tz` cookie is absent
+- [x] 3.7 Removal animation timing is visually unchanged
 
 ### Phase 4: Risk #3 — Edit-Path Integrity
 
