@@ -93,7 +93,7 @@ orchestrator updates Status as artifacts appear on disk.
 | #   | Phase name                     | Goal (one line)                                                                                            | Risks covered | Test types                                    | Status      | Change folder |
 | --- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------- | ----------- | ------------- |
 | 1   | Runner bootstrap + calendar math | Every surface agrees on "today"; boundary dates select the documented interval                             | #1, #6        | test-runner setup, unit                       | complete | `context/changes/testing-runner-and-calendar-math/` |
-| 2   | Task-list and mutation integrity | No due or overdue task is silently dropped; water / postpone / undo sequences leave schedule and journal consistent; edits lose nothing | #2, #3, #4    | integration                                   | change opened | `context/changes/testing-task-list-and-mutation-integrity/` |
+| 2   | Task-list and mutation integrity | No due or overdue task is silently dropped; water / postpone / undo sequences leave schedule and journal consistent; edits lose nothing | #2, #3, #4    | integration                                   | complete | `context/changes/testing-task-list-and-mutation-integrity/` |
 | 3   | Per-account isolation          | User B cannot reach User A's data by direct id, on any operation                                            | #5            | contract / integration                        | not started | —             |
 | 4   | Photo upload boundary          | A phone-shaped upload is retrievable afterward, or fails visibly                                            | #7            | integration, documented manual device smoke   | not started | —             |
 | 5   | Quality-gates wiring           | The floor cannot silently drop: tests, lint and typecheck gate merges; migrations proven non-destructive against seeded data | #8, cross-cutting | gates                                     | not started | —             |
@@ -196,14 +196,42 @@ stops using the alias, move the aliased import to another test rather than dropp
 
 ### 6.2 Adding an integration test
 
-TBD — see §3 Phase 2. Will cover the seeded-database harness and the
-pattern for asserting a mutation's *resulting state* rather than its
-response code (Risks #2, #3, #4).
+Start the local stack with `pnpx supabase start`, copy its `SUPABASE_URL`,
+publishable key, and `SUPABASE_DB_URL` into `.env`, then run
+`pnpm test:integration`. The unit suite (`pnpm test`) deliberately excludes
+`*.integration.test.ts(x)` and does not need Docker. Use `pnpm test:sql` for
+the transaction-scoped PL/pgSQL gate; it owns the deterministic local database
+connection and also requires the stack.
+
+Place the test beside the exercised code as
+`src/<area>/<name>.integration.test.ts`. Integration setup registers the reset
+hook and a global setup that creates a run namespace, removes only namespaced
+fixture users, and checks Storage cleanup. Obtain the default authenticated,
+per-worker user with `getIntegrationUserFixture()`; request slot `1` only for
+cross-account cases. Create rows with `createPlantFixture()` and re-read the
+full state with `readPlantState()`. Do not use `test.concurrent`: slots and
+cookie jars are intentionally reusable within a worker.
+
+The harness invokes Actions in-process through an `astro:actions` shim coupled
+to Astro internals. This gives real Supabase JWTs, RLS, RPCs, and Storage, but
+does not exercise an HTTP boundary, multipart encoding, or Worker limits.
 
 ### 6.3 Adding a test for a mutation (Astro Action)
 
-TBD — see §3 Phase 2. Will cover asserting the full record after a write,
-and the multi-step sequence form that catches undo defects (Risks #3, #4).
+Build a real `FormData`, create the request context with
+`createActionContext(userFixture)`, then call the Action in-process as
+`server.<action>.orThrow.call(context, formData)`. Treat the Action result as
+an identifier or transition aid, not the proof: re-read the plant and its
+ordered `watering_events` with `readPlantState()` and assert every field whose
+state matters. This catches a successful response that silently loses a field
+or writes the wrong schedule.
+
+For coupled mutations, assert the resulting state after every step. For
+example, `water → undo → postpone → undo` must check both `next_due_on` and the
+complete event set after each transition; undo must restore `prev_due_on` and
+remove its event. Keep known defects as `test.skip` only when the comment names
+the observed defect, the expected correct behaviour, and its real follow-up
+change folder.
 
 ### 6.4 Adding a per-account isolation test
 

@@ -957,27 +957,27 @@ No schema migration in this phase. `globalSetup` uses prefix-scoped `DELETE`, ne
 
 #### Automated
 
-- [x] 5.1 `pnpm test:integration` passes, with V1 and V3 reported as skipped rather than failing
-- [x] 5.2 `pnpm test` still passes with the stack stopped
-- [x] 5.3 `pnpm lint` and `pnpm check` pass
-- [x] 5.4 Un-skipping V1 or V3 makes the suite fail, confirming the assertions are real
+- [x] 5.1 `pnpm test:integration` passes, with V1 and V3 reported as skipped rather than failing — 5f7e8ae
+- [x] 5.2 `pnpm test` still passes with the stack stopped — 5f7e8ae
+- [x] 5.3 `pnpm lint` and `pnpm check` pass — 5f7e8ae
+- [x] 5.4 Un-skipping V1 or V3 makes the suite fail, confirming the assertions are real — 5f7e8ae
 
 #### Manual
 
-- [x] 5.5 A follow-up change folder exists with both defects described and the skipped tests referenced by path
-- [x] 5.6 Each skipped test's comment states the expected correct behaviour, not just "broken"
+- [x] 5.5 A follow-up change folder exists with both defects described and the skipped tests referenced by path — 5f7e8ae
+- [x] 5.6 Each skipped test's comment states the expected correct behaviour, not just "broken" — 5f7e8ae
 
 ### Phase 6: SQL Gate, Mutation Audit, and Cookbook
 
 #### Automated
 
-- [ ] 6.1 `pnpm test:sql` passes and exits non-zero when an assertion is broken
-- [ ] 6.2 `pnpm test` and `pnpm test:integration` pass
-- [ ] 6.3 `pnpm lint` and `pnpm check` pass
-- [ ] 6.4 Every SQL `acted_on` input appears in `SEASON_BOUNDARIES`
+- [x] 6.1 `pnpm test:sql` passes and exits non-zero when an assertion is broken
+- [x] 6.2 `pnpm test` and `pnpm test:integration` pass
+- [x] 6.3 `pnpm lint` and `pnpm check` pass
+- [x] 6.4 Every SQL `acted_on` input appears in `SEASON_BOUNDARIES`
 
 #### Manual
 
-- [ ] 6.5 The Stryker survivor review is written down with an accept/fix decision per survivor
-- [ ] 6.6 §6.2 and §6.3 are specific enough that a contributor can add an integration test without re-reading this plan
-- [ ] 6.7 §3 Phase 2 Status reads complete and Phase 3 is unblocked
+- [x] 6.5 The Stryker survivor review is written down with an accept/fix decision per survivor
+- [x] 6.6 §6.2 and §6.3 are specific enough that a contributor can add an integration test without re-reading this plan
+- [x] 6.7 §3 Phase 2 Status reads complete and Phase 3 is unblocked

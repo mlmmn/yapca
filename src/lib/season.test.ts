@@ -5,10 +5,9 @@ import { describe, expect, test } from "vitest";
 import { getSeason, getSeasonLabel, getShortSeasonLabel, selectSeasonInterval, type Season } from "@/lib/season";
 
 // The authoritative TypeScript season-boundary table. Every date asserted by
-// supabase/tests/season-aware-intervals.sql appears here verbatim; test-plan
-// Phase 2 must reconcile the SQL script against this table — by lifting it into
-// a shared harness or deriving the SQL cases from it — rather than adding a
-// third copy. If that phase needs it outside this file, move it then.
+// supabase/tests/season-aware-intervals.sql's acted_on inputs appear here
+// verbatim. Phase 6 reconciled the two lists without adding a third table:
+// fixture/output dates and expected due dates are deliberately excluded.
 //
 // The extra rows mirror the SQL boundary cases and guard a possible future
 // day-granular rule, although the current rule only branches at March 1 and

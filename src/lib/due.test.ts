@@ -47,6 +47,17 @@ describe("findNextUpcoming", () => {
     expect(nextUpcoming).toEqual({ id: "due-tomorrow", name: "Aloe", next_due_on: "2024-01-02" });
   });
 
+  test("keeps the earliest upcoming record when a later one follows it", () => {
+    const records = [
+      { id: "due-tomorrow", name: "Aloe", next_due_on: "2024-01-02" },
+      { id: "due-next-month", name: "Yucca", next_due_on: "2024-02-01" },
+    ];
+
+    const nextUpcoming = findNextUpcoming(records, TODAY);
+
+    expect(nextUpcoming).toEqual({ id: "due-tomorrow", name: "Aloe", next_due_on: "2024-01-02" });
+  });
+
   test("breaks a same-day tie on name", () => {
     const tiedRecords = [
       { id: "zebra", name: "Zebra plant", next_due_on: "2024-01-02" },
@@ -56,6 +67,17 @@ describe("findNextUpcoming", () => {
     const nextUpcoming = findNextUpcoming(tiedRecords, TODAY);
 
     expect(nextUpcoming).toEqual({ id: "aloe", name: "Aloe", next_due_on: "2024-01-02" });
+  });
+
+  test("keeps the first record when upcoming dates and names tie", () => {
+    const tiedRecords = [
+      { id: "first", name: "Aloe", next_due_on: "2024-01-02" },
+      { id: "second", name: "Aloe", next_due_on: "2024-01-02" },
+    ];
+
+    const nextUpcoming = findNextUpcoming(tiedRecords, TODAY);
+
+    expect(nextUpcoming).toEqual({ id: "first", name: "Aloe", next_due_on: "2024-01-02" });
   });
 
   test("returns null when every record is due", () => {

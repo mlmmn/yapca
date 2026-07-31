@@ -1,5 +1,8 @@
 -- Transaction-scoped boundary and ownership checks for seasonal scheduling.
--- Run with: psql ... -v ON_ERROR_STOP=1 -f supabase/tests/season-aware-intervals.sql
+-- Run with: pnpm test:sql (requires `pnpx supabase start`). ON_ERROR_STOP makes
+-- the first failed assertion a non-zero process exit, which is this gate's signal.
+-- The `acted_on` inputs below are reconciled against the authoritative
+-- SEASON_BOUNDARIES table in src/lib/season.test.ts; do not add another table here.
 
 begin;
 
