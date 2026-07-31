@@ -24,6 +24,9 @@ export async function loadTodayPlants(
     .order("name", { ascending: true });
 
   if (error) {
+    // eslint-disable-next-line no-console -- the caller only sees `plants: null`, so the cause is otherwise unrecoverable
+    console.error("Failed to load plants for the today view:", error);
+
     return { plants: null };
   }
 
@@ -31,9 +34,14 @@ export async function loadTodayPlants(
   const signedUrlByPath = new Map<string, string>();
 
   if (photoPaths.length > 0) {
-    const { data: signedUrls } = await supabase.storage
+    const { data: signedUrls, error: signedUrlsError } = await supabase.storage
       .from("plant-photos")
       .createSignedUrls(photoPaths, SIGNED_URL_TTL_SECONDS);
+
+    if (signedUrlsError) {
+      // eslint-disable-next-line no-console -- best-effort photo signing must not fail the view, but a total Storage outage still needs a signal
+      console.error("Failed to sign plant photo URLs; falling back to initial-letter placeholders:", signedUrlsError);
+    }
 
     for (const item of signedUrls ?? []) {
       if (item.path && item.signedUrl && !item.error) {
