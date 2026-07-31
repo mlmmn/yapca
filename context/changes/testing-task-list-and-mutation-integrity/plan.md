@@ -943,15 +943,15 @@ No schema migration in this phase. `globalSetup` uses prefix-scoped `DELETE`, ne
 
 #### Automated
 
-- [x] 4.1 `pnpm test:integration` passes
-- [x] 4.2 `pnpm test` still passes with the stack stopped
-- [x] 4.3 `pnpm lint` and `pnpm check` pass
-- [x] 4.4 The past-dated recalculation case passes, proving no clamping was introduced
+- [x] 4.1 `pnpm test:integration` passes — d40f5c0
+- [x] 4.2 `pnpm test` still passes with the stack stopped — d40f5c0
+- [x] 4.3 `pnpm lint` and `pnpm check` pass — d40f5c0
+- [x] 4.4 The past-dated recalculation case passes, proving no clamping was introduced — d40f5c0
 
 #### Manual
 
-- [x] 4.5 `context/foundation/test-plan.md` Risk #3 row now matches shipped behaviour, and §8 records the amendment
-- [x] 4.6 Editing a plant with a photo through the real UI still preserves the photo
+- [x] 4.5 `context/foundation/test-plan.md` Risk #3 row now matches shipped behaviour, and §8 records the amendment — d40f5c0
+- [x] 4.6 Editing a plant with a photo through the real UI still preserves the photo — d40f5c0
 
 ### Phase 5: Risk #4 — Mutation Sequences and Consistency Vectors
 

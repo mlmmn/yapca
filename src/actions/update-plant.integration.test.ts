@@ -1,10 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { server } from "@/actions/index";
 import { addDays } from "@/lib/date";
+import { getSeason } from "@/lib/season";
 import { getTodayInTimeZone } from "@/lib/timezone";
 import { createActionContext } from "../../test/fixtures/action-context";
 import { createPlantFixture, readPlantState } from "../../test/fixtures/plants";
-import { assertNoStorageObjects, getIntegrationUserFixture, removeAllStorageObjects } from "../../test/fixtures/user";
+import { assertNoStorageObjects, getIntegrationUserFixture } from "../../test/fixtures/user";
 
 type UpdatePlantInput = {
   clientDate: string;
@@ -76,52 +77,74 @@ async function expectPhotoRetrievable(path: string) {
   expect(data?.size).toBeGreaterThan(0);
 }
 
+async function expectPhotoAbsent(path: string) {
+  const userFixture = await getIntegrationUserFixture();
+  const { data, error } = await userFixture.client.storage.from("plant-photos").download(path);
+
+  expect(error).not.toBeNull();
+  expect(data).toBeNull();
+}
+
 describe("server.updatePlant", () => {
+  // The fixture below is 7 growing / 30 dormancy, so each row's expected shift depends on which
+  // interval is active on the day the suite runs. Both deltas are stated literally rather than
+  // subtracted here, so the assertion stays grounded independently of the arithmetic under test.
   test.each([
-    { dormancyIntervalDays: 30, growingIntervalDays: 7, name: "renamed plant" },
-    { dormancyIntervalDays: 30, growingIntervalDays: 10, name: "interval only" },
-    { dormancyIntervalDays: 35, growingIntervalDays: 10, name: "both intervals" },
-    { dormancyIntervalDays: 35, growingIntervalDays: 12, name: "complete edit" },
-  ])("preserves the complete record for $name", async ({ dormancyIntervalDays, growingIntervalDays, name }) => {
-    const clientDate = getTodayInTimeZone("UTC");
-    const userFixture = await getIntegrationUserFixture();
-    const plant = await createPlantFixture({
-      dueOffsetDays: 8,
-      dormancyIntervalDays: 30,
-      growingIntervalDays: 7,
-      referenceDay: clientDate,
-      userFixture,
-    });
-    const result = await updatePlant({
-      clientDate,
-      dormancyIntervalDays,
-      growingIntervalDays,
-      name,
-      plantId: plant.id,
-      updatedAt: plant.updated_at,
-    });
-    const state = await readPlantState(userFixture, plant.id);
+    { dormancyDelta: 0, dormancyIntervalDays: 30, growingDelta: 0, growingIntervalDays: 7, name: "renamed plant" },
+    { dormancyDelta: 0, dormancyIntervalDays: 30, growingDelta: 3, growingIntervalDays: 10, name: "interval only" },
+    { dormancyDelta: 5, dormancyIntervalDays: 35, growingDelta: 3, growingIntervalDays: 10, name: "both intervals" },
+    { dormancyDelta: 5, dormancyIntervalDays: 35, growingDelta: 5, growingIntervalDays: 12, name: "complete edit" },
+  ])(
+    "preserves the complete record for $name",
+    async ({ dormancyDelta, dormancyIntervalDays, growingDelta, growingIntervalDays, name }) => {
+      const clientDate = getTodayInTimeZone("UTC");
+      const expectedDelta = getSeason(clientDate) === "growing" ? growingDelta : dormancyDelta;
+      const userFixture = await getIntegrationUserFixture();
+      const plant = await createPlantFixture({
+        dueOffsetDays: 8,
+        dormancyIntervalDays: 30,
+        growingIntervalDays: 7,
+        referenceDay: clientDate,
+        userFixture,
+      });
+      const result = await updatePlant({
+        clientDate,
+        dormancyIntervalDays,
+        growingIntervalDays,
+        name,
+        plantId: plant.id,
+        updatedAt: plant.updated_at,
+      });
+      const state = await readPlantState(userFixture, plant.id);
 
-    expect(result).toEqual(state.plant);
-    expect(state.plant).toMatchObject({
-      created_at: plant.created_at,
-      dormancy_interval_days: dormancyIntervalDays,
-      growing_interval_days: growingIntervalDays,
-      id: plant.id,
-      name,
-      photo_path: null,
-      user_id: plant.user_id,
-    });
-    expect(state.plant.updated_at).not.toBe(plant.updated_at);
-    expect(state.wateringEvents).toHaveLength(0);
-  });
+      expect(result).toEqual(state.plant);
+      expect(state.plant).toMatchObject({
+        created_at: plant.created_at,
+        dormancy_interval_days: dormancyIntervalDays,
+        growing_interval_days: growingIntervalDays,
+        id: plant.id,
+        name,
+        next_due_on: addDays(plant.next_due_on, expectedDelta),
+        photo_path: null,
+        user_id: plant.user_id,
+      });
+      expect(state.plant.updated_at).not.toBe(plant.updated_at);
+      expect(state.wateringEvents).toHaveLength(0);
+    },
+  );
 
+  // The two interval pairs are deliberately asymmetric (7 → 1 growing, 30 → 20 dormancy) so the
+  // shift is only correct if the *active* interval for the action date was selected. `getActionDate`
+  // (`src/lib/date.ts:43-51`) rejects a clientDate more than a day from UTC today, so the dormancy
+  // branch itself can only execute here between November and February; `src/lib/season.test.ts` and
+  // `src/lib/schedule.test.ts:43-59` cover the branch year-round.
   test("shifts from the stored due date by the active interval delta without clamping", async () => {
     const clientDate = getTodayInTimeZone("UTC");
+    const expectedDelta = getSeason(clientDate) === "growing" ? -6 : -10;
     const userFixture = await getIntegrationUserFixture();
     const plant = await createPlantFixture({
       dueOffsetDays: -1,
-      dormancyIntervalDays: 7,
+      dormancyIntervalDays: 30,
       growingIntervalDays: 7,
       referenceDay: clientDate,
       userFixture,
@@ -129,7 +152,7 @@ describe("server.updatePlant", () => {
 
     await updatePlant({
       clientDate,
-      dormancyIntervalDays: 1,
+      dormancyIntervalDays: 20,
       growingIntervalDays: 1,
       name: plant.name,
       plantId: plant.id,
@@ -138,7 +161,9 @@ describe("server.updatePlant", () => {
 
     const state = await readPlantState(userFixture, plant.id);
 
-    expect(state.plant.next_due_on).toBe(addDays(plant.next_due_on, -6));
+    expect(state.plant.next_due_on).toBe(addDays(plant.next_due_on, expectedDelta));
+    // Both deltas are negative and the plant was already overdue, so the result lands in the past
+    // in either season — clamping to `>= today` would fail here, which is the point.
     expect(state.plant.next_due_on < clientDate).toBe(true);
   });
 
@@ -174,13 +199,15 @@ describe("server.updatePlant", () => {
       name: keptPlant.name,
       photo: createPhotoFile("replacement.png"),
       plantId: plant.id,
-      removePhoto: true,
       updatedAt: keptPlant.updated_at,
     });
 
     expect(replacedPlant.photo_path).not.toBe(originalPhotoPath);
     expect(replacedPlant.photo_path).not.toBeNull();
     await expectPhotoRetrievable(replacedPlant.photo_path!);
+    // The superseded-object removal at `src/actions/index.ts:186-193` is best-effort and only
+    // logs on failure, so `photo_path` alone cannot prove the old photo left the bucket.
+    await expectPhotoAbsent(originalPhotoPath);
 
     const removedPlant = await updatePlant({
       clientDate,
@@ -193,14 +220,54 @@ describe("server.updatePlant", () => {
     });
 
     expect(removedPlant.photo_path).toBeNull();
-    await removeAllStorageObjects(userFixture.client, userFixture.userId);
+    // Load-bearing: nothing wipes the bucket first, so this fails if either the replace or the
+    // remove intent orphans its superseded object. `resetUserSlot` clears storage before the next
+    // test, and `global-setup.ts` fails the run on residue, so this is the per-case signal.
     await assertNoStorageObjects(userFixture.client, userFixture.userId);
+  });
+
+  // E5: `edit-plant-form.tsx:79,83` never emits `photo` and `removePhoto=true` together, so this
+  // payload is unreachable from the UI but reachable by direct call. The handler's
+  // `if (input.photo) … else if (input.removePhoto)` (`src/actions/index.ts:138-142`) silently
+  // resolves it to replace. Pinned so a reordering of those branches is a deliberate choice.
+  test("resolves a request carrying both a photo and removePhoto to replace", async () => {
+    const clientDate = getTodayInTimeZone("UTC");
+    const userFixture = await getIntegrationUserFixture();
+    const originalPhotoPath = `${userFixture.userId}/${userFixture.createUniqueName("e5")}.png`;
+
+    await uploadPhoto(originalPhotoPath);
+
+    const plant = await createPlantFixture({
+      dueOffsetDays: 0,
+      photoPath: originalPhotoPath,
+      referenceDay: clientDate,
+      userFixture,
+    });
+    const collidedPlant = await updatePlant({
+      clientDate,
+      dormancyIntervalDays: plant.dormancy_interval_days,
+      growingIntervalDays: plant.growing_interval_days,
+      name: plant.name,
+      photo: createPhotoFile("collision.png"),
+      plantId: plant.id,
+      removePhoto: true,
+      updatedAt: plant.updated_at,
+    });
+
+    expect(collidedPlant.photo_path).not.toBeNull();
+    expect(collidedPlant.photo_path).not.toBe(originalPhotoPath);
+    await expectPhotoRetrievable(collidedPlant.photo_path!);
+    await expectPhotoAbsent(originalPhotoPath);
   });
 
   test("rejects a stale token only when the interval delta changes", async () => {
     const clientDate = getTodayInTimeZone("UTC");
     const userFixture = await getIntegrationUserFixture();
     const plant = await createPlantFixture({ dueOffsetDays: 0, referenceDay: clientDate, userFixture });
+    // `plant.updated_at` is passed straight through as the string Postgres returned. Round-tripping
+    // it via `Date` truncates to milliseconds and turns the guard into a permanent conflict — the
+    // failure mode `context/archive/2026-07-25-edit-plant-and-recalc/reviews/impl-review.md:36`
+    // calls the plan's single most fragile requirement.
     const freshPlant = await updatePlant({
       clientDate,
       dormancyIntervalDays: plant.dormancy_interval_days,
@@ -221,6 +288,10 @@ describe("server.updatePlant", () => {
       }),
     ).rejects.toMatchObject({ code: "CONFLICT" });
 
+    // E1, accepted debt: the same stale token now succeeds, because `.eq("updated_at", …)` is
+    // attached only when `deltaDays !== 0` (`src/actions/index.ts:168-170`). A name-only edit is
+    // therefore unguarded and last-write-wins. Pinned as observed behaviour, not endorsed — if the
+    // guard is ever made unconditional, this assertion is the one that should fail first.
     const nameOnlyResult = await updatePlant({
       clientDate,
       dormancyIntervalDays: freshPlant.dormancy_interval_days,
