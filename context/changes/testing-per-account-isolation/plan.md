@@ -693,33 +693,33 @@ migration.
 
 #### Automated
 
-- [x] 2.1 Migration applies cleanly against a reset local stack
-- [x] 2.2 SQL suite passes: `pnpm test:sql`
-- [x] 2.3 Integration suite passes: `pnpm test:integration`
-- [x] 2.4 Type checking passes: `pnpm check`
-- [x] 2.5 Linting passes: `pnpm lint`
-- [x] 2.6 Reverting `20260802120000` makes the INSERT-grant regression cases fail
-- [x] 2.10 Foreign-owner plant INSERT, allowed-column UPDATE and DELETE policy cases pass with owner positive controls
+- [x] 2.1 Migration applies cleanly against a reset local stack — fe4e489
+- [x] 2.2 SQL suite passes: `pnpm test:sql` — fe4e489
+- [x] 2.3 Integration suite passes: `pnpm test:integration` — fe4e489
+- [x] 2.4 Type checking passes: `pnpm check` — fe4e489
+- [x] 2.5 Linting passes: `pnpm lint` — fe4e489
+- [x] 2.6 Reverting `20260802120000` makes the INSERT-grant regression cases fail — fe4e489
+- [x] 2.10 Foreign-owner plant INSERT, allowed-column UPDATE and DELETE policy cases pass with owner positive controls — fe4e489
 
 #### Manual
 
-- [x] 2.7 Adding a plant through the running app still works, with and without a photo
-- [x] 2.8 Editing an existing plant still works
+- [x] 2.7 Adding a plant through the running app still works, with and without a photo — fe4e489
+- [x] 2.8 Editing an existing plant still works — fe4e489
 
 ### Phase 3: Storage Isolation and Close-Out
 
 #### Automated
 
-- [ ] 3.1 SQL suite passes: `pnpm test:sql`
-- [ ] 3.2 Integration suite passes: `pnpm test:integration`
-- [ ] 3.3 Unit suite passes: `pnpm test`
-- [ ] 3.4 Type checking passes: `pnpm check`
-- [ ] 3.5 Linting passes: `pnpm lint`
-- [ ] 3.6 `update-plant.integration.test.ts` passes unchanged after the fixture extraction
-- [ ] 3.10 Storage SELECT, INSERT, UPDATE and DELETE isolation cases pass with owner positive controls
+- [x] 3.1 SQL suite passes: `pnpm test:sql`
+- [x] 3.2 Integration suite passes: `pnpm test:integration`
+- [x] 3.3 Unit suite passes: `pnpm test`
+- [x] 3.4 Type checking passes: `pnpm check`
+- [x] 3.5 Linting passes: `pnpm lint`
+- [x] 3.6 `update-plant.integration.test.ts` passes unchanged after the fixture extraction
+- [x] 3.10 Storage SELECT, INSERT, UPDATE and DELETE isolation cases pass with owner positive controls
 
 #### Manual
 
-- [ ] 3.7 Uploading and viewing a photo through the running app still works
-- [ ] 3.8 Cross-account `download` denial fails if the positive control's upload is removed
-- [ ] 3.9 §6.4 is specific enough to add a fourth isolation case without reading this plan
+- [x] 3.7 Uploading and viewing a photo through the running app still works
+- [x] 3.8 Cross-account `download` denial fails if the positive control's upload is removed
+- [x] 3.9 §6.4 is specific enough to add a fourth isolation case without reading this plan

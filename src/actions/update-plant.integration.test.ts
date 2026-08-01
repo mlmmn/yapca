@@ -4,6 +4,7 @@ import { addDays } from "@/lib/date";
 import { getSeason } from "@/lib/season";
 import { getTodayInTimeZone } from "@/lib/timezone";
 import { createActionContext } from "../../test/fixtures/action-context";
+import { createPhotoFile, downloadPhoto, uploadPhotoFixture } from "../../test/fixtures/photos";
 import { createPlantFixture, readPlantState } from "../../test/fixtures/plants";
 import { assertNoStorageObjects, getIntegrationUserFixture } from "../../test/fixtures/user";
 
@@ -17,10 +18,6 @@ type UpdatePlantInput = {
   removePhoto?: boolean;
   updatedAt: string;
 };
-
-function createPhotoFile(name = "plant.png") {
-  return new File([new Uint8Array([137, 80, 78, 71])], name, { type: "image/png" });
-}
 
 function createUpdateFormData({
   clientDate,
@@ -57,31 +54,10 @@ async function updatePlant(input: UpdatePlantInput) {
   return server.updatePlant.orThrow.call(context, formData);
 }
 
-async function uploadPhoto(path: string) {
-  const userFixture = await getIntegrationUserFixture();
-  const photo = createPhotoFile();
-  const { error } = await userFixture.client.storage.from("plant-photos").upload(path, photo, {
-    contentType: photo.type,
-  });
-
-  if (error) {
-    throw new Error(`Failed to upload fixture photo ${path}: ${error.message}`);
-  }
-}
-
-async function expectPhotoRetrievable(path: string) {
-  const userFixture = await getIntegrationUserFixture();
-  const { data, error } = await userFixture.client.storage.from("plant-photos").download(path);
-
-  expect(error).toBeNull();
-  expect(data?.size).toBeGreaterThan(0);
-}
-
 // Asserts absence positively, by listing, rather than by expecting `download` to fail: *any*
 // storage error satisfies "the download failed", so an expired or broken fixture session would
 // read as "photo correctly deleted". A listing that succeeds and omits the object cannot.
-async function expectPhotoAbsent(path: string) {
-  const userFixture = await getIntegrationUserFixture();
+async function expectPhotoAbsent(userFixture: Awaited<ReturnType<typeof getIntegrationUserFixture>>, path: string) {
   const separatorIndex = path.lastIndexOf("/");
   const folder = path.slice(0, separatorIndex);
   const objectName = path.slice(separatorIndex + 1);
@@ -197,7 +173,7 @@ describe("server.updatePlant", () => {
     const userFixture = await getIntegrationUserFixture();
     const originalPhotoPath = `${userFixture.userId}/original.png`;
 
-    await uploadPhoto(originalPhotoPath);
+    await uploadPhotoFixture(userFixture, originalPhotoPath);
 
     const plant = await createPlantFixture({
       dueOffsetDays: 0,
@@ -215,7 +191,11 @@ describe("server.updatePlant", () => {
     });
 
     expect(keptPlant.photo_path).toBe(originalPhotoPath);
-    await expectPhotoRetrievable(originalPhotoPath);
+
+    const originalPhoto = await downloadPhoto(userFixture, originalPhotoPath);
+
+    expect(originalPhoto.error).toBeNull();
+    expect(originalPhoto.data?.size).toBeGreaterThan(0);
 
     const replacedPlant = await updatePlant({
       clientDate,
@@ -229,10 +209,14 @@ describe("server.updatePlant", () => {
 
     expect(replacedPlant.photo_path).not.toBe(originalPhotoPath);
     expect(replacedPlant.photo_path).not.toBeNull();
-    await expectPhotoRetrievable(replacedPlant.photo_path!);
+
+    const replacementPhoto = await downloadPhoto(userFixture, replacedPlant.photo_path!);
+
+    expect(replacementPhoto.error).toBeNull();
+    expect(replacementPhoto.data?.size).toBeGreaterThan(0);
     // The superseded-object removal at `src/actions/index.ts:186-193` is best-effort and only
     // logs on failure, so `photo_path` alone cannot prove the old photo left the bucket.
-    await expectPhotoAbsent(originalPhotoPath);
+    await expectPhotoAbsent(userFixture, originalPhotoPath);
 
     const removedPlant = await updatePlant({
       clientDate,
@@ -260,7 +244,7 @@ describe("server.updatePlant", () => {
     const userFixture = await getIntegrationUserFixture();
     const originalPhotoPath = `${userFixture.userId}/${userFixture.createUniqueName("e5")}.png`;
 
-    await uploadPhoto(originalPhotoPath);
+    await uploadPhotoFixture(userFixture, originalPhotoPath);
 
     const plant = await createPlantFixture({
       dueOffsetDays: 0,
@@ -281,8 +265,12 @@ describe("server.updatePlant", () => {
 
     expect(collidedPlant.photo_path).not.toBeNull();
     expect(collidedPlant.photo_path).not.toBe(originalPhotoPath);
-    await expectPhotoRetrievable(collidedPlant.photo_path!);
-    await expectPhotoAbsent(originalPhotoPath);
+
+    const collidedPhoto = await downloadPhoto(userFixture, collidedPlant.photo_path!);
+
+    expect(collidedPhoto.error).toBeNull();
+    expect(collidedPhoto.data?.size).toBeGreaterThan(0);
+    await expectPhotoAbsent(userFixture, originalPhotoPath);
   });
 
   test("rejects a stale token only when the interval delta changes", async () => {

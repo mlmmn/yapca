@@ -94,7 +94,7 @@ orchestrator updates Status as artifacts appear on disk.
 | --- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------- | ----------- | ------------- |
 | 1   | Runner bootstrap + calendar math | Every surface agrees on "today"; boundary dates select the documented interval                             | #1, #6        | test-runner setup, unit                       | complete | `context/changes/testing-runner-and-calendar-math/` |
 | 2   | Task-list and mutation integrity | No due or overdue task is silently dropped; water / postpone / undo sequences leave schedule and journal consistent; edits lose nothing | #2, #3, #4    | integration                                   | complete | `context/changes/testing-task-list-and-mutation-integrity/` |
-| 3   | Per-account isolation          | User B cannot reach User A's data by direct id, on any operation                                            | #5            | contract / integration                        | change opened | `context/changes/testing-per-account-isolation/` |
+| 3   | Per-account isolation          | User B cannot reach User A's data by direct id, on any operation                                            | #5            | contract / integration                        | complete | `context/changes/testing-per-account-isolation/` |
 | 4   | Photo upload boundary          | A phone-shaped upload is retrievable afterward, or fails visibly                                            | #7            | integration, documented manual device smoke   | not started | —             |
 | 5   | Quality-gates wiring           | The floor cannot silently drop: tests, lint and typecheck gate merges; migrations proven non-destructive against seeded data | #8, cross-cutting | gates                                     | not started | —             |
 
@@ -238,8 +238,27 @@ change folder.
 
 ### 6.4 Adding a per-account isolation test
 
-TBD — see §3 Phase 3. Will cover the two-seeded-user fixture and direct-id
-access, bypassing the UI (Risk #5).
+Use the two seeded-user slots from `test/fixtures/user.ts`: slot `0` is the
+owner and slot `1` is the attacker. Acquire both at the top of each test before
+creating rows, because each slot resets lazily. The pool is deliberately capped
+at two: Supabase limits sign-ins per IP, and an isolation case needs no third
+identity.
+
+Address the owner row or object directly from the attacker fixture — never
+through the UI, which does not expose a foreign identifier. Put policy and grant
+primitives in `supabase/tests/per-account-isolation.sql`; put Astro Action
+contracts and real client paths (including Storage) in an integration test.
+
+Match the assertion to the denial shape and pair it with an owner positive
+control. Actions must reject with `ActionError` `NOT_FOUND`; RLS reads must yield
+a zero-row result; Storage download/signing must return null data with an error.
+The owner must prove the same setup works, otherwise a broken fixture can make a
+denial test pass vacuously.
+
+Do not use Storage `list` to prove an attacker was denied: a denied list returns
+an empty array, indistinguishable from an empty folder. Use an owner upload plus
+an attacker download/signing attempt; use listing only for an owner-scoped
+absence assertion after a delete.
 
 ### 6.5 Adding a test that crosses the storage boundary
 
