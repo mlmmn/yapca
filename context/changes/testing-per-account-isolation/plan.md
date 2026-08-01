@@ -677,34 +677,34 @@ migration.
 
 #### Automated
 
-- [x] 1.1 Glob runner discovers all three SQL files and passes: `pnpm test:sql`
-- [x] 1.2 Integration suite passes: `pnpm test:integration`
-- [x] 1.3 Unit suite unaffected: `pnpm test`
-- [x] 1.4 Type checking passes: `pnpm check`
-- [x] 1.5 Linting passes: `pnpm lint`
-- [x] 1.6 Deliberate-break check: dropping `plants_select_own` fails both SQL and integration read-isolation cases
+- [x] 1.1 Glob runner discovers all three SQL files and passes: `pnpm test:sql` — 0239f72
+- [x] 1.2 Integration suite passes: `pnpm test:integration` — 0239f72
+- [x] 1.3 Unit suite unaffected: `pnpm test` — 0239f72
+- [x] 1.4 Type checking passes: `pnpm check` — 0239f72
+- [x] 1.5 Linting passes: `pnpm lint` — 0239f72
+- [x] 1.6 Deliberate-break check: dropping `plants_select_own` fails both SQL and integration read-isolation cases — 0239f72
 
 #### Manual
 
-- [x] 1.7 `scripts/run-sql-tests.sh` exits non-zero when any single SQL file fails
-- [x] 1.8 Each positive control fails when its fixture creation is removed
+- [x] 1.7 `scripts/run-sql-tests.sh` exits non-zero when any single SQL file fails — 0239f72
+- [x] 1.8 Each positive control fails when its fixture creation is removed — 0239f72
 
 ### Phase 2: Mutation Isolation and the INSERT-Grant Fix
 
 #### Automated
 
-- [ ] 2.1 Migration applies cleanly against a reset local stack
-- [ ] 2.2 SQL suite passes: `pnpm test:sql`
-- [ ] 2.3 Integration suite passes: `pnpm test:integration`
-- [ ] 2.4 Type checking passes: `pnpm check`
-- [ ] 2.5 Linting passes: `pnpm lint`
-- [ ] 2.6 Reverting `20260802120000` makes the INSERT-grant regression cases fail
-- [ ] 2.10 Foreign-owner plant INSERT, allowed-column UPDATE and DELETE policy cases pass with owner positive controls
+- [x] 2.1 Migration applies cleanly against a reset local stack
+- [x] 2.2 SQL suite passes: `pnpm test:sql`
+- [x] 2.3 Integration suite passes: `pnpm test:integration`
+- [x] 2.4 Type checking passes: `pnpm check`
+- [x] 2.5 Linting passes: `pnpm lint`
+- [x] 2.6 Reverting `20260802120000` makes the INSERT-grant regression cases fail
+- [x] 2.10 Foreign-owner plant INSERT, allowed-column UPDATE and DELETE policy cases pass with owner positive controls
 
 #### Manual
 
-- [ ] 2.7 Adding a plant through the running app still works, with and without a photo
-- [ ] 2.8 Editing an existing plant still works
+- [x] 2.7 Adding a plant through the running app still works, with and without a photo
+- [x] 2.8 Editing an existing plant still works
 
 ### Phase 3: Storage Isolation and Close-Out
 
