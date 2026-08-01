@@ -710,16 +710,16 @@ migration.
 
 #### Automated
 
-- [x] 3.1 SQL suite passes: `pnpm test:sql`
-- [x] 3.2 Integration suite passes: `pnpm test:integration`
-- [x] 3.3 Unit suite passes: `pnpm test`
-- [x] 3.4 Type checking passes: `pnpm check`
-- [x] 3.5 Linting passes: `pnpm lint`
-- [x] 3.6 `update-plant.integration.test.ts` passes unchanged after the fixture extraction
-- [x] 3.10 Storage SELECT, INSERT, UPDATE and DELETE isolation cases pass with owner positive controls
+- [x] 3.1 SQL suite passes: `pnpm test:sql` — 107782f
+- [x] 3.2 Integration suite passes: `pnpm test:integration` — 107782f
+- [x] 3.3 Unit suite passes: `pnpm test` — 107782f
+- [x] 3.4 Type checking passes: `pnpm check` — 107782f
+- [x] 3.5 Linting passes: `pnpm lint` — 107782f
+- [x] 3.6 `update-plant.integration.test.ts` passes unchanged after the fixture extraction — 107782f
+- [x] 3.10 Storage SELECT, INSERT, UPDATE and DELETE isolation cases pass with owner positive controls — 107782f
 
 #### Manual
 
-- [x] 3.7 Uploading and viewing a photo through the running app still works
-- [x] 3.8 Cross-account `download` denial fails if the positive control's upload is removed
-- [x] 3.9 §6.4 is specific enough to add a fourth isolation case without reading this plan
+- [x] 3.7 Uploading and viewing a photo through the running app still works — 107782f
+- [x] 3.8 Cross-account `download` denial fails if the positive control's upload is removed — 107782f
+- [x] 3.9 §6.4 is specific enough to add a fourth isolation case without reading this plan — 107782f
