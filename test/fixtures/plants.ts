@@ -77,3 +77,43 @@ export async function readPlantState(userFixture: IntegrationUserFixture, plantI
 
   return { plant, wateringEvents };
 }
+
+export async function tryReadPlant(userFixture: IntegrationUserFixture, plantId: string): Promise<PlantRow | null> {
+  const { data, error } = await userFixture.client.from("plants").select("*").eq("id", plantId).maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to read plant ${plantId}: ${error.message}`);
+  }
+
+  return data;
+}
+
+export async function tryReadWateringEvents(
+  userFixture: IntegrationUserFixture,
+  plantId: string,
+): Promise<WateringEventRow[]> {
+  const { data, error } = await userFixture.client
+    .from("watering_events")
+    .select("*")
+    .eq("plant_id", plantId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to read watering events for ${plantId}: ${error.message}`);
+  }
+
+  return data;
+}
+
+export async function tryReadWateringEventById(
+  userFixture: IntegrationUserFixture,
+  eventId: string,
+): Promise<WateringEventRow | null> {
+  const { data, error } = await userFixture.client.from("watering_events").select("*").eq("id", eventId).maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to read watering event ${eventId}: ${error.message}`);
+  }
+
+  return data;
+}
