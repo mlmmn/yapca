@@ -41,6 +41,7 @@ export type Database = {
       plants: {
         Row: {
           created_at: string
+          current_watering_event_id: string | null
           dormancy_interval_days: number
           growing_interval_days: number
           id: string
@@ -52,6 +53,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_watering_event_id?: string | null
           dormancy_interval_days: number
           growing_interval_days: number
           id?: string
@@ -63,6 +65,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_watering_event_id?: string | null
           dormancy_interval_days?: number
           growing_interval_days?: number
           id?: string
@@ -72,7 +75,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "plants_current_watering_event_id_fkey"
+            columns: ["current_watering_event_id"]
+            isOneToOne: false
+            referencedRelation: "watering_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       watering_events: {
         Row: {
@@ -83,6 +94,7 @@ export type Database = {
           new_due_on: string
           plant_id: string
           prev_due_on: string
+          previous_event_id: string | null
           user_id: string
         }
         Insert: {
@@ -93,6 +105,7 @@ export type Database = {
           new_due_on: string
           plant_id: string
           prev_due_on: string
+          previous_event_id?: string | null
           user_id: string
         }
         Update: {
@@ -103,6 +116,7 @@ export type Database = {
           new_due_on?: string
           plant_id?: string
           prev_due_on?: string
+          previous_event_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -111,6 +125,13 @@ export type Database = {
             columns: ["plant_id"]
             isOneToOne: false
             referencedRelation: "plants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "watering_events_previous_event_id_fkey"
+            columns: ["previous_event_id"]
+            isOneToOne: false
+            referencedRelation: "watering_events"
             referencedColumns: ["id"]
           },
         ]
@@ -285,4 +306,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

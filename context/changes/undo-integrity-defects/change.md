@@ -1,9 +1,9 @@
 ---
 change_id: undo-integrity-defects
 title: Preserve undo integrity across colliding and edited schedules
-status: new
+status: implementing
 created: 2026-07-31
-updated: 2026-07-31
+updated: 2026-08-01
 archived_at: null
 ---
 

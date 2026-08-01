@@ -3,7 +3,13 @@ pre-commit:
   commands:
     lint:
       glob: "*.{ts,tsx,js,jsx,astro}"
-      run: pnpm eslint --fix --max-warnings=0 {staged_files} && git add {staged_files}
+      # --no-warn-ignored: staged paths are passed to ESLint explicitly, and naming an
+      # ESLint-ignored file directly emits a "File ignored because of a matching ignore
+      # pattern" *warning* — which --max-warnings=0 promotes to a failed commit. That fires
+      # on any commit staging generated sources (e.g. src/lib/database.types.ts, regenerated
+      # whenever a migration lands), even though `pnpm lint` is green because the
+      # project-wide run never visits ignored files. Real rule violations still fail the gate.
+      run: pnpm eslint --fix --max-warnings=0 --no-warn-ignored {staged_files} && git add {staged_files}
     typecheck:
       run: pnpm run check
     test:

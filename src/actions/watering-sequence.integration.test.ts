@@ -237,9 +237,8 @@ describe("schedule mutation sequences", () => {
     ]);
   });
 
-  // V1 defect: undo must reject an out-of-order event when new_due_on collides; the value-based
-  // guard currently accepts it and strands the second event. Expected correction is tracked by
-  // context/changes/undo-integrity-defects/.
+  // Regression: undo rejects an out-of-order event when new_due_on collides. A value-based guard
+  // is ambiguous here, so the explicit event stack provides the LIFO identity instead.
   //
   // Two same-day postpones write E1{prev: D0, new: T+2} and E2{prev: T+2, new: T+2} — the second's
   // prev and new are equal, because the plant was already at T+2. Undo's currency guard compares
@@ -248,9 +247,7 @@ describe("schedule mutation sequences", () => {
   // T+2 that no longer holds and permanently un-undoable with P0003. The same collision occurs for
   // any plant whose interval is 2.
   //
-  // The body below encodes the *corrected* behaviour, so un-skipping it fails today: undo is
-  // last-in-first-out, and unwinding in that order strands nothing.
-  test.skip("rejects an out-of-order undo when same-day postpones share a due date", async () => {
+  test("rejects an out-of-order undo when same-day postpones share a due date", async () => {
     const clientDate = getTodayInTimeZone("UTC");
     const originalDueOn = addDays(clientDate, -3);
     const postponedDueOn = addDays(clientDate, 2);
@@ -264,8 +261,14 @@ describe("schedule mutation sequences", () => {
     expect(postponedState.plant.next_due_on).toBe(postponedDueOn);
     expect(postponedState.wateringEvents).toEqual([
       expect.objectContaining({ id: firstEvent.event_id, new_due_on: postponedDueOn, prev_due_on: originalDueOn }),
-      expect.objectContaining({ id: secondEvent.event_id, new_due_on: postponedDueOn, prev_due_on: postponedDueOn }),
+      expect.objectContaining({
+        id: secondEvent.event_id,
+        new_due_on: postponedDueOn,
+        prev_due_on: postponedDueOn,
+        previous_event_id: firstEvent.event_id,
+      }),
     ]);
+    expect(postponedState.plant.current_watering_event_id).toBe(secondEvent.event_id);
 
     // Out of order: E2 is the current transition, so undoing E1 must be refused rather than
     // silently accepted on a value match.
@@ -278,12 +281,18 @@ describe("schedule mutation sequences", () => {
 
     // In order: E2 then E1 — neither is stranded, and the plant returns to where it started.
     await undoWateringEvent(secondEvent.event_id);
+
+    const afterSecondUndoState = await readPlantState(userFixture, plant.id);
+
+    expect(afterSecondUndoState.plant.current_watering_event_id).toBe(firstEvent.event_id);
+
     await undoWateringEvent(firstEvent.event_id);
 
     const unwoundState = await readPlantState(userFixture, plant.id);
 
     expect(unwoundState.plant.next_due_on).toBe(originalDueOn);
     expect(unwoundState.wateringEvents).toEqual([]);
+    expect(unwoundState.plant.current_watering_event_id).toBeNull();
   });
 
   // V3 defect: a schedule-changing edit must preserve the active undo transition; currently the

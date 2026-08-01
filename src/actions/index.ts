@@ -297,7 +297,14 @@ export const server = {
         }
 
         if (error.code === "P0003") {
-          throw new ActionError({ code: "CONFLICT", message: "This event is no longer current." });
+          throw new ActionError({ code: "CONFLICT", message: "Only the most recent action can be undone." });
+        }
+
+        if (error.code === "P0004") {
+          throw new ActionError({
+            code: "PRECONDITION_FAILED",
+            message: "This action can no longer be undone after an earlier schedule change.",
+          });
         }
 
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to undo event." });
