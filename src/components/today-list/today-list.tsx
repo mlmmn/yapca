@@ -13,12 +13,21 @@ import {
   isClientDateRejection,
 } from "@/lib/date";
 import { findNextUpcoming, isDueOn, selectDueRecords } from "@/lib/due";
+import { isUndoBlockedConflict, isUndoScheduleMismatch } from "@/lib/errors";
 import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
 import { getBrowserToday } from "@/lib/timezone";
 import { cn, prefersReducedMotion } from "@/lib/utils";
 import { useBrowserToday } from "@/components/hooks/use-browser-today";
 import type { PlantListItem } from "@/types";
-import { ANIMATION_MS, formatOverdueDate, getActionLabel, getFailureMessage, getSuccessMessage } from "./utils";
+import {
+  ANIMATION_MS,
+  formatOverdueDate,
+  getActionLabel,
+  getFailureMessage,
+  getSuccessMessage,
+  getUndoBlockedMessage,
+  getUndoScheduleMismatchMessage,
+} from "./utils";
 import type { ActionKind, MutationResult, NoticeContext, TodayListProps } from "./types";
 
 type OptimisticPlant = PlantListItem & { leaving?: boolean };
@@ -111,7 +120,8 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
       duration: 10_000,
       action: {
         label: "Undo",
-        onClick: () => {
+        onClick: (event) => {
+          event.preventDefault();
           handleUndo(noticeId);
         },
       },
@@ -236,7 +246,19 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
             getRowButton(context.plant.id, context.kind)?.focus();
           });
         }
-      } catch {
+      } catch (error) {
+        if (isUndoBlockedConflict(error)) {
+          toast.error(getUndoBlockedMessage(context.plant.name), { id: noticeId, duration: 10_000 });
+
+          return;
+        }
+
+        if (isUndoScheduleMismatch(error)) {
+          toast.error(getUndoScheduleMismatchMessage(context.plant.name), { id: noticeId, duration: 10_000 });
+
+          return;
+        }
+
         toast.error(`Couldn't undo ${context.plant.name}. Try again.`, {
           id: noticeId,
           duration: 10_000,

@@ -24,6 +24,14 @@ export function getFailureMessage(kind: ActionKind, name: string): string {
   return kind === "watered" ? `Couldn't mark ${name} watered. Try again.` : `Couldn't postpone ${name}. Try again.`;
 }
 
+export function getUndoBlockedMessage(name: string): string {
+  return `Couldn't undo ${name}. Undo the newer action first.`;
+}
+
+export function getUndoScheduleMismatchMessage(name: string): string {
+  return `Couldn't undo ${name} safely after a schedule change.`;
+}
+
 export function formatOverdueDate(dateString: string, today: string): string {
   const [dueYear, dueMonth, dueDay] = dateString.split("-").map(Number);
   const [todayYear] = today.split("-").map(Number);

@@ -615,7 +615,7 @@ sacrifices their undoability instead of manufacturing a restore date from ambigu
 #### Manual
 
 - [x] 1.8 Water a plant from Today and press Undo — plant returns with its original due date — fcbc0b1
-- [ ] 1.9 Two-tab conflict shows a message naming the most-recent-action rule
+- [x] 1.9 Two-tab conflict shows a message naming the most-recent-action rule
 
 > 1.9 deferred to Phase 3. The `P0003` → `CONFLICT` mapping lands in this phase
 > (`src/actions/index.ts:300`, "Only the most recent action can be undone."), but
@@ -629,32 +629,32 @@ sacrifices their undoability instead of manufacturing a restore date from ambigu
 
 #### Automated
 
-- [x] 2.1 Both migrations apply cleanly on a reset stack: `pnpx supabase db reset`
-- [x] 2.2 Regenerated types contain `update_plant_schedule` and retain the two header lines
-- [x] 2.3 SQL gate passes: `pnpm test:sql`
-- [x] 2.4 Integration suite passes with both V1 and V3 un-skipped and no `.skip` remaining: `pnpm test:integration`
-- [x] 2.5 Unit suite passes: `pnpm test`
-- [x] 2.6 Type checking passes: `pnpm check`
-- [x] 2.7 Linting passes: `pnpm lint`
+- [x] 2.1 Both migrations apply cleanly on a reset stack: `pnpx supabase db reset` — 9770365
+- [x] 2.2 Regenerated types contain `update_plant_schedule` and retain the two header lines — 9770365
+- [x] 2.3 SQL gate passes: `pnpm test:sql` — 9770365
+- [x] 2.4 Integration suite passes with both V1 and V3 un-skipped and no `.skip` remaining: `pnpm test:integration` — 9770365
+- [x] 2.5 Unit suite passes: `pnpm test` — 9770365
+- [x] 2.6 Type checking passes: `pnpm check` — 9770365
+- [x] 2.7 Linting passes: `pnpm lint` — 9770365
 
 #### Manual
 
-- [x] 2.8 Interval edit moves the header due date and every reachable journal window together
-- [x] 2.9 Water, edit interval in another tab, Undo — restored date reflects the interval edit
-- [x] 2.10 Rename-only edit leaves due date and journal untouched with no spurious conflict
+- [x] 2.8 Interval edit moves the header due date and every reachable journal window together — 9770365
+- [x] 2.9 Water, edit interval in another tab, Undo — restored date reflects the interval edit — 9770365
+- [x] 2.10 Rename-only edit leaves due date and journal untouched with no spurious conflict — 9770365
 
 ### Phase 3: Non-Retryable Undo Failure Handling
 
 #### Automated
 
-- [ ] 3.1 Unit suite passes including the new predicate tests: `pnpm test`
-- [ ] 3.2 Integration suite still passes: `pnpm test:integration`
-- [ ] 3.3 Type checking passes: `pnpm check`
-- [ ] 3.4 Linting passes: `pnpm lint`
-- [ ] 3.5 Narrowed mutation run completes and survivors are triaged: `pnpm exec stryker run --mutate "src/lib/errors.ts"`
+- [x] 3.1 Unit suite passes including the new predicate tests: `pnpm test`
+- [x] 3.2 Integration suite still passes: `pnpm test:integration`
+- [x] 3.3 Type checking passes: `pnpm check`
+- [x] 3.4 Linting passes: `pnpm lint`
+- [x] 3.5 Narrowed mutation run completes and survivors are triaged: `pnpm exec stryker run --mutate "src/lib/errors.ts"`
 
 #### Manual
 
-- [ ] 3.6 Forced conflict shows the blocked-by-newer-event message with no immediate Retry action
-- [ ] 3.7 Forced retryable failure still offers a working Retry
-- [ ] 3.8 All toast paths behave correctly under `prefers-reduced-motion`
+- [x] 3.6 Forced conflict shows the blocked-by-newer-event message with no immediate Retry action
+- [x] 3.7 Forced retryable failure still offers a working Retry
+- [x] 3.8 All toast paths behave correctly under `prefers-reduced-motion`
