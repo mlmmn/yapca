@@ -295,10 +295,9 @@ describe("schedule mutation sequences", () => {
     expect(unwoundState.plant.current_watering_event_id).toBeNull();
   });
 
-  // V3 defect: a schedule-changing edit must preserve the active undo transition; currently the
-  // edit moves next_due_on without a journal row, so undo returns CONFLICT. Expected correction
-  // is tracked by context/changes/undo-integrity-defects/.
-  test.skip("keeps a pending undo valid after a schedule-changing plant edit", async () => {
+  // Regression: a schedule-changing edit moves every reachable undo window by its delta, so undo
+  // reverses the action while preserving the interval edit's immediate schedule effect.
+  test("keeps a pending undo valid after a schedule-changing plant edit", async () => {
     const clientDate = getTodayInTimeZone("UTC");
     const originalDueOn = addDays(clientDate, -2);
     const userFixture = await getIntegrationUserFixture();
@@ -320,11 +319,111 @@ describe("schedule mutation sequences", () => {
       plantId: plant.id,
       updatedAt: wateredState.plant.updated_at,
     });
+
+    const amendedState = await readPlantState(userFixture, plant.id);
+
+    expect(amendedState.plant.next_due_on).toBe(addDays(wateredState.plant.next_due_on, 1));
+    expect(amendedState.wateringEvents).toEqual([
+      expect.objectContaining({
+        id: event.event_id,
+        new_due_on: addDays(wateredState.wateringEvents[0].new_due_on, 1),
+        prev_due_on: addDays(wateredState.wateringEvents[0].prev_due_on, 1),
+      }),
+    ]);
+
     await undoWateringEvent(event.event_id);
 
     const state = await readPlantState(userFixture, plant.id);
 
-    expect(state.plant.next_due_on).toBe(originalDueOn);
+    expect(state.plant.next_due_on).toBe(addDays(originalDueOn, 1));
     expect(state.wateringEvents).toEqual([]);
+  });
+
+  test("retains a schedule-edit delta through a two-event unwind", async () => {
+    const clientDate = getTodayInTimeZone("UTC");
+    const originalDueOn = addDays(clientDate, -2);
+    const userFixture = await getIntegrationUserFixture();
+    const plant = await createPlantFixture({
+      dormancyIntervalDays: 30,
+      dueOffsetDays: -2,
+      growingIntervalDays: 7,
+      referenceDay: clientDate,
+      userFixture,
+    });
+    const firstEvent = await markPlantWatered(plant.id, clientDate);
+    const secondEvent = await markPlantWatered(plant.id, clientDate);
+    const wateredState = await readPlantState(userFixture, plant.id);
+
+    await updatePlantSchedule({
+      clientDate,
+      dormancyIntervalDays: wateredState.plant.dormancy_interval_days + 1,
+      growingIntervalDays: wateredState.plant.growing_interval_days + 1,
+      name: wateredState.plant.name,
+      plantId: plant.id,
+      updatedAt: wateredState.plant.updated_at,
+    });
+
+    const amendedState = await readPlantState(userFixture, plant.id);
+
+    for (const event of wateredState.wateringEvents) {
+      expect(amendedState.wateringEvents).toContainEqual(
+        expect.objectContaining({
+          id: event.id,
+          new_due_on: addDays(event.new_due_on, 1),
+          prev_due_on: addDays(event.prev_due_on, 1),
+        }),
+      );
+    }
+
+    await undoWateringEvent(secondEvent.event_id);
+
+    const afterSecondUndoState = await readPlantState(userFixture, plant.id);
+
+    expect(afterSecondUndoState.plant.next_due_on).toBe(addDays(wateredState.wateringEvents[1].prev_due_on, 1));
+
+    await undoWateringEvent(firstEvent.event_id);
+
+    const unwoundState = await readPlantState(userFixture, plant.id);
+
+    expect(unwoundState.plant.next_due_on).toBe(addDays(originalDueOn, 1));
+    expect(unwoundState.plant.current_watering_event_id).toBeNull();
+    expect(unwoundState.wateringEvents).toEqual([]);
+  });
+
+  test("preserves a divergent legacy stack during a later schedule edit", async () => {
+    const clientDate = getTodayInTimeZone("UTC");
+    const userFixture = await getIntegrationUserFixture();
+    const plant = await createPlantFixture({ dueOffsetDays: -2, referenceDay: clientDate, userFixture });
+    const event = await markPlantWatered(plant.id, clientDate);
+    const wateredState = await readPlantState(userFixture, plant.id);
+    const divergentDueOn = addDays(wateredState.plant.next_due_on, 3);
+    const { error } = await userFixture.client
+      .from("plants")
+      .update({ next_due_on: divergentDueOn })
+      .eq("id", plant.id);
+
+    expect(error).toBeNull();
+
+    const divergentState = await readPlantState(userFixture, plant.id);
+
+    await updatePlantSchedule({
+      clientDate,
+      dormancyIntervalDays: divergentState.plant.dormancy_interval_days + 1,
+      growingIntervalDays: divergentState.plant.growing_interval_days + 1,
+      name: divergentState.plant.name,
+      plantId: plant.id,
+      updatedAt: divergentState.plant.updated_at,
+    });
+
+    const amendedState = await readPlantState(userFixture, plant.id);
+
+    expect(amendedState.plant.next_due_on).toBe(addDays(divergentDueOn, 1));
+    expect(amendedState.wateringEvents).toEqual(divergentState.wateringEvents);
+
+    await expect(undoWateringEvent(event.event_id)).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+
+    const refusedState = await readPlantState(userFixture, plant.id);
+
+    expect(refusedState).toEqual(amendedState);
   });
 });

@@ -156,30 +156,37 @@ export const server = {
           uploadedPhotoPath = nextPhotoPath;
         }
 
-        const payload = {
-          name: input.name,
-          growing_interval_days: input.growing_interval_days,
-          dormancy_interval_days: input.dormancy_interval_days,
-          ...(nextPhotoPath !== undefined ? { photo_path: nextPhotoPath } : {}),
-          ...(scheduleChange.deltaDays !== 0 ? { next_due_on: scheduleChange.newNextDue } : {}),
-        };
-        let query = supabase.from("plants").update(payload).eq("id", input.plantId);
-
-        if (scheduleChange.deltaDays !== 0) {
-          query = query.eq("updated_at", input.updated_at);
-        }
-
-        const { data, error } = await query.select().maybeSingle();
+        const { data, error } = await supabase.rpc("update_plant_schedule", {
+          p_delta_days: scheduleChange.deltaDays,
+          p_dormancy_interval_days: input.dormancy_interval_days,
+          p_growing_interval_days: input.growing_interval_days,
+          p_name: input.name,
+          p_photo_path: nextPhotoPath ?? null,
+          p_plant_id: input.plantId,
+          p_set_photo_path: nextPhotoPath !== undefined,
+          p_updated_at: input.updated_at,
+        });
 
         if (error) {
-          throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to save plant." });
-        }
+          // eslint-disable-next-line no-console -- debug RPC errors
+          console.error("update_plant_schedule RPC error:", {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+          });
 
-        if (!data) {
-          if (scheduleChange.deltaDays !== 0) {
+          if (error.code === "P0002") {
+            throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
+          }
+
+          if (error.code === "P0003") {
             throw new ActionError({ code: "CONFLICT", message: "This plant changed elsewhere." });
           }
 
+          throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to save plant." });
+        }
+
+        if (!data[0]) {
           throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
         }
 
@@ -192,7 +199,7 @@ export const server = {
           }
         }
 
-        return data;
+        return data[0];
       } catch (error) {
         if (uploadedPhotoPath) {
           const { error: cleanupError } = await supabase.storage.from("plant-photos").remove([uploadedPhotoPath]);

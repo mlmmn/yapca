@@ -171,6 +171,36 @@ export type Database = {
           restored_due_on: string
         }[]
       }
+      update_plant_schedule: {
+        Args: {
+          p_delta_days: number
+          p_dormancy_interval_days: number
+          p_growing_interval_days: number
+          p_name: string
+          p_photo_path: string | null
+          p_plant_id: string
+          p_set_photo_path: boolean
+          p_updated_at: string
+        }
+        Returns: {
+          created_at: string
+          current_watering_event_id: string | null
+          dormancy_interval_days: number
+          growing_interval_days: number
+          id: string
+          name: string
+          next_due_on: string
+          photo_path: string | null
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "plants"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       [_ in never]: never

@@ -134,6 +134,135 @@ begin
 end;
 $$;
 
+do $$
+declare
+  v_first record;
+  v_second record;
+  v_plant record;
+  v_stale_updated_at timestamptz;
+  v_event record;
+begin
+  select * into v_first
+  from public.mark_watered('00000000-0000-0000-0000-000000000211', date '2024-03-10');
+
+  select * into v_second
+  from public.mark_watered('00000000-0000-0000-0000-000000000211', date '2024-03-10');
+
+  select updated_at into v_stale_updated_at
+  from public.plants
+  where id = '00000000-0000-0000-0000-000000000211';
+
+  perform * from public.update_plant_schedule(
+    '00000000-0000-0000-0000-000000000211',
+    'Undo stack fixture renamed',
+    7,
+    30,
+    false,
+    null,
+    0,
+    v_stale_updated_at - interval '1 microsecond'
+  );
+
+  begin
+    perform * from public.update_plant_schedule(
+      '00000000-0000-0000-0000-000000000211',
+      'Undo stack fixture renamed again',
+      8,
+      31,
+      false,
+      null,
+      1,
+      v_stale_updated_at - interval '1 microsecond'
+    );
+    raise exception 'Stale schedule token unexpectedly succeeded';
+  exception
+    when sqlstate 'P0003' then
+      null;
+  end;
+
+  select * into v_plant
+  from public.plants
+  where id = '00000000-0000-0000-0000-000000000211';
+
+  perform * from public.update_plant_schedule(
+    '00000000-0000-0000-0000-000000000211',
+    'Undo stack fixture amended',
+    8,
+    31,
+    false,
+    null,
+    1,
+    v_plant.updated_at
+  );
+
+  select * into v_event
+  from public.watering_events
+  where id = v_first.event_id;
+
+  if v_event.prev_due_on <> date '2024-03-02' or v_event.new_due_on <> date '2024-03-18' then
+    raise exception 'First event window did not shift by the schedule delta';
+  end if;
+
+  select * into v_event
+  from public.watering_events
+  where id = v_second.event_id;
+
+  if v_event.prev_due_on <> date '2024-03-18' or v_event.new_due_on <> date '2024-03-18' then
+    raise exception 'Second event window did not shift by the schedule delta';
+  end if;
+
+  perform * from public.undo_watering_event(v_second.event_id);
+  perform * from public.undo_watering_event(v_first.event_id);
+
+  select * into v_plant
+  from public.plants
+  where id = '00000000-0000-0000-0000-000000000211';
+
+  if v_plant.next_due_on <> date '2024-03-02' or v_plant.current_watering_event_id is not null then
+    raise exception 'Amended stack did not retain the schedule delta through unwind';
+  end if;
+
+  update public.plants
+  set next_due_on = date '2024-03-20'
+  where id = '00000000-0000-0000-0000-000000000212';
+
+  select * into v_plant
+  from public.plants
+  where id = '00000000-0000-0000-0000-000000000212';
+
+  perform * from public.update_plant_schedule(
+    '00000000-0000-0000-0000-000000000212',
+    'Divergent undo fixture amended',
+    8,
+    31,
+    false,
+    null,
+    1,
+    v_plant.updated_at
+  );
+
+  if not exists (
+    select 1
+    from public.watering_events
+    where plant_id = '00000000-0000-0000-0000-000000000212'
+      and prev_due_on = date '2024-03-01'
+      and new_due_on = date '2024-03-17'
+  ) then
+    raise exception 'Divergent stack was amended despite its mismatch';
+  end if;
+
+  begin
+    perform * from public.undo_watering_event((
+      select id from public.watering_events where plant_id = '00000000-0000-0000-0000-000000000212'
+    ));
+    raise exception 'Divergent stack unexpectedly undid after schedule edit';
+  exception
+    when sqlstate 'P0004' then
+      null;
+  end;
+end;
+$$;
+
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000012","role":"authenticated"}';
 
 do $$
@@ -148,6 +277,23 @@ begin
   begin
     perform * from public.undo_watering_event(v_other_event.event_id);
     raise exception 'Another user''s event unexpectedly undid';
+  exception
+    when sqlstate 'P0002' then
+      null;
+  end;
+
+  begin
+    perform * from public.update_plant_schedule(
+      '00000000-0000-0000-0000-000000000213',
+      'Other owner fixture',
+      7,
+      30,
+      false,
+      null,
+      0,
+      now()
+    );
+    raise exception 'Another user''s plant unexpectedly updated';
   exception
     when sqlstate 'P0002' then
       null;

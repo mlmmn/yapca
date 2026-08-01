@@ -173,6 +173,25 @@ describe("server.updatePlant", () => {
     expect(state.plant.next_due_on < clientDate).toBe(true);
   });
 
+  test("updates a schedule-changing plant with no journal events without creating one", async () => {
+    const clientDate = getTodayInTimeZone("UTC");
+    const userFixture = await getIntegrationUserFixture();
+    const plant = await createPlantFixture({ dueOffsetDays: 0, referenceDay: clientDate, userFixture });
+
+    await updatePlant({
+      clientDate,
+      dormancyIntervalDays: plant.dormancy_interval_days + 1,
+      growingIntervalDays: plant.growing_interval_days + 1,
+      name: plant.name,
+      plantId: plant.id,
+      updatedAt: plant.updated_at,
+    });
+
+    const state = await readPlantState(userFixture, plant.id);
+
+    expect(state.wateringEvents).toEqual([]);
+  });
+
   test("keeps, replaces, and removes photos according to intent", async () => {
     const clientDate = getTodayInTimeZone("UTC");
     const userFixture = await getIntegrationUserFixture();

@@ -604,17 +604,17 @@ sacrifices their undoability instead of manufacturing a restore date from ambigu
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly against a reset local stack: `pnpx supabase db reset`
-- [x] 1.2 Regenerated types contain both stack-link columns and retain the two header lines
-- [x] 1.3 SQL gate passes: `pnpm test:sql`
-- [x] 1.4 Integration suite passes with the V1 test un-skipped: `pnpm test:integration`
-- [x] 1.5 Unit suite passes: `pnpm test`
-- [x] 1.6 Type checking passes: `pnpm check`
-- [x] 1.7 Linting passes: `pnpm lint`
+- [x] 1.1 Migration applies cleanly against a reset local stack: `pnpx supabase db reset` — fcbc0b1
+- [x] 1.2 Regenerated types contain both stack-link columns and retain the two header lines — fcbc0b1
+- [x] 1.3 SQL gate passes: `pnpm test:sql` — fcbc0b1
+- [x] 1.4 Integration suite passes with the V1 test un-skipped: `pnpm test:integration` — fcbc0b1
+- [x] 1.5 Unit suite passes: `pnpm test` — fcbc0b1
+- [x] 1.6 Type checking passes: `pnpm check` — fcbc0b1
+- [x] 1.7 Linting passes: `pnpm lint` — fcbc0b1
 
 #### Manual
 
-- [x] 1.8 Water a plant from Today and press Undo — plant returns with its original due date
+- [x] 1.8 Water a plant from Today and press Undo — plant returns with its original due date — fcbc0b1
 - [ ] 1.9 Two-tab conflict shows a message naming the most-recent-action rule
 
 > 1.9 deferred to Phase 3. The `P0003` → `CONFLICT` mapping lands in this phase
@@ -629,19 +629,19 @@ sacrifices their undoability instead of manufacturing a restore date from ambigu
 
 #### Automated
 
-- [ ] 2.1 Both migrations apply cleanly on a reset stack: `pnpx supabase db reset`
-- [ ] 2.2 Regenerated types contain `update_plant_schedule` and retain the two header lines
-- [ ] 2.3 SQL gate passes: `pnpm test:sql`
-- [ ] 2.4 Integration suite passes with both V1 and V3 un-skipped and no `.skip` remaining: `pnpm test:integration`
-- [ ] 2.5 Unit suite passes: `pnpm test`
-- [ ] 2.6 Type checking passes: `pnpm check`
-- [ ] 2.7 Linting passes: `pnpm lint`
+- [x] 2.1 Both migrations apply cleanly on a reset stack: `pnpx supabase db reset`
+- [x] 2.2 Regenerated types contain `update_plant_schedule` and retain the two header lines
+- [x] 2.3 SQL gate passes: `pnpm test:sql`
+- [x] 2.4 Integration suite passes with both V1 and V3 un-skipped and no `.skip` remaining: `pnpm test:integration`
+- [x] 2.5 Unit suite passes: `pnpm test`
+- [x] 2.6 Type checking passes: `pnpm check`
+- [x] 2.7 Linting passes: `pnpm lint`
 
 #### Manual
 
-- [ ] 2.8 Interval edit moves the header due date and every reachable journal window together
-- [ ] 2.9 Water, edit interval in another tab, Undo — restored date reflects the interval edit
-- [ ] 2.10 Rename-only edit leaves due date and journal untouched with no spurious conflict
+- [x] 2.8 Interval edit moves the header due date and every reachable journal window together
+- [x] 2.9 Water, edit interval in another tab, Undo — restored date reflects the interval edit
+- [x] 2.10 Rename-only edit leaves due date and journal untouched with no spurious conflict
 
 ### Phase 3: Non-Retryable Undo Failure Handling
 
