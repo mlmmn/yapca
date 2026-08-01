@@ -183,6 +183,13 @@ export const server = {
             throw new ActionError({ code: "CONFLICT", message: "This plant changed elsewhere." });
           }
 
+          // Every RPC raises 28000 when auth.uid() is null. requireSession makes that
+          // near-unreachable, but a session expiring mid-request should prompt re-auth
+          // rather than surface as a 500.
+          if (error.code === "28000") {
+            throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+          }
+
           throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to save plant." });
         }
 
@@ -242,6 +249,13 @@ export const server = {
           throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
         }
 
+        // Every RPC raises 28000 when auth.uid() is null. requireSession makes that
+        // near-unreachable, but a session expiring mid-request should prompt re-auth
+        // rather than surface as a 500.
+        if (error.code === "28000") {
+          throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+        }
+
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to mark plant watered." });
       }
 
@@ -273,6 +287,13 @@ export const server = {
 
         if (error.code === "P0002") {
           throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
+        }
+
+        // Every RPC raises 28000 when auth.uid() is null. requireSession makes that
+        // near-unreachable, but a session expiring mid-request should prompt re-auth
+        // rather than surface as a 500.
+        if (error.code === "28000") {
+          throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
         }
 
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to postpone plant." });
@@ -312,6 +333,13 @@ export const server = {
             code: "PRECONDITION_FAILED",
             message: "This action can no longer be undone after an earlier schedule change.",
           });
+        }
+
+        // Every RPC raises 28000 when auth.uid() is null. requireSession makes that
+        // near-unreachable, but a session expiring mid-request should prompt re-auth
+        // rather than surface as a 500.
+        if (error.code === "28000") {
+          throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
         }
 
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to undo event." });

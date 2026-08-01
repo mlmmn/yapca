@@ -331,6 +331,12 @@ describe("schedule mutation sequences", () => {
       }),
     ]);
 
+    // The delta assertions above hold each side against addDays(..., 1) separately, so the
+    // plant-journal invariant they imply is only transitive. Pin it directly: the current
+    // event's window must still end exactly where the plant is now due, because that
+    // alignment -- not the restore date alone -- is what keeps the event undoable.
+    expect(amendedState.wateringEvents[0].new_due_on).toBe(amendedState.plant.next_due_on);
+
     await undoWateringEvent(event.event_id);
 
     const state = await readPlantState(userFixture, plant.id);

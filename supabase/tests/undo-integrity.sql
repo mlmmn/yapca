@@ -141,6 +141,10 @@ declare
   v_plant record;
   v_stale_updated_at timestamptz;
   v_event record;
+  v_due_before date;
+  v_due_after date;
+  v_events_before jsonb;
+  v_events_after jsonb;
 begin
   select * into v_first
   from public.mark_watered('00000000-0000-0000-0000-000000000211', date '2024-03-10');
@@ -152,6 +156,16 @@ begin
   from public.plants
   where id = '00000000-0000-0000-0000-000000000211';
 
+  -- Snapshot the schedule and the whole journal so the zero-delta call below can be
+  -- shown to leave both untouched, rather than leaving that implied by later baselines.
+  select next_due_on into v_due_before
+  from public.plants
+  where id = '00000000-0000-0000-0000-000000000211';
+
+  select jsonb_agg(to_jsonb(e.*) order by e.id) into v_events_before
+  from public.watering_events as e
+  where e.plant_id = '00000000-0000-0000-0000-000000000211';
+
   perform * from public.update_plant_schedule(
     '00000000-0000-0000-0000-000000000211',
     'Undo stack fixture renamed',
@@ -162,6 +176,22 @@ begin
     0,
     v_stale_updated_at - interval '1 microsecond'
   );
+
+  select next_due_on into v_due_after
+  from public.plants
+  where id = '00000000-0000-0000-0000-000000000211';
+
+  select jsonb_agg(to_jsonb(e.*) order by e.id) into v_events_after
+  from public.watering_events as e
+  where e.plant_id = '00000000-0000-0000-0000-000000000211';
+
+  if v_due_after <> v_due_before then
+    raise exception 'Zero-delta edit moved next_due_on from % to %', v_due_before, v_due_after;
+  end if;
+
+  if v_events_after is distinct from v_events_before then
+    raise exception 'Zero-delta edit modified the journal';
+  end if;
 
   begin
     perform * from public.update_plant_schedule(
@@ -298,6 +328,67 @@ begin
     when sqlstate 'P0002' then
       null;
   end;
+end;
+$$;
+
+-- The stack pointer must stay RPC-only.
+--
+-- `plants.current_watering_event_id` is a plain foreign key: RLS decides which row a
+-- client may update, but nothing constrains which event id it writes there. While the
+-- client held a table-wide UPDATE grant, a user could aim their own plant at another
+-- user's event, and the victim's own undo and plant deletion then failed at
+-- constraint-check time with 23503 -- a cross-tenant denial of service they could not
+-- clear. 20260801120002 narrowed the grant to the columns the client legitimately edits.
+-- This asserts the grant, not the policy, because only the grant can express it.
+
+do $$
+declare
+  v_editable_denied text;
+begin
+  if has_column_privilege('authenticated', 'public.plants', 'current_watering_event_id', 'update') then
+    raise exception 'authenticated must not hold UPDATE on plants.current_watering_event_id';
+  end if;
+
+  -- Withheld for the same reason: row identity, ownership, and the optimistic-lock
+  -- token update_plant_schedule compares against.
+  if has_column_privilege('authenticated', 'public.plants', 'id', 'update')
+    or has_column_privilege('authenticated', 'public.plants', 'user_id', 'update')
+    or has_column_privilege('authenticated', 'public.plants', 'updated_at', 'update') then
+    raise exception 'authenticated must not hold UPDATE on plant identity or lock columns';
+  end if;
+
+  -- The columns the edit form legitimately writes must remain granted, or the app breaks
+  -- in a way no other assertion here would catch.
+  select string_agg(column_name, ', ')
+  into v_editable_denied
+  from unnest(array['name', 'growing_interval_days', 'dormancy_interval_days', 'next_due_on', 'photo_path'])
+    as column_name
+  where not has_column_privilege('authenticated', 'public.plants', column_name, 'update');
+
+  if v_editable_denied is not null then
+    raise exception 'authenticated lost UPDATE on editable plant columns: %', v_editable_denied;
+  end if;
+end;
+$$;
+
+-- Anonymous callers must not reach any stack-mutating RPC.
+do $$
+declare
+  v_granted text;
+begin
+  select string_agg(signature, ', ')
+  into v_granted
+  from unnest(array[
+    'public.mark_watered(uuid, date)',
+    'public.postpone_plant(uuid, date)',
+    'public.undo_watering_event(uuid)',
+    'public.update_plant_schedule(uuid, text, int, int, boolean, text, int, timestamptz)'
+  ]) as signature
+  where has_function_privilege('anon', signature, 'execute');
+
+  if v_granted is not null then
+    raise exception 'anon must not hold EXECUTE on: %', v_granted;
+  end if;
 end;
 $$;
 

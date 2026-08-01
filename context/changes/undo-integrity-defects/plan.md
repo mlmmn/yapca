@@ -397,8 +397,8 @@ delta-adjusted starting date, the current pointer is null, and the journal is em
 
 Add a legacy-compatibility regression that creates a current event, directly diverges the plant date
 to model pre-migration state, then performs another schedule edit. Assert the plant edit succeeds,
-the entire event stack remains byte-for-byte unchanged, and undo rejects with `CONFLICT` without
-changing either plant or journal state.
+the entire event stack remains byte-for-byte unchanged, and undo rejects with
+`PRECONDITION_FAILED` without changing either plant or journal state.
 
 #### 5. Cover the amendment against the existing edit tests
 

@@ -1,26 +1,26 @@
 import { describe, expect, test } from "vitest";
-import { isUndoBlockedConflict, isUndoScheduleMismatch } from "./errors";
+import { isConflict, isPreconditionFailed } from "./errors";
 
-describe("isUndoBlockedConflict", () => {
+describe("isConflict", () => {
   test("recognizes only a conflict error", () => {
-    expect(isUndoBlockedConflict({ code: "CONFLICT" })).toBe(true);
-    expect(isUndoBlockedConflict({ code: "PRECONDITION_FAILED" })).toBe(false);
-    expect(isUndoBlockedConflict({ code: "INTERNAL_SERVER_ERROR" })).toBe(false);
+    expect(isConflict({ code: "CONFLICT" })).toBe(true);
+    expect(isConflict({ code: "PRECONDITION_FAILED" })).toBe(false);
+    expect(isConflict({ code: "INTERNAL_SERVER_ERROR" })).toBe(false);
   });
 
   test.each([null, undefined, "CONFLICT", {}])("rejects a non-error value: %s", (error) => {
-    expect(isUndoBlockedConflict(error)).toBe(false);
+    expect(isConflict(error)).toBe(false);
   });
 });
 
-describe("isUndoScheduleMismatch", () => {
+describe("isPreconditionFailed", () => {
   test("recognizes only a schedule mismatch error", () => {
-    expect(isUndoScheduleMismatch({ code: "PRECONDITION_FAILED" })).toBe(true);
-    expect(isUndoScheduleMismatch({ code: "CONFLICT" })).toBe(false);
-    expect(isUndoScheduleMismatch({ code: "INTERNAL_SERVER_ERROR" })).toBe(false);
+    expect(isPreconditionFailed({ code: "PRECONDITION_FAILED" })).toBe(true);
+    expect(isPreconditionFailed({ code: "CONFLICT" })).toBe(false);
+    expect(isPreconditionFailed({ code: "INTERNAL_SERVER_ERROR" })).toBe(false);
   });
 
   test.each([null, undefined, "PRECONDITION_FAILED", {}])("rejects a non-error value: %s", (error) => {
-    expect(isUndoScheduleMismatch(error)).toBe(false);
+    expect(isPreconditionFailed(error)).toBe(false);
   });
 });

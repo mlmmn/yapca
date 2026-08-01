@@ -13,7 +13,7 @@ import {
   isClientDateRejection,
 } from "@/lib/date";
 import { findNextUpcoming, isDueOn, selectDueRecords } from "@/lib/due";
-import { isUndoBlockedConflict, isUndoScheduleMismatch } from "@/lib/errors";
+import { isConflict, isPreconditionFailed } from "@/lib/errors";
 import { getSeason, getShortSeasonLabel, selectSeasonInterval } from "@/lib/season";
 import { getBrowserToday } from "@/lib/timezone";
 import { cn, prefersReducedMotion } from "@/lib/utils";
@@ -247,13 +247,13 @@ export default function TodayList({ plants, fetchError = false, today: initialTo
           });
         }
       } catch (error) {
-        if (isUndoBlockedConflict(error)) {
+        if (isConflict(error)) {
           toast.error(getUndoBlockedMessage(context.plant.name), { id: noticeId, duration: 10_000 });
 
           return;
         }
 
-        if (isUndoScheduleMismatch(error)) {
+        if (isPreconditionFailed(error)) {
           toast.error(getUndoScheduleMismatchMessage(context.plant.name), { id: noticeId, duration: 10_000 });
 
           return;

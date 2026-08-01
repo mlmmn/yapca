@@ -1,3 +1,5 @@
+import { hasErrorCode } from "@/lib/errors";
+
 const DATE_STRING_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 // A dedicated code, not the display copy, is the machine-readable marker for a rejected
@@ -51,7 +53,7 @@ export function isPlausibleClientDate(candidate: string, utcToday: string): bool
 }
 
 export function isClientDateRejection(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === CLIENT_DATE_ERROR_CODE;
+  return hasErrorCode(error, CLIENT_DATE_ERROR_CODE);
 }
 
 export function parseLocalDateString(dateString: string): Date {
