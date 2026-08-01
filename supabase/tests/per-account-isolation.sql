@@ -63,7 +63,13 @@ begin
   select string_agg(privilege, ', ')
   into v_watering_events_write_privileges
   from unnest(array['INSERT', 'UPDATE', 'DELETE']) as privilege
-  where has_table_privilege('authenticated', 'public.watering_events', privilege);
+  -- INSERT and UPDATE are checked column-aware: has_table_privilege returns false when only
+  -- column-level grants exist, which is the grant shape 20260802120000 introduces on plants.
+  -- DELETE has no column-level form in Postgres, so it stays a table-level check.
+  where case
+    when privilege = 'DELETE' then has_table_privilege('authenticated', 'public.watering_events', privilege)
+    else has_any_column_privilege('authenticated', 'public.watering_events', privilege)
+  end;
 
   if v_watering_events_write_privileges is not null then
     raise exception 'authenticated must not hold watering_events write privileges: %', v_watering_events_write_privileges;

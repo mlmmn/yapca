@@ -18,7 +18,7 @@ let cachedEnv: IntegrationEnv | null = null;
 
 // The fixture harness deletes rows from `auth.users`, and `plants`/`watering_events` cascade from
 // it — so a `SUPABASE_DB_URL` pointing anywhere but the local stack destroys real data. Presence
-// checks alone cannot catch that; `package.json`'s `test:sql` hardcodes 127.0.0.1:54322 for the
+// checks alone cannot catch that; `scripts/run-sql-tests.sh` hardcodes 127.0.0.1:54322 for the
 // same reason. Fail before anything caches or connects.
 function assertLocalDatabaseUrl(databaseUrl: string): void {
   let parsedUrl: URL;

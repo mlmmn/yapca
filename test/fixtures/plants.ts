@@ -65,15 +65,7 @@ export async function readPlantState(userFixture: IntegrationUserFixture, plantI
     throw new Error(`Failed to read plant ${plantId}: ${plantError.message}`);
   }
 
-  const { data: wateringEvents, error: wateringEventsError } = await userFixture.client
-    .from("watering_events")
-    .select("*")
-    .eq("plant_id", plantId)
-    .order("created_at", { ascending: true });
-
-  if (wateringEventsError) {
-    throw new Error(`Failed to read watering events for ${plantId}: ${wateringEventsError.message}`);
-  }
+  const wateringEvents = await tryReadWateringEvents(userFixture, plantId);
 
   return { plant, wateringEvents };
 }

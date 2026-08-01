@@ -4,56 +4,20 @@ import { buildPhotoPath, resolvePhotoUrl } from "@/lib/photo";
 import { getTodayInTimeZone } from "@/lib/timezone";
 import { createActionContext } from "../../test/fixtures/action-context";
 import { expectActionNotFound, expectStorageDenied } from "../../test/fixtures/denial";
-import { createPhotoFile, downloadPhoto, uploadPhotoFixture } from "../../test/fixtures/photos";
+import {
+  createEventActionFormData,
+  createPlantActionFormData,
+  markPlantWatered,
+} from "../../test/fixtures/plant-actions";
+import {
+  createPhotoFile,
+  downloadPhoto,
+  expectPhotoAbsent,
+  expectPhotoAvailable,
+  uploadPhotoFixture,
+} from "../../test/fixtures/photos";
 import { createPlantFixture, readPlantState } from "../../test/fixtures/plants";
-import { getIntegrationUserFixture, type IntegrationUserFixture } from "../../test/fixtures/user";
-
-function createPlantActionFormData(plantId: string, clientDate: string) {
-  const formData = new FormData();
-
-  formData.set("plantId", plantId);
-  formData.set("clientDate", clientDate);
-
-  return formData;
-}
-
-function createEventActionFormData(eventId: string) {
-  const formData = new FormData();
-
-  formData.set("eventId", eventId);
-
-  return formData;
-}
-
-async function markPlantWatered(userFixture: IntegrationUserFixture, plantId: string, clientDate: string) {
-  const context = createActionContext(userFixture);
-
-  return server.markWatered.orThrow.call(context, createPlantActionFormData(plantId, clientDate));
-}
-
-async function expectPhotoAvailable(userFixture: IntegrationUserFixture, path: string) {
-  const result = await downloadPhoto(userFixture, path);
-
-  expect(result.error).toBeNull();
-  expect(result.data?.size).toBeGreaterThan(0);
-
-  return result.data!;
-}
-
-async function expectPhotoAbsentForOwner(userFixture: IntegrationUserFixture, path: string) {
-  const separatorIndex = path.lastIndexOf("/");
-  const folder = path.slice(0, separatorIndex);
-  const objectName = path.slice(separatorIndex + 1);
-  const { data, error } = await userFixture.client.storage.from("plant-photos").list(folder);
-
-  expect(error).toBeNull();
-
-  if (!data) {
-    throw new Error(`Expected an owner-scoped storage listing for ${folder}.`);
-  }
-
-  expect(data.map((entry) => entry.name)).not.toContain(objectName);
-}
+import { getIntegrationUserFixture } from "../../test/fixtures/user";
 
 describe("server.markWatered", () => {
   test("returns NOT_FOUND and preserves another account's complete plant state", async () => {
@@ -66,7 +30,14 @@ describe("server.markWatered", () => {
       userFixture: ownerFixture,
     });
     const attackerContext = createActionContext(attackerFixture);
+
+    // Seeded so the snapshot's ordered watering_events array is non-empty: an empty-to-empty
+    // comparison would not detect a reordering or a mutation of an existing event.
+    await markPlantWatered(ownerFixture, ownerPlant.id, clientDate);
+
     const beforeState = await readPlantState(ownerFixture, ownerPlant.id);
+
+    expect(beforeState.wateringEvents.length).toBeGreaterThan(0);
 
     await expectActionNotFound(() =>
       server.markWatered.orThrow.call(attackerContext, createPlantActionFormData(ownerPlant.id, clientDate)),
@@ -89,7 +60,14 @@ describe("server.postponePlant", () => {
       userFixture: ownerFixture,
     });
     const attackerContext = createActionContext(attackerFixture);
+
+    // Seeded for the same reason as the markWatered case: a non-empty event array is what makes
+    // the "complete ordered watering_events" half of the snapshot meaningful.
+    await markPlantWatered(ownerFixture, ownerPlant.id, clientDate);
+
     const beforeState = await readPlantState(ownerFixture, ownerPlant.id);
+
+    expect(beforeState.wateringEvents.length).toBeGreaterThan(0);
 
     await expectActionNotFound(() =>
       server.postponePlant.orThrow.call(attackerContext, createPlantActionFormData(ownerPlant.id, clientDate)),
@@ -114,6 +92,8 @@ describe("server.undoWateringEvent", () => {
     const ownerEvent = await markPlantWatered(ownerFixture, ownerPlant.id, clientDate);
     const attackerContext = createActionContext(attackerFixture);
     const beforeState = await readPlantState(ownerFixture, ownerPlant.id);
+
+    expect(beforeState.wateringEvents.length).toBeGreaterThan(0);
 
     await expectActionNotFound(() =>
       server.undoWateringEvent.orThrow.call(attackerContext, createEventActionFormData(ownerEvent.event_id)),
@@ -229,6 +209,6 @@ describe("storage.objects", () => {
     const { error: ownerError } = await ownerFixture.client.storage.from("plant-photos").remove([ownerPath]);
 
     expect(ownerError).toBeNull();
-    await expectPhotoAbsentForOwner(ownerFixture, ownerPath);
+    await expectPhotoAbsent(ownerFixture, ownerPath);
   });
 });

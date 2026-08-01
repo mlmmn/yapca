@@ -19,14 +19,19 @@ export async function expectActionNotFound(call: () => Promise<unknown>): Promis
 // RLS read policies deny access by filtering rows, rather than rejecting the request like an
 // Action or Storage policy. This accepts only the zero-row shapes from tryRead* helpers.
 export function expectNoRowVisible(value: unknown): void {
-  const absent = value === null || (Array.isArray(value) && value.length === 0);
+  // Normalised to an array so a genuine leak prints the offending row, rather than reporting
+  // "expected false to be true" at the one moment the row's contents matter most.
+  const singleRows = value === null ? [] : [value];
+  const visibleRows = Array.isArray(value) ? value : singleRows;
 
-  expect(absent).toBe(true);
+  expect(visibleRows).toEqual([]);
 }
 
 // Storage download/signing denies access with an error and null data. Do not use list here:
 // a denied list returns [], which is indistinguishable from an empty folder.
 export function expectStorageDenied(result: { data: unknown; error: unknown }): void {
-  expect(result.error).not.toBeNull();
+  // `toBeTruthy` rather than `not.toBeNull`: the latter also passes for `undefined`, which is the
+  // shape a helper that forgot to return the Storage result would produce.
+  expect(result.error).toBeTruthy();
   expect(result.data).toBeNull();
 }

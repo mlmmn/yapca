@@ -3,22 +3,14 @@ import { server } from "@/actions/index";
 import { getTodayInTimeZone } from "@/lib/timezone";
 import { createActionContext } from "../../../test/fixtures/action-context";
 import { expectActionNotFound, expectNoRowVisible } from "../../../test/fixtures/denial";
+import { createUpdatePlantFormData, markPlantWatered } from "../../../test/fixtures/plant-actions";
 import {
   createPlantFixture,
   tryReadPlant,
   tryReadWateringEventById,
   tryReadWateringEvents,
 } from "../../../test/fixtures/plants";
-import { getIntegrationUserFixture, type IntegrationUserFixture } from "../../../test/fixtures/user";
-
-function createPlantMutationFormData(plantId: string, clientDate: string) {
-  const formData = new FormData();
-
-  formData.set("plantId", plantId);
-  formData.set("clientDate", clientDate);
-
-  return formData;
-}
+import { getIntegrationUserFixture } from "../../../test/fixtures/user";
 
 function createUpdateFormData(
   plant: {
@@ -30,26 +22,17 @@ function createUpdateFormData(
   },
   clientDate: string,
 ) {
-  const formData = new FormData();
-
-  formData.set("plantId", plant.id);
-  formData.set("name", plant.name);
-  formData.set("growing_interval_days", String(plant.growing_interval_days));
-  formData.set("dormancy_interval_days", String(plant.dormancy_interval_days));
-  formData.set("removePhoto", "false");
-  formData.set("updated_at", plant.updated_at);
-  formData.set("clientDate", clientDate);
-
-  return formData;
+  return createUpdatePlantFormData({
+    clientDate,
+    dormancyIntervalDays: plant.dormancy_interval_days,
+    growingIntervalDays: plant.growing_interval_days,
+    name: plant.name,
+    plantId: plant.id,
+    updatedAt: plant.updated_at,
+  });
 }
 
-async function markPlantWatered(userFixture: IntegrationUserFixture, plantId: string, clientDate: string) {
-  const context = createActionContext(userFixture);
-
-  return server.markWatered.orThrow.call(context, createPlantMutationFormData(plantId, clientDate));
-}
-
-describe("tryReadPlant", () => {
+describe("plants_select_own", () => {
   test("hides another account's plant addressed by direct id", async () => {
     const clientDate = getTodayInTimeZone("UTC");
     const attackerFixture = await getIntegrationUserFixture(1);
@@ -67,7 +50,7 @@ describe("tryReadPlant", () => {
   });
 });
 
-describe("tryReadWateringEvents", () => {
+describe("watering_events_select_own", () => {
   test("hides another account's watering events by plant and event id", async () => {
     const clientDate = getTodayInTimeZone("UTC");
     const attackerFixture = await getIntegrationUserFixture(1);
@@ -90,7 +73,7 @@ describe("tryReadWateringEvents", () => {
   });
 });
 
-describe("server.updatePlant", () => {
+describe("server.updatePlant cross-account pre-read", () => {
   test("returns NOT_FOUND for another account's plant before reaching its mutation RPC", async () => {
     const clientDate = getTodayInTimeZone("UTC");
     const attackerFixture = await getIntegrationUserFixture(1);

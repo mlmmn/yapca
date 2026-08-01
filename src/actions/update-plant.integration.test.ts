@@ -4,67 +4,17 @@ import { addDays } from "@/lib/date";
 import { getSeason } from "@/lib/season";
 import { getTodayInTimeZone } from "@/lib/timezone";
 import { createActionContext } from "../../test/fixtures/action-context";
-import { createPhotoFile, downloadPhoto, uploadPhotoFixture } from "../../test/fixtures/photos";
+import { createUpdatePlantFormData, type UpdatePlantFormInput } from "../../test/fixtures/plant-actions";
+import { createPhotoFile, downloadPhoto, expectPhotoAbsent, uploadPhotoFixture } from "../../test/fixtures/photos";
 import { createPlantFixture, readPlantState } from "../../test/fixtures/plants";
 import { assertNoStorageObjects, getIntegrationUserFixture } from "../../test/fixtures/user";
 
-type UpdatePlantInput = {
-  clientDate: string;
-  dormancyIntervalDays: number;
-  growingIntervalDays: number;
-  name: string;
-  photo?: File;
-  plantId: string;
-  removePhoto?: boolean;
-  updatedAt: string;
-};
-
-function createUpdateFormData({
-  clientDate,
-  dormancyIntervalDays,
-  growingIntervalDays,
-  name,
-  photo,
-  plantId,
-  removePhoto = false,
-  updatedAt,
-}: UpdatePlantInput) {
-  const formData = new FormData();
-
-  formData.set("plantId", plantId);
-  formData.set("name", name);
-  formData.set("growing_interval_days", String(growingIntervalDays));
-  formData.set("dormancy_interval_days", String(dormancyIntervalDays));
-  formData.set("removePhoto", String(removePhoto));
-  formData.set("updated_at", updatedAt);
-  formData.set("clientDate", clientDate);
-
-  if (photo) {
-    formData.set("photo", photo);
-  }
-
-  return formData;
-}
-
-async function updatePlant(input: UpdatePlantInput) {
+async function updatePlant(input: UpdatePlantFormInput) {
   const userFixture = await getIntegrationUserFixture();
   const context = createActionContext(userFixture);
-  const formData = createUpdateFormData(input);
+  const formData = createUpdatePlantFormData(input);
 
   return server.updatePlant.orThrow.call(context, formData);
-}
-
-// Asserts absence positively, by listing, rather than by expecting `download` to fail: *any*
-// storage error satisfies "the download failed", so an expired or broken fixture session would
-// read as "photo correctly deleted". A listing that succeeds and omits the object cannot.
-async function expectPhotoAbsent(userFixture: Awaited<ReturnType<typeof getIntegrationUserFixture>>, path: string) {
-  const separatorIndex = path.lastIndexOf("/");
-  const folder = path.slice(0, separatorIndex);
-  const objectName = path.slice(separatorIndex + 1);
-  const { data, error } = await userFixture.client.storage.from("plant-photos").list(folder);
-
-  expect(error).toBeNull();
-  expect(data?.map((entry) => entry.name)).not.toContain(objectName);
 }
 
 describe("server.updatePlant", () => {
