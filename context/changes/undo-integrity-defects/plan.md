@@ -647,14 +647,14 @@ sacrifices their undoability instead of manufacturing a restore date from ambigu
 
 #### Automated
 
-- [x] 3.1 Unit suite passes including the new predicate tests: `pnpm test`
-- [x] 3.2 Integration suite still passes: `pnpm test:integration`
-- [x] 3.3 Type checking passes: `pnpm check`
-- [x] 3.4 Linting passes: `pnpm lint`
-- [x] 3.5 Narrowed mutation run completes and survivors are triaged: `pnpm exec stryker run --mutate "src/lib/errors.ts"`
+- [x] 3.1 Unit suite passes including the new predicate tests: `pnpm test` — c3fb42e
+- [x] 3.2 Integration suite still passes: `pnpm test:integration` — c3fb42e
+- [x] 3.3 Type checking passes: `pnpm check` — c3fb42e
+- [x] 3.4 Linting passes: `pnpm lint` — c3fb42e
+- [x] 3.5 Narrowed mutation run completes and survivors are triaged: `pnpm exec stryker run --mutate "src/lib/errors.ts"` — c3fb42e
 
 #### Manual
 
-- [x] 3.6 Forced conflict shows the blocked-by-newer-event message with no immediate Retry action
-- [x] 3.7 Forced retryable failure still offers a working Retry
-- [x] 3.8 All toast paths behave correctly under `prefers-reduced-motion`
+- [x] 3.6 Forced conflict shows the blocked-by-newer-event message with no immediate Retry action — c3fb42e
+- [x] 3.7 Forced retryable failure still offers a working Retry — c3fb42e
+- [x] 3.8 All toast paths behave correctly under `prefers-reduced-motion` — c3fb42e
