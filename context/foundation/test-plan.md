@@ -310,6 +310,15 @@ pass. New migration versions must sort after the base ref's newest version;
 out-of-order additions and edits, deletions, copies, or renames of historical
 migrations fail the gate.
 
+Scope limit: the gate proves **row survival** — presence and per-column values in
+`plants`, `watering_events`, and the fixture's `auth.users` row. A dropped or
+renamed column or table also fails it, because the assertions declare `%rowtype`
+against live tables. It does *not* see dropped RLS policies, revoked grants,
+dropped functions, or the `plant-photos` storage bucket that `plants.photo_path`
+references — `20260802120000_narrow_plants_insert_grant.sql` is precisely the
+class of change it cannot detect. Those remain the province of
+`supabase/tests/*.sql` and the integration suite.
+
 (Filled in as phases land.)
 
 ## 7. What We Deliberately Don't Test
@@ -335,6 +344,7 @@ should respect these unless the underlying assumption changes.
 - 2026-08-02: §3 Phase 5, implementation phase 1 — `test:integration`, `test:sql`, and `test:http` now run sequentially against a local Supabase stack in the required `database` CI job; the existing no-Docker checks report as `static`.
 - 2026-08-02: §3 Phase 5, implementation phase 2 — `test:migrations` now replays new migrations over persistent baseline rows and the required `migrations` CI job reports green-by-skip when no migration changed.
 - 2026-08-02: §3 Phase 5 completed — the `main` ruleset requires `static`, `database`, and `migrations` to pass on an up-to-date branch; enforcement was verified by deliberate failing-gate pull requests.
+- 2026-08-02: §3 Phase 5 implementation review — the HTTP suite's readiness budget is 90s on CI (cold workerd start) and stays 20s locally; the migration gate's baseline fixture, its post-`migration up` applied-set self-check, and its untracked-migration and version-format guards were repaired after the review found the gate could fail on its own fixture or pass without proving anything.
 - Strategy (§1–§5) last reviewed: 2026-07-31 (Risk #3 edit recalculation wording corrected to the shipped interval-delta rule)
 - Stack versions last verified: 2026-07-27 (Stryker 9.6.1 added to §4/§5)
 - AI-native tool references last verified: 2026-07-25

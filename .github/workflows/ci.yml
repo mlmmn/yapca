@@ -56,7 +56,18 @@ jobs:
       - run: pnpm exec supabase start
       - name: Materialize local Supabase environment
         run: |
-          eval "$(pnpm exec supabase status -o env)"
+          set -euo pipefail
+          # Capture on its own line: `eval` returns 0 on empty input, so a failed
+          # `supabase status` would otherwise write an empty .env and go green.
+          status_env="$(pnpm exec supabase status -o env)"
+          eval "$status_env"
+          for required in API_URL ANON_KEY DB_URL; do
+            eval "value=\${$required:-}"
+            if [ -z "$value" ]; then
+              echo "supabase status did not report $required" >&2
+              exit 1
+            fi
+          done
           {
             printf 'SUPABASE_URL=%s\n' "$API_URL"
             printf 'SUPABASE_KEY=%s\n' "$ANON_KEY"
