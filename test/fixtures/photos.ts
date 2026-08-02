@@ -1,8 +1,31 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { expect } from "vitest";
 import type { IntegrationUserFixture } from "./user";
 
+const thisDirectory = path.dirname(fileURLToPath(import.meta.url));
+const jpegFixturePath = path.join(thisDirectory, "images", "seed.jpg");
+
 export function createPhotoFile(name = "plant.png") {
   return new File([`fixture photo: ${name}`], name, { type: "image/png" });
+}
+
+export async function createPaddedJpegFile(targetBytes: number, name = "plant.jpg") {
+  const seedBytes = await readFile(jpegFixturePath);
+  const paddingBytes = targetBytes - seedBytes.byteLength;
+
+  if (paddingBytes < 0) {
+    throw new RangeError(`JPEG fixture is ${seedBytes.byteLength} bytes, larger than requested ${targetBytes}.`);
+  }
+
+  // Deliberately append after the JPEG EOI marker: the fixture retains genuine JPEG/EXIF bytes
+  // while reaching boundary sizes cheaply. Revisit this helper if validation starts sniffing bytes.
+  return new File([seedBytes, new Uint8Array(paddingBytes)], name, { type: "image/jpeg" });
+}
+
+export function createHeicFile(name = "plant.heic") {
+  return new File(["fixture HEIC payload"], name, { type: "image/heic" });
 }
 
 export async function uploadPhotoFixture(userFixture: IntegrationUserFixture, path: string) {

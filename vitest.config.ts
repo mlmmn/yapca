@@ -20,7 +20,7 @@ export default defineConfig({
   test: {
     name: "unit",
     include: ["src/**/*.test.{ts,tsx}"],
-    exclude: ["src/**/*.integration.test.{ts,tsx}"],
+    exclude: ["src/**/*.integration.test.{ts,tsx}", "src/**/*.http.test.{ts,tsx}"],
     environment: "node",
     env: { TZ: process.env.TZ ?? "UTC" },
   },

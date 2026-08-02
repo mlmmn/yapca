@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:http": "vitest run --config vitest.http.config.ts",
     "test:sql": "./scripts/run-sql-tests.sh",
     "test:mutants": "stryker run"
   },

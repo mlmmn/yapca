@@ -4,6 +4,7 @@
 // not be in its program and `inject()` would type as `never`.
 declare module "vitest" {
   export interface ProvidedContext {
+    httpBaseUrl: string;
     integrationRunNamespace: string;
   }
 }

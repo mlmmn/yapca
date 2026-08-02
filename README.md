@@ -35,8 +35,8 @@ SUPABASE_DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 
 For a hosted project instead, use its Project URL and `anon` public key (dashboard → Settings → API).
 
-`SUPABASE_DB_URL` is required only by the integration test suite (`pnpm test:integration`),
-which uses it to mint fixture users directly. The app itself never reads it. If your `.env`
+`SUPABASE_DB_URL` is required only by the Supabase-backed test suites (`pnpm test:integration`
+and `pnpm test:http`), which use it to mint fixture users directly. The app itself never reads it. If your `.env`
 predates this variable, add it — `cp .env.example .env` is a one-time bootstrap step, so an
 existing `.env` will not pick it up and the suite will fail with `Missing: SUPABASE_DB_URL`.
 
@@ -71,6 +71,7 @@ For a hosted Supabase project:
 - `pnpm build` / `pnpm preview` — production build / preview
 - `pnpm lint` / `pnpm lint:fix` — ESLint (type-checked)
 - `pnpm format` — Prettier
+- `pnpm test:integration` / `pnpm test:http` — local-Supabase integration suites
 
 ## Deploy
 
