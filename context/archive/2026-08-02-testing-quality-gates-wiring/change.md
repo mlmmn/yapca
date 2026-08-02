@@ -1,10 +1,10 @@
 ---
 change_id: testing-quality-gates-wiring
 title: Testing quality gates wiring
-status: impl_reviewed
+status: archived
 created: 2026-08-02
 updated: 2026-08-02
-archived_at: null
+archived_at: 2026-08-02T22:19:36Z
 ---
 
 ## Notes
