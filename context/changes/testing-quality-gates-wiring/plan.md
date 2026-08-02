@@ -512,11 +512,11 @@ legitimate use.
 
 #### Automated
 
-- [x] 2.1 `pnpm lint` and `pnpm check` pass
-- [x] 2.2 No new migrations → `pnpm test:migrations` prints SKIP, exits 0
-- [x] 2.3 Scratch additive migration → exits 0 with fixture rows asserted
-- [x] 2.4 Scratch destructive migration → exits non-zero
-- [x] 2.5 Scratch out-of-order or changed historical migration → exits non-zero with the applicable history-integrity message
+- [x] 2.1 `pnpm lint` and `pnpm check` pass — c904140
+- [x] 2.2 No new migrations → `pnpm test:migrations` prints SKIP, exits 0 — c904140
+- [x] 2.3 Scratch additive migration → exits 0 with fixture rows asserted — c904140
+- [x] 2.4 Scratch destructive migration → exits non-zero — c904140
+- [x] 2.5 Scratch out-of-order or changed historical migration → exits non-zero with the applicable history-integrity message — c904140
 - [ ] 2.6 Pull request targeting `main` touching migrations → `migrations` job does work and passes
 - [ ] 2.7 Pull request targeting `main` touching no migration → `migrations` job green with skip message
 
