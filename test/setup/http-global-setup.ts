@@ -8,7 +8,7 @@ import integrationGlobalSetup from "./global-setup";
 const require = createRequire(import.meta.url);
 const astroCliPath = path.join(path.dirname(require.resolve("astro/package.json")), "bin", "astro.mjs");
 const candidatePort = 4321;
-const readinessTimeoutMs = 20_000;
+const readinessTimeoutMs = 45_000;
 const probeTimeoutMs = 2_000;
 const shutdownTimeoutMs = 5_000;
 const shutdownSignals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
