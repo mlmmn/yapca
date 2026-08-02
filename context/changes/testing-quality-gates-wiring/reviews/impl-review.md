@@ -4,8 +4,8 @@
 - **Plan**: context/changes/testing-quality-gates-wiring/plan.md
 - **Scope**: Phases 1–3 of 3 (full plan)
 - **Date**: 2026-08-02
-- **Verdict**: REJECTED (all 10 findings triaged and fixed)
-- **Findings**: 1 critical, 5 warnings, 4 observations
+- **Verdict**: NEEDS ATTENTION (9 findings fixed; F1 withdrawn as a misdiagnosis)
+- **Findings**: 5 warnings, 4 observations (1 critical withdrawn)
 
 ## Verdicts
 
@@ -13,30 +13,28 @@
 |-----------|---------|
 | Plan Adherence | WARNING |
 | Scope Discipline | WARNING |
-| Safety & Quality | FAIL |
+| Safety & Quality | WARNING |
 | Architecture | PASS |
 | Pattern Consistency | WARNING |
-| Success Criteria | FAIL |
+| Success Criteria | PASS |
 
 ## Findings
 
-### F1 — Migration gate fails on every migration PR: fixture no longer sets a column the assertions require
+### F1 — WITHDRAWN (misdiagnosis): fixture correctly omits post-baseline columns
 
-- **Severity**: ❌ CRITICAL
+- **Severity**: ❌ CRITICAL — **retracted**
 - **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
 - **Dimension**: Safety & Quality
 - **Location**: supabase/migration-gate/assert-survival.sql:60,75 ↔ supabase/migration-gate/baseline-fixture.sql
 - **Detail**: Commit `9d8a525` deleted the fixture's trailing `update public.plants set current_watering_event_id = …` block (and the `previous_event_id` insert columns), but `assert-survival.sql:60` and `:75` still assert `current_watering_event_id is distinct from '…0921' / '…0922'`. Nothing else populates that column — it is a plain nullable column added in `20260801120000_explicit_undo_stack.sql` with no default, and the only trigger in the schema is `plants_set_updated_at`; the column is written exclusively by the `mark_watered` / `postpone_plant` / `undo_watering_event` RPCs, which the fixture bypasses with direct inserts. Verified empirically against the running local stack (inside a rolled-back transaction): `ERROR: Migration gate growing-plant values changed / CONTEXT: PL/pgSQL function inline_code_block line 59 at RAISE`.
 
-  The commit's stated rationale ("keep the baseline fixture valid before the branch's schema migrations") does not hold: `20260801120000_explicit_undo_stack.sql` is present on `main` (`git ls-tree main -- supabase/migrations`), so both columns exist in the baseline schema, and this branch adds no migration of its own. The removal was unnecessary and broke the gate.
+  **This finding was wrong, and the "fix" broke CI (run 30769112661).** The reproduction ran the fixture against *current `main`'s* schema. That is not the baseline the gate replays. In CI the base ref is `github.event.pull_request.base.sha` = `3713425`, whose newest migration is `20260724120000` — before `previous_event_id` and `current_watering_event_id` exist. `20260801120000_explicit_undo_stack.sql` **adds both columns and backfills them**: `lag(id) over (partition by plant_id order by created_at, id)` for `previous_event_id`, and `distinct on (plant_id) … order by created_at desc` for `current_watering_event_id`. Against the true baseline the fixture *cannot* reference those columns, the migration creates and populates them, and `assert-survival.sql:60,75` verifies the backfill reproduced exactly the linkage the fixture's event ordering implies. That is the gate doing its job — proving a data-migration preserved causality — not a broken assertion.
 
-  Consequences: `migrations` is now a required status check (ruleset 20253578 confirmed), so the next PR that adds any migration — including a trivially safe additive one — gets an unmergeable red check whose message blames the author's migration rather than the fixture. Progress row 2.3 ("scratch additive migration → exits 0 with fixture rows asserted") is stamped `c904140`, i.e. verified *before* `9d8a525` broke it and never re-run; it is not reproducible against HEAD. Secondary loss: the fixture no longer populates the undo-stack linkage columns at all, so the gate has lost coverage of the FK-orphaning class that Risk #8 exists to catch.
-- **Fix**: Restore the `update public.plants set current_watering_event_id = …` block (and the `previous_event_id` insert columns) at the end of `baseline-fixture.sql`, then re-run the Phase 2 scratch-migration cases and re-stamp Progress rows 2.3 / 2.6. Dropping the two assertions instead is explicitly forbidden by the Phase 2 contract and test-plan §6.7 ("must not remove a row or value assertion merely to make the gate pass").
-  - Strength: Returns the gate to the arrangement that was actually verified at `c904140`, and restores Risk #8's orphaning coverage.
-  - Tradeoff: None — the removed lines were valid against the baseline schema.
-  - Confidence: HIGH — reproduced empirically twice, independently.
-  - Blind spot: None significant.
-- **Decision**: FIXED
+  Commit `9d8a525` ("target the true migration baseline") was therefore correct, and its rationale holds precisely. The error was verifying against `origin/main` locally instead of the PR's actual base sha, where the backfill never runs because the columns already exist.
+
+  Retained lesson: a finding about the migration gate is only reproducible against the base ref the gate actually uses. Verify with `MIGRATION_GATE_BASE_REF=<pr base sha>`, never against `main`.
+- **Resolution**: Reverted to the `9d8a525` fixture. Re-verified with `MIGRATION_GATE_BASE_REF=3713425…` — exit 0, reset to `20260724120000`, four migrations replayed, assertions passed.
+- **Decision**: WITHDRAWN — no defect; original code restored
 
 ### F2 — `migration up` is not verified to have applied anything
 

@@ -48,7 +48,6 @@ insert into public.watering_events (
   acted_on,
   prev_due_on,
   new_due_on,
-  previous_event_id,
   created_at
 )
 values
@@ -60,7 +59,6 @@ values
     date '2025-03-01',
     date '2025-02-22',
     date '2025-03-08',
-    null,
     timestamptz '2025-03-01 12:00:00+00'
   ),
   (
@@ -71,16 +69,5 @@ values
     date '2025-11-13',
     date '2025-11-10',
     date '2025-11-15',
-    null,
     timestamptz '2025-11-13 12:00:00+00'
   );
-
-update public.plants
-set current_watering_event_id = case id
-  when '00000000-0000-0000-0000-000000000911'::uuid then '00000000-0000-0000-0000-000000000921'::uuid
-  when '00000000-0000-0000-0000-000000000912'::uuid then '00000000-0000-0000-0000-000000000922'::uuid
-end
-where id in (
-  '00000000-0000-0000-0000-000000000911',
-  '00000000-0000-0000-0000-000000000912'
-);
