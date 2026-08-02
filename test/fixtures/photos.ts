@@ -75,3 +75,19 @@ export async function expectPhotoAbsent(userFixture: IntegrationUserFixture, pat
 
   expect(data.map((entry) => entry.name)).not.toContain(objectName);
 }
+
+export async function expectPlantPhotoUploadAbsent(userFixture: IntegrationUserFixture, plantName: string) {
+  const { data: plant, error: plantError } = await userFixture.client
+    .from("plants")
+    .select("id")
+    .eq("name", plantName)
+    .maybeSingle();
+  const { data: objects, error: storageError } = await userFixture.client.storage
+    .from("plant-photos")
+    .list(userFixture.userId);
+
+  expect(plantError).toBeNull();
+  expect(plant).toBeNull();
+  expect(storageError).toBeNull();
+  expect(objects).toEqual([]);
+}

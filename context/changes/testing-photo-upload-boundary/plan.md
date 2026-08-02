@@ -560,36 +560,36 @@ is explicitly out of scope here but should be noted when Phase 5 opens.
 
 #### Automated
 
-- [x] 1.1 Lint passes: `pnpm lint`
-- [x] 1.2 Type checking passes: `pnpm check`
-- [x] 1.3 Unit suite still passes: `pnpm test`
-- [x] 1.4 Existing integration suite still passes and is not slowed by a server boot: `pnpm test:integration`
-- [x] 1.5 The new suite passes: `pnpm test:http`
-- [x] 1.6 Running `pnpm test:http` twice in a row passes both times
-- [x] 1.7 README formatting passes: `pnpm exec prettier --check README.md`
+- [x] 1.1 Lint passes: `pnpm lint` — ab35fa9
+- [x] 1.2 Type checking passes: `pnpm check` — ab35fa9
+- [x] 1.3 Unit suite still passes: `pnpm test` — ab35fa9
+- [x] 1.4 Existing integration suite still passes and is not slowed by a server boot: `pnpm test:integration` — ab35fa9
+- [x] 1.5 The new suite passes: `pnpm test:http` — ab35fa9
+- [x] 1.6 Running `pnpm test:http` twice in a row passes both times — ab35fa9
+- [x] 1.7 README formatting passes: `pnpm exec prettier --check README.md` — ab35fa9
 
 #### Manual
 
-- [x] 1.8 `pnpm test:http` exits cleanly with no orphaned `astro dev` process
-- [x] 1.9 Running `pnpm dev` first does not wedge `pnpm test:http` on a port collision
-- [x] 1.10 Killing the Supabase stack mid-run produces a readable failure, not a hang
+- [x] 1.8 `pnpm test:http` exits cleanly with no orphaned `astro dev` process — ab35fa9
+- [x] 1.9 Running `pnpm dev` first does not wedge `pnpm test:http` on a port collision — ab35fa9
+- [x] 1.10 Killing the Supabase stack mid-run produces a readable failure, not a hang — ab35fa9
 
 ### Phase 2: Risk #7 case matrix
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `pnpm lint`
-- [ ] 2.2 Type checking passes: `pnpm check`
-- [ ] 2.3 Full matrix passes: `pnpm test:http`
-- [ ] 2.4 Existing suites unaffected: `pnpm test` and `pnpm test:integration`
-- [ ] 2.5 Suite teardown reports no residual Storage objects
+- [x] 2.1 Lint passes: `pnpm lint`
+- [x] 2.2 Type checking passes: `pnpm check`
+- [x] 2.3 Full matrix passes: `pnpm test:http`
+- [x] 2.4 Existing suites unaffected: `pnpm test` and `pnpm test:integration`
+- [x] 2.5 Suite teardown reports no residual Storage objects
 
 #### Manual
 
-- [ ] 2.6 Deliberate break: raising `MAX_PHOTO_BYTES` above the body limit turns the near-limit cases red
-- [ ] 2.7 Deliberate break: adding `image/heic` to the allowlist turns the HEIC case red
-- [ ] 2.8 Deliberate break: lowering `actionBodySizeLimit` to 1 MiB turns the near-limit cases red
-- [ ] 2.9 Oversized case fails at the body limit, not at schema validation
+- [x] 2.6 Deliberate break: raising `MAX_PHOTO_BYTES` above the body limit turns the near-limit cases red
+- [x] 2.7 Deliberate break: adding `image/heic` to the allowlist turns the HEIC case red
+- [x] 2.8 Deliberate break: lowering `actionBodySizeLimit` to 1 MiB turns the near-limit cases red
+- [x] 2.9 Oversized case fails at the body limit, not at schema validation
 
 ### Phase 3: Cookbook, gate, and manual smoke
 
