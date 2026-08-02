@@ -1,10 +1,10 @@
 ---
 change_id: testing-per-account-isolation
 title: Per-account isolation — prove User B cannot reach User A's data by direct id
-status: impl_reviewed
+status: archived
 created: 2026-08-01
-updated: 2026-08-01
-archived_at: null
+updated: 2026-08-02
+archived_at: 2026-08-02T19:36:43Z
 ---
 
 ## Notes
