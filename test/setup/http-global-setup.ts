@@ -8,7 +8,9 @@ import integrationGlobalSetup from "./global-setup";
 const require = createRequire(import.meta.url);
 const astroCliPath = path.join(path.dirname(require.resolve("astro/package.json")), "bin", "astro.mjs");
 const candidatePort = 4321;
-const readinessTimeoutMs = 20_000;
+// A cold workerd start on a CI runner needs far longer than a warm local one;
+// keeping the local budget tight preserves fast feedback on a genuinely stuck server.
+const readinessTimeoutMs = process.env.CI ? 90_000 : 20_000;
 const probeTimeoutMs = 2_000;
 const shutdownTimeoutMs = 5_000;
 const shutdownSignals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];

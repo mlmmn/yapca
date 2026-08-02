@@ -96,7 +96,7 @@ orchestrator updates Status as artifacts appear on disk.
 | 2   | Task-list and mutation integrity | No due or overdue task is silently dropped; water / postpone / undo sequences leave schedule and journal consistent; edits lose nothing | #2, #3, #4    | integration                                   | complete | `context/changes/testing-task-list-and-mutation-integrity/` |
 | 3   | Per-account isolation          | User B cannot reach User A's data by direct id, on any operation                                            | #5            | contract / integration                        | complete | `context/changes/testing-per-account-isolation/` |
 | 4   | Photo upload boundary          | A phone-shaped upload is retrievable afterward, or fails visibly                                            | #7            | integration, documented manual device smoke   | complete | `context/changes/testing-photo-upload-boundary/` |
-| 5   | Quality-gates wiring           | The floor cannot silently drop: tests, lint and typecheck gate merges; migrations proven non-destructive against seeded data | #8, cross-cutting | gates                                     | not started | —             |
+| 5   | Quality-gates wiring           | The floor cannot silently drop: tests, lint and typecheck gate merges; migrations proven non-destructive against seeded data | #8, cross-cutting | gates                                     | complete | `context/changes/testing-quality-gates-wiring/` |
 
 Ordering rationale: nothing is testable until a runner exists, so Phase 1
 bootstraps it against the top hot-spot directory using the cheapest possible
@@ -138,7 +138,7 @@ The classic test base for this project. AI-native tools (if any) carry a
 | test-quality audit   | Stryker + `@stryker-mutator/vitest-runner`         | 9.6.1   | `pnpm test:mutants`. **Advisory, not a gate** (`break: null` — a low score never fails a run) and not wired into CI. Its purpose is to detect the anti-pattern §2 names most often: an assertion whose expected value was lifted from the implementation under test. A tautological assertion produces a survived mutant by construction. Per `AGENTS.md`: narrow with `--mutate "path/to/file.ts:start-end"`, never chase 100%, review survivors one by one and add an assertion only when the mutant is a user-visible or business-relevant bug. Note the config's `mutate` glob spans all of `src/`, while the only suite today is Phase 1's `src/lib/` units — an unnarrowed run reports a near-zero score that is noise, not a finding. checked: 2026-07-27 |
 | Astro component render | none yet — optional, no phase claims it          | —       | Astro Container API (`experimental_AstroContainer`) exists if `.astro` components ever need rendering. Not scheduled — §7 excludes the UI layer. checked: 2026-07-25 |
 | integration substrate | local Supabase stack (`pnpx supabase start`)     | CLI 2.x | Already a devDependency. Requires Docker. The seeded-database harness for §3 Phases 2–4.                                    |
-| HTTP upload boundary | Astro dev on workerd + Vitest                    | Astro 6 / Vitest 4.1.10 | `pnpm test:http` starts an opt-in local workerd server and posts real multipart requests to `/_actions/*`; it requires the same local Supabase stack as integration tests. checked: 2026-08-02 |
+| HTTP upload boundary | Astro dev on workerd + Vitest                    | Astro 6 / Vitest 4.1.10 | `pnpm test:http` starts a local workerd server and posts real multipart requests to `/_actions/*`; it requires the same local Supabase stack as integration tests and is enforced in CI. checked: 2026-08-02 |
 | API mocking          | none — deliberate                                  | —       | The external boundary here is Supabase, and the local stack is real. Mocking it would test the mock (see §2 Risk #7 anti-pattern). |
 | e2e                  | none — deliberate                                  | —       | No rollout phase claims a browser layer; §7 excludes the UI while the design is unsettled.                                  |
 | accessibility        | `eslint-plugin-jsx-a11y`                           | 6.10.2  | Already wired into lint. The non-color-only overdue cue is a design constraint tracked in `DESIGN.md`, not an automated assertion. |
@@ -161,9 +161,10 @@ phase lands; before that, the gate is planned.
 | ----------------------------- | -------------------- | ---------------------------- | ---------------------------------------------------------------- |
 | lint + typecheck              | local (husky) + CI   | required — already wired      | syntactic and type drift                                          |
 | unit                          | local + CI           | required — enforced           | calendar and interval math regressions                            |
-| integration                   | local + CI           | required after §3 Phase 2     | task-list omissions, mutation and recalculation defects           |
-| per-account isolation         | CI on PR             | required after §3 Phase 3     | cross-user data access                                            |
-| migration safety              | CI on PR             | required after §3 Phase 5     | migrations that drop or orphan existing rows                      |
+| integration                   | local + CI           | required — enforced           | task-list omissions, mutation and recalculation defects           |
+| per-account isolation         | CI on PR             | required — enforced           | cross-user data access                                            |
+| HTTP upload boundary          | CI on PR             | required — enforced           | HTTP multipart upload boundary and Worker request-size regressions |
+| migration safety              | CI on PR             | required — enforced           | migrations that drop or orphan existing rows                      |
 | manual device photo smoke     | before release       | recommended after §3 Phase 4  | real-phone upload formats no automated test reproduces            |
 | mutation audit (Stryker)      | local only — not in CI | advisory, never blocking     | assertions copied from the implementation under test (tautological tests that can never fail for the right reason) |
 
@@ -297,6 +298,36 @@ with `context/foundation/manual-device-smoke.md` before release.
 
 ### 6.6 Per-rollout-phase notes
 
+### 6.7 Adding a migration-safety check
+
+`pnpm test:migrations` proves migrations against rows that existed before the
+migration under test. Keep `supabase/migration-gate/baseline-fixture.sql` valid
+against the base-ref schema; it is deliberately not updated pre-emptively for a
+migration in the same PR. If an intentional schema transformation changes a
+fixture field, update `assert-survival.sql` to map and assert every original
+value in its new representation — never remove an assertion to make the gate
+pass. New migration versions must sort after the base ref's newest version;
+out-of-order additions and edits, deletions, copies, or renames of historical
+migrations fail the gate.
+
+Reproducing a gate failure: CI replays against `github.event.pull_request.base.sha`,
+which is the base branch tip *when the PR was opened or last synced* — often well
+behind current `main`. Running the gate locally against `origin/main` therefore
+exercises a different baseline schema and can contradict CI in both directions.
+Always reproduce with `MIGRATION_GATE_BASE_REF=<the sha from the failing job's env>`.
+In particular, a fixture column that a replayed migration *adds and backfills* must
+be absent from the fixture and asserted only afterwards — that is the gate proving a
+data migration preserved causality, not a broken assertion.
+
+Scope limit: the gate proves **row survival** — presence and per-column values in
+`plants`, `watering_events`, and the fixture's `auth.users` row. A dropped or
+renamed column or table also fails it, because the assertions declare `%rowtype`
+against live tables. It does *not* see dropped RLS policies, revoked grants,
+dropped functions, or the `plant-photos` storage bucket that `plants.photo_path`
+references — `20260802120000_narrow_plants_insert_grant.sql` is precisely the
+class of change it cannot detect. Those remain the province of
+`supabase/tests/*.sql` and the integration suite.
+
 (Filled in as phases land.)
 
 ## 7. What We Deliberately Don't Test
@@ -318,7 +349,11 @@ should respect these unless the underlying assumption changes.
 
 ## 8. Freshness Ledger
 
-- 2026-08-02: §3 Phase 4 completed — added the workerd-backed HTTP upload suite, its cookbook pattern, and the manual device smoke release gate; `test:http` is local-only and is not CI-enforced.
+- 2026-08-02: §3 Phase 4 completed — added the workerd-backed HTTP upload suite, its cookbook pattern, and the manual device smoke release gate.
+- 2026-08-02: §3 Phase 5, implementation phase 1 — `test:integration`, `test:sql`, and `test:http` now run sequentially against a local Supabase stack in the required `database` CI job; the existing no-Docker checks report as `static`.
+- 2026-08-02: §3 Phase 5, implementation phase 2 — `test:migrations` now replays new migrations over persistent baseline rows and the required `migrations` CI job reports green-by-skip when no migration changed.
+- 2026-08-02: §3 Phase 5 completed — the `main` ruleset requires `static`, `database`, and `migrations` to pass on an up-to-date branch; enforcement was verified by deliberate failing-gate pull requests.
+- 2026-08-02: §3 Phase 5 implementation review — the HTTP suite's readiness budget is 90s on CI (cold workerd start) and stays 20s locally; the migration gate gained a post-`migration up` applied-set self-check plus untracked-migration and version-format guards, after the review found paths on which it could report success without proving anything.
 - Strategy (§1–§5) last reviewed: 2026-07-31 (Risk #3 edit recalculation wording corrected to the shipped interval-delta rule)
 - Stack versions last verified: 2026-07-27 (Stryker 9.6.1 added to §4/§5)
 - AI-native tool references last verified: 2026-07-25
