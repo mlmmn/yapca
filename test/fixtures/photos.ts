@@ -76,6 +76,9 @@ export async function expectPhotoAbsent(userFixture: IntegrationUserFixture, pat
   expect(data.map((entry) => entry.name)).not.toContain(objectName);
 }
 
+// Asserts the "no row and no object" pair together, so a case cannot half-prove that a rejected
+// upload left nothing behind. Like expectPhotoAbsent, this must always be called as the owner: a
+// denied listing also returns [], so a foreign-user call would pass vacuously.
 export async function expectPlantPhotoUploadAbsent(userFixture: IntegrationUserFixture, plantName: string) {
   const { data: plant, error: plantError } = await userFixture.client
     .from("plants")

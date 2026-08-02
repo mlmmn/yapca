@@ -281,8 +281,12 @@ persisted. For a successful upload, re-read the owner-visible row, assert its
 owner-prefixed `photo_path`, and download the object as that owner. For a
 rejection, assert both that the named row is absent and that the owner's
 Storage folder gained no object; one absence alone can miss a partial save.
-Clean up every persisted row and object in `finally` so focused cases do not
-leak Storage state.
+Clean up every persisted row and object so focused cases do not leak Storage
+state, but keep that cleanup non-asserting: a `finally` block that calls
+`expect` will replace a test's real failure with a misleading cleanup one. Do
+the deletion best-effort, and assert the resulting absence on the happy path
+where it is a genuine post-condition. The suite teardown already fails the run
+on residual Storage objects, so it is the backstop rather than the mechanism.
 
 The suite starts `astro dev` on workerd once per run through
 `test/setup/http-global-setup.ts`, publishes its ready URL to workers, and
