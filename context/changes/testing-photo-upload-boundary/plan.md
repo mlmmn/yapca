@@ -600,6 +600,6 @@ is explicitly out of scope here but should be noted when Phase 5 opens.
 
 #### Manual
 
-- [ ] 3.3 §6.5 is followable: a reader can tell which suite a new test belongs in
-- [ ] 3.4 The manual checklist is executed once against a real phone and produces unambiguous rows
-- [ ] 3.5 §3 Phase 4 status and §8 ledger reflect what shipped, with no claim of CI enforcement
+- [x] 3.3 §6.5 is followable: a reader can tell which suite a new test belongs in — dbba1e1
+- [x] 3.4 The manual checklist is executed once against a real phone and produces unambiguous rows — dbba1e1
+- [x] 3.5 §3 Phase 4 status and §8 ledger reflect what shipped, with no claim of CI enforcement — dbba1e1
