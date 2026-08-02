@@ -595,8 +595,8 @@ is explicitly out of scope here but should be noted when Phase 5 opens.
 
 #### Automated
 
-- [x] 3.1 Markdown formatting passes: `pnpm exec prettier --check` on the two docs
-- [x] 3.2 Full local floor still green: lint, check, test, test:integration, test:http
+- [x] 3.1 Markdown formatting passes: `pnpm exec prettier --check` on the two docs — dbba1e1
+- [x] 3.2 Full local floor still green: lint, check, test, test:integration, test:http — dbba1e1
 
 #### Manual
 
