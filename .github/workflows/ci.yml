@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
+  static:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -38,3 +38,30 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec astro sync
+      - run: pnpm exec supabase start
+      - name: Materialize local Supabase environment
+        run: |
+          eval "$(pnpm exec supabase status -o env)"
+          {
+            printf 'SUPABASE_URL=%s\n' "$API_URL"
+            printf 'SUPABASE_KEY=%s\n' "$ANON_KEY"
+            printf 'SUPABASE_DB_URL=%s\n' "$DB_URL"
+          } > .env
+      - run: pnpm test:integration
+      - run: pnpm test:sql
+      - run: pnpm test:http
