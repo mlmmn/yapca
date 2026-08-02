@@ -499,24 +499,24 @@ legitimate use.
 - [x] 1.2 `pnpm check` passes
 - [x] 1.3 Workflow YAML parses under prettier
 - [x] 1.4 All four suites pass locally against the running stack
-- [ ] 1.5 Pull request targeting `main` shows `static` and `database` green
+- [x] 1.5 Pull request targeting `main` shows `static` and `database` green
 
 #### Manual
 
-- [ ] 1.6 `database` log shows non-zero test counts for all three suites
-- [ ] 1.7 `database` wall-clock acceptable (or actual figure recorded)
-- [ ] 1.8 `static` still reports on its pre-change timeline
-- [ ] 1.9 `database` references no `SUPABASE_*` repository secret
+- [x] 1.6 `database` log shows non-zero test counts for all three suites
+- [x] 1.7 `database` wall-clock acceptable (or actual figure recorded)
+- [x] 1.8 `static` still reports on its pre-change timeline
+- [x] 1.9 `database` references no `SUPABASE_*` repository secret
 
 ### Phase 2: Build the migration-safety gate
 
 #### Automated
 
-- [ ] 2.1 `pnpm lint` and `pnpm check` pass
-- [ ] 2.2 No new migrations → `pnpm test:migrations` prints SKIP, exits 0
-- [ ] 2.3 Scratch additive migration → exits 0 with fixture rows asserted
-- [ ] 2.4 Scratch destructive migration → exits non-zero
-- [ ] 2.5 Scratch out-of-order or changed historical migration → exits non-zero with the applicable history-integrity message
+- [x] 2.1 `pnpm lint` and `pnpm check` pass
+- [x] 2.2 No new migrations → `pnpm test:migrations` prints SKIP, exits 0
+- [x] 2.3 Scratch additive migration → exits 0 with fixture rows asserted
+- [x] 2.4 Scratch destructive migration → exits non-zero
+- [x] 2.5 Scratch out-of-order or changed historical migration → exits non-zero with the applicable history-integrity message
 - [ ] 2.6 Pull request targeting `main` touching migrations → `migrations` job does work and passes
 - [ ] 2.7 Pull request targeting `main` touching no migration → `migrations` job green with skip message
 

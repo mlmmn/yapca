@@ -164,7 +164,7 @@ phase lands; before that, the gate is planned.
 | integration                   | local + CI           | required — enforced           | task-list omissions, mutation and recalculation defects           |
 | per-account isolation         | CI on PR             | required — enforced           | cross-user data access                                            |
 | HTTP upload boundary          | CI on PR             | required — enforced           | HTTP multipart upload boundary and Worker request-size regressions |
-| migration safety              | CI on PR             | required after §3 Phase 5     | migrations that drop or orphan existing rows                      |
+| migration safety              | CI on PR             | required — enforced           | migrations that drop or orphan existing rows                      |
 | manual device photo smoke     | before release       | recommended after §3 Phase 4  | real-phone upload formats no automated test reproduces            |
 | mutation audit (Stryker)      | local only — not in CI | advisory, never blocking     | assertions copied from the implementation under test (tautological tests that can never fail for the right reason) |
 
@@ -298,6 +298,18 @@ with `context/foundation/manual-device-smoke.md` before release.
 
 ### 6.6 Per-rollout-phase notes
 
+### 6.7 Adding a migration-safety check
+
+`pnpm test:migrations` proves migrations against rows that existed before the
+migration under test. Keep `supabase/migration-gate/baseline-fixture.sql` valid
+against the base-ref schema; it is deliberately not updated pre-emptively for a
+migration in the same PR. If an intentional schema transformation changes a
+fixture field, update `assert-survival.sql` to map and assert every original
+value in its new representation — never remove an assertion to make the gate
+pass. New migration versions must sort after the base ref's newest version;
+out-of-order additions and edits, deletions, copies, or renames of historical
+migrations fail the gate.
+
 (Filled in as phases land.)
 
 ## 7. What We Deliberately Don't Test
@@ -321,6 +333,7 @@ should respect these unless the underlying assumption changes.
 
 - 2026-08-02: §3 Phase 4 completed — added the workerd-backed HTTP upload suite, its cookbook pattern, and the manual device smoke release gate.
 - 2026-08-02: §3 Phase 5, implementation phase 1 — `test:integration`, `test:sql`, and `test:http` now run sequentially against a local Supabase stack in the required `database` CI job; the existing no-Docker checks report as `static`.
+- 2026-08-02: §3 Phase 5, implementation phase 2 — `test:migrations` now replays new migrations over persistent baseline rows and the required `migrations` CI job reports green-by-skip when no migration changed.
 - Strategy (§1–§5) last reviewed: 2026-07-31 (Risk #3 edit recalculation wording corrected to the shipped interval-delta rule)
 - Stack versions last verified: 2026-07-27 (Stryker 9.6.1 added to §4/§5)
 - AI-native tool references last verified: 2026-07-25

@@ -72,6 +72,7 @@ For a hosted Supabase project:
 - `pnpm lint` / `pnpm lint:fix` — ESLint (type-checked)
 - `pnpm format` — Prettier
 - `pnpm test:integration` / `pnpm test:http` — local-Supabase integration suites
+- `pnpm test:migrations` — migration-safety replay gate (requires Docker and a running local Supabase stack)
 
 ## Deploy
 
