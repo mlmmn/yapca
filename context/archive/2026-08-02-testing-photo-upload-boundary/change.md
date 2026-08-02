@@ -1,10 +1,10 @@
 ---
 change_id: testing-photo-upload-boundary
 title: Testing photo upload boundary
-status: complete
+status: archived
 created: 2026-08-02
 updated: 2026-08-02
-archived_at: null
+archived_at: 2026-08-02T19:38:36Z
 ---
 
 ## Notes
