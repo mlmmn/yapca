@@ -1,0 +1,1 @@
+-- Verification-only destructive migration. Do not merge.\ndrop table public.watering_events cascade;\n
