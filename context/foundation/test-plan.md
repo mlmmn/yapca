@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-07-27
+> Last updated: 2026-08-02
 
 ## 1. Strategy
 
@@ -95,7 +95,7 @@ orchestrator updates Status as artifacts appear on disk.
 | 1   | Runner bootstrap + calendar math | Every surface agrees on "today"; boundary dates select the documented interval                             | #1, #6        | test-runner setup, unit                       | complete | `context/changes/testing-runner-and-calendar-math/` |
 | 2   | Task-list and mutation integrity | No due or overdue task is silently dropped; water / postpone / undo sequences leave schedule and journal consistent; edits lose nothing | #2, #3, #4    | integration                                   | complete | `context/changes/testing-task-list-and-mutation-integrity/` |
 | 3   | Per-account isolation          | User B cannot reach User A's data by direct id, on any operation                                            | #5            | contract / integration                        | complete | `context/changes/testing-per-account-isolation/` |
-| 4   | Photo upload boundary          | A phone-shaped upload is retrievable afterward, or fails visibly                                            | #7            | integration, documented manual device smoke   | change opened | `context/changes/testing-photo-upload-boundary/` |
+| 4   | Photo upload boundary          | A phone-shaped upload is retrievable afterward, or fails visibly                                            | #7            | integration, documented manual device smoke   | complete | `context/changes/testing-photo-upload-boundary/` |
 | 5   | Quality-gates wiring           | The floor cannot silently drop: tests, lint and typecheck gate merges; migrations proven non-destructive against seeded data | #8, cross-cutting | gates                                     | not started | —             |
 
 Ordering rationale: nothing is testable until a runner exists, so Phase 1
@@ -138,6 +138,7 @@ The classic test base for this project. AI-native tools (if any) carry a
 | test-quality audit   | Stryker + `@stryker-mutator/vitest-runner`         | 9.6.1   | `pnpm test:mutants`. **Advisory, not a gate** (`break: null` — a low score never fails a run) and not wired into CI. Its purpose is to detect the anti-pattern §2 names most often: an assertion whose expected value was lifted from the implementation under test. A tautological assertion produces a survived mutant by construction. Per `AGENTS.md`: narrow with `--mutate "path/to/file.ts:start-end"`, never chase 100%, review survivors one by one and add an assertion only when the mutant is a user-visible or business-relevant bug. Note the config's `mutate` glob spans all of `src/`, while the only suite today is Phase 1's `src/lib/` units — an unnarrowed run reports a near-zero score that is noise, not a finding. checked: 2026-07-27 |
 | Astro component render | none yet — optional, no phase claims it          | —       | Astro Container API (`experimental_AstroContainer`) exists if `.astro` components ever need rendering. Not scheduled — §7 excludes the UI layer. checked: 2026-07-25 |
 | integration substrate | local Supabase stack (`pnpx supabase start`)     | CLI 2.x | Already a devDependency. Requires Docker. The seeded-database harness for §3 Phases 2–4.                                    |
+| HTTP upload boundary | Astro dev on workerd + Vitest                    | Astro 6 / Vitest 4.1.10 | `pnpm test:http` starts an opt-in local workerd server and posts real multipart requests to `/_actions/*`; it requires the same local Supabase stack as integration tests. checked: 2026-08-02 |
 | API mocking          | none — deliberate                                  | —       | The external boundary here is Supabase, and the local stack is real. Mocking it would test the mock (see §2 Risk #7 anti-pattern). |
 | e2e                  | none — deliberate                                  | —       | No rollout phase claims a browser layer; §7 excludes the UI while the design is unsettled.                                  |
 | accessibility        | `eslint-plugin-jsx-a11y`                           | 6.10.2  | Already wired into lint. The non-color-only overdue cue is a design constraint tracked in `DESIGN.md`, not an automated assertion. |
@@ -262,9 +263,33 @@ absence assertion after a delete.
 
 ### 6.5 Adding a test that crosses the storage boundary
 
-TBD — see §3 Phase 4. Will cover asserting an uploaded object is
-retrievable, and the manual device checklist for formats no automated test
-reproduces (Risk #7).
+Use `pnpm test:http` only when the risk includes multipart encoding, the
+`/_actions/*` route, middleware, or the Worker request-body ceiling. Otherwise
+use the cheaper in-process `pnpm test:integration` layer from §6.2: it already
+proves authenticated Actions, RLS, RPCs, and Supabase Storage without paying
+for a workerd server boot.
+
+Place HTTP-boundary tests beside the exercised code as
+`src/<area>/<name>.http.test.ts`, then use native `FormData`, `File`, `fetch`,
+and `createActionRequestHeaders()` with a fixture user's authenticated cookie.
+Include a plausible `clientDate`; `addPlant` rejects requests that omit it
+before photo handling. Let `fetch` set the multipart `Content-Type` and its
+boundary — never set `Content-Type` manually.
+
+Treat the HTTP response as transport evidence, not proof that the mutation
+persisted. For a successful upload, re-read the owner-visible row, assert its
+owner-prefixed `photo_path`, and download the object as that owner. For a
+rejection, assert both that the named row is absent and that the owner's
+Storage folder gained no object; one absence alone can miss a partial save.
+Clean up every persisted row and object in `finally` so focused cases do not
+leak Storage state.
+
+The suite starts `astro dev` on workerd once per run through
+`test/setup/http-global-setup.ts`, publishes its ready URL to workers, and
+stops the server before the shared integration teardown. It proves the real
+HTTP boundary, not the browser UI: it cannot show that a React island included
+the selected file or that the user saw actionable feedback. Cover those claims
+with `context/foundation/manual-device-smoke.md` before release.
 
 ### 6.6 Per-rollout-phase notes
 
@@ -289,6 +314,7 @@ should respect these unless the underlying assumption changes.
 
 ## 8. Freshness Ledger
 
+- 2026-08-02: §3 Phase 4 completed — added the workerd-backed HTTP upload suite, its cookbook pattern, and the manual device smoke release gate; `test:http` is local-only and is not CI-enforced.
 - Strategy (§1–§5) last reviewed: 2026-07-31 (Risk #3 edit recalculation wording corrected to the shipped interval-delta rule)
 - Stack versions last verified: 2026-07-27 (Stryker 9.6.1 added to §4/§5)
 - AI-native tool references last verified: 2026-07-25

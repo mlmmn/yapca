@@ -578,25 +578,25 @@ is explicitly out of scope here but should be noted when Phase 5 opens.
 
 #### Automated
 
-- [x] 2.1 Lint passes: `pnpm lint`
-- [x] 2.2 Type checking passes: `pnpm check`
-- [x] 2.3 Full matrix passes: `pnpm test:http`
-- [x] 2.4 Existing suites unaffected: `pnpm test` and `pnpm test:integration`
-- [x] 2.5 Suite teardown reports no residual Storage objects
+- [x] 2.1 Lint passes: `pnpm lint` — 9843786
+- [x] 2.2 Type checking passes: `pnpm check` — 9843786
+- [x] 2.3 Full matrix passes: `pnpm test:http` — 9843786
+- [x] 2.4 Existing suites unaffected: `pnpm test` and `pnpm test:integration` — 9843786
+- [x] 2.5 Suite teardown reports no residual Storage objects — 9843786
 
 #### Manual
 
-- [x] 2.6 Deliberate break: raising `MAX_PHOTO_BYTES` above the body limit turns the near-limit cases red
-- [x] 2.7 Deliberate break: adding `image/heic` to the allowlist turns the HEIC case red
-- [x] 2.8 Deliberate break: lowering `actionBodySizeLimit` to 1 MiB turns the near-limit cases red
-- [x] 2.9 Oversized case fails at the body limit, not at schema validation
+- [x] 2.6 Deliberate break: raising `MAX_PHOTO_BYTES` above the body limit turns the near-limit cases red — 9843786
+- [x] 2.7 Deliberate break: adding `image/heic` to the allowlist turns the HEIC case red — 9843786
+- [x] 2.8 Deliberate break: lowering `actionBodySizeLimit` to 1 MiB turns the near-limit cases red — 9843786
+- [x] 2.9 Oversized case fails at the body limit, not at schema validation — 9843786
 
 ### Phase 3: Cookbook, gate, and manual smoke
 
 #### Automated
 
-- [ ] 3.1 Markdown formatting passes: `pnpm exec prettier --check` on the two docs
-- [ ] 3.2 Full local floor still green: lint, check, test, test:integration, test:http
+- [x] 3.1 Markdown formatting passes: `pnpm exec prettier --check` on the two docs
+- [x] 3.2 Full local floor still green: lint, check, test, test:integration, test:http
 
 #### Manual
 
