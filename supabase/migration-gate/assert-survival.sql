@@ -39,10 +39,10 @@ begin
   from auth.users
   where id = '00000000-0000-0000-0000-000000000901';
 
-  if v_user.aud <> 'authenticated'
-    or v_user.role <> 'authenticated'
-    or v_user.email <> 'migration-gate@yapca.local'
-    or v_user.email_confirmed_at <> timestamptz '2025-01-01 00:00:00+00'
+  if v_user.aud is distinct from 'authenticated'
+    or v_user.role is distinct from 'authenticated'
+    or v_user.email is distinct from 'migration-gate@yapca.local'
+    or v_user.email_confirmed_at is distinct from timestamptz '2025-01-01 00:00:00+00'
   then
     raise exception 'Migration gate fixture user values changed';
   end if;
@@ -51,13 +51,13 @@ begin
   from public.plants
   where id = '00000000-0000-0000-0000-000000000911';
 
-  if v_growing_plant.user_id <> '00000000-0000-0000-0000-000000000901'
-    or v_growing_plant.name <> 'Migration gate growing fixture'
-    or v_growing_plant.growing_interval_days <> 7
-    or v_growing_plant.dormancy_interval_days <> 30
-    or v_growing_plant.next_due_on <> date '2025-03-08'
-    or v_growing_plant.photo_path <> '00000000-0000-0000-0000-000000000901/growing.webp'
-    or v_growing_plant.current_watering_event_id <> '00000000-0000-0000-0000-000000000921'
+  if v_growing_plant.user_id is distinct from '00000000-0000-0000-0000-000000000901'
+    or v_growing_plant.name is distinct from 'Migration gate growing fixture'
+    or v_growing_plant.growing_interval_days is distinct from 7
+    or v_growing_plant.dormancy_interval_days is distinct from 30
+    or v_growing_plant.next_due_on is distinct from date '2025-03-08'
+    or v_growing_plant.photo_path is distinct from '00000000-0000-0000-0000-000000000901/growing.webp'
+    or v_growing_plant.current_watering_event_id is distinct from '00000000-0000-0000-0000-000000000921'
   then
     raise exception 'Migration gate growing-plant values changed';
   end if;
@@ -66,13 +66,13 @@ begin
   from public.plants
   where id = '00000000-0000-0000-0000-000000000912';
 
-  if v_dormancy_plant.user_id <> '00000000-0000-0000-0000-000000000901'
-    or v_dormancy_plant.name <> 'Migration gate dormancy fixture'
-    or v_dormancy_plant.growing_interval_days <> 14
-    or v_dormancy_plant.dormancy_interval_days <> 45
-    or v_dormancy_plant.next_due_on <> date '2025-11-15'
+  if v_dormancy_plant.user_id is distinct from '00000000-0000-0000-0000-000000000901'
+    or v_dormancy_plant.name is distinct from 'Migration gate dormancy fixture'
+    or v_dormancy_plant.growing_interval_days is distinct from 14
+    or v_dormancy_plant.dormancy_interval_days is distinct from 45
+    or v_dormancy_plant.next_due_on is distinct from date '2025-11-15'
     or v_dormancy_plant.photo_path is not null
-    or v_dormancy_plant.current_watering_event_id <> '00000000-0000-0000-0000-000000000922'
+    or v_dormancy_plant.current_watering_event_id is distinct from '00000000-0000-0000-0000-000000000922'
   then
     raise exception 'Migration gate dormancy-plant values changed';
   end if;
@@ -81,14 +81,14 @@ begin
   from public.watering_events
   where id = '00000000-0000-0000-0000-000000000921';
 
-  if v_growing_event.plant_id <> '00000000-0000-0000-0000-000000000911'
-    or v_growing_event.user_id <> '00000000-0000-0000-0000-000000000901'
-    or v_growing_event.event_type <> 'watered'
-    or v_growing_event.acted_on <> date '2025-03-01'
-    or v_growing_event.prev_due_on <> date '2025-02-22'
-    or v_growing_event.new_due_on <> date '2025-03-08'
+  if v_growing_event.plant_id is distinct from '00000000-0000-0000-0000-000000000911'
+    or v_growing_event.user_id is distinct from '00000000-0000-0000-0000-000000000901'
+    or v_growing_event.event_type is distinct from 'watered'
+    or v_growing_event.acted_on is distinct from date '2025-03-01'
+    or v_growing_event.prev_due_on is distinct from date '2025-02-22'
+    or v_growing_event.new_due_on is distinct from date '2025-03-08'
     or v_growing_event.previous_event_id is not null
-    or v_growing_event.created_at <> timestamptz '2025-03-01 12:00:00+00'
+    or v_growing_event.created_at is distinct from timestamptz '2025-03-01 12:00:00+00'
   then
     raise exception 'Migration gate growing-event values changed';
   end if;
@@ -97,14 +97,14 @@ begin
   from public.watering_events
   where id = '00000000-0000-0000-0000-000000000922';
 
-  if v_dormancy_event.plant_id <> '00000000-0000-0000-0000-000000000912'
-    or v_dormancy_event.user_id <> '00000000-0000-0000-0000-000000000901'
-    or v_dormancy_event.event_type <> 'postponed'
-    or v_dormancy_event.acted_on <> date '2025-11-13'
-    or v_dormancy_event.prev_due_on <> date '2025-11-10'
-    or v_dormancy_event.new_due_on <> date '2025-11-15'
+  if v_dormancy_event.plant_id is distinct from '00000000-0000-0000-0000-000000000912'
+    or v_dormancy_event.user_id is distinct from '00000000-0000-0000-0000-000000000901'
+    or v_dormancy_event.event_type is distinct from 'postponed'
+    or v_dormancy_event.acted_on is distinct from date '2025-11-13'
+    or v_dormancy_event.prev_due_on is distinct from date '2025-11-10'
+    or v_dormancy_event.new_due_on is distinct from date '2025-11-15'
     or v_dormancy_event.previous_event_id is not null
-    or v_dormancy_event.created_at <> timestamptz '2025-11-13 12:00:00+00'
+    or v_dormancy_event.created_at is distinct from timestamptz '2025-11-13 12:00:00+00'
   then
     raise exception 'Migration gate dormancy-event values changed';
   end if;

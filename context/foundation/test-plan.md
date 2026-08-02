@@ -96,7 +96,7 @@ orchestrator updates Status as artifacts appear on disk.
 | 2   | Task-list and mutation integrity | No due or overdue task is silently dropped; water / postpone / undo sequences leave schedule and journal consistent; edits lose nothing | #2, #3, #4    | integration                                   | complete | `context/changes/testing-task-list-and-mutation-integrity/` |
 | 3   | Per-account isolation          | User B cannot reach User A's data by direct id, on any operation                                            | #5            | contract / integration                        | complete | `context/changes/testing-per-account-isolation/` |
 | 4   | Photo upload boundary          | A phone-shaped upload is retrievable afterward, or fails visibly                                            | #7            | integration, documented manual device smoke   | complete | `context/changes/testing-photo-upload-boundary/` |
-| 5   | Quality-gates wiring           | The floor cannot silently drop: tests, lint and typecheck gate merges; migrations proven non-destructive against seeded data | #8, cross-cutting | gates                                     | change opened | `context/changes/testing-quality-gates-wiring/` |
+| 5   | Quality-gates wiring           | The floor cannot silently drop: tests, lint and typecheck gate merges; migrations proven non-destructive against seeded data | #8, cross-cutting | gates                                     | complete | `context/changes/testing-quality-gates-wiring/` |
 
 Ordering rationale: nothing is testable until a runner exists, so Phase 1
 bootstraps it against the top hot-spot directory using the cheapest possible
@@ -334,6 +334,7 @@ should respect these unless the underlying assumption changes.
 - 2026-08-02: §3 Phase 4 completed — added the workerd-backed HTTP upload suite, its cookbook pattern, and the manual device smoke release gate.
 - 2026-08-02: §3 Phase 5, implementation phase 1 — `test:integration`, `test:sql`, and `test:http` now run sequentially against a local Supabase stack in the required `database` CI job; the existing no-Docker checks report as `static`.
 - 2026-08-02: §3 Phase 5, implementation phase 2 — `test:migrations` now replays new migrations over persistent baseline rows and the required `migrations` CI job reports green-by-skip when no migration changed.
+- 2026-08-02: §3 Phase 5 completed — the `main` ruleset requires `static`, `database`, and `migrations` to pass on an up-to-date branch; enforcement was verified by deliberate failing-gate pull requests.
 - Strategy (§1–§5) last reviewed: 2026-07-31 (Risk #3 edit recalculation wording corrected to the shipped interval-delta rule)
 - Stack versions last verified: 2026-07-27 (Stryker 9.6.1 added to §4/§5)
 - AI-native tool references last verified: 2026-07-25

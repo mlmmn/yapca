@@ -522,21 +522,21 @@ legitimate use.
 
 #### Manual
 
-- [ ] 2.8 Successful EXIT trap restores the local database to full schema + seed
-- [ ] 2.9 Failure path preserves the original status; explicit post-removal reset restores schema + seed
-- [ ] 2.10 The skip path is visibly a skip in the CI log
-- [ ] 2.11 `pnpm test:sql` still runs exactly the three `supabase/tests/` files
+- [x] 2.8 Successful EXIT trap restores the local database to full schema + seed
+- [x] 2.9 Failure path preserves the original status; explicit post-removal reset restores schema + seed
+- [x] 2.10 The skip path is visibly a skip in the CI log
+- [x] 2.11 `pnpm test:sql` still runs exactly the three `supabase/tests/` files
 
 ### Phase 3: Make the gates enforcing and prove it
 
 #### Automated
 
-- [ ] 3.1 `pnpm lint` and `pnpm check` pass
-- [ ] 3.2 Ruleset API lists `static`, `database`, `migrations` as required
+- [x] 3.1 `pnpm lint` and `pnpm check` pass
+- [x] 3.2 Ruleset API lists `static`, `database`, `migrations` as required
 
 #### Manual
 
-- [ ] 3.3 Throwaway PR breaking one gate shows the merge button disabled
-- [ ] 3.4 Throwaway PR with a destructive scratch migration is blocked by `migrations`
-- [ ] 3.5 Throwaway PR closed, branch deleted, nothing broken reached `main`
-- [ ] 3.6 `context/foundation/test-plan.md` §3 Phase 5 reads `complete`
+- [x] 3.3 Throwaway PR breaking one gate shows the merge button disabled
+- [x] 3.4 Throwaway PR with a destructive scratch migration is blocked by `migrations`
+- [x] 3.5 Throwaway PR closed, branch deleted, nothing broken reached `main`
+- [x] 3.6 `context/foundation/test-plan.md` §3 Phase 5 reads `complete`

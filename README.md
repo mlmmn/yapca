@@ -74,6 +74,13 @@ For a hosted Supabase project:
 - `pnpm test:integration` / `pnpm test:http` — local-Supabase integration suites
 - `pnpm test:migrations` — migration-safety replay gate (requires Docker and a running local Supabase stack)
 
+### CI gates
+
+The `main` branch ruleset requires the `static`, `database`, and `migrations`
+checks to pass, and requires branches to be up to date before merging. The
+`migrations` check reports green-by-skip when a pull request changes no
+migration, so it is safe to require on every pull request.
+
 ## Deploy
 
 ```bash
