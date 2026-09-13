@@ -34,4 +34,5 @@ reports
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/.playwright-cli
 /e2e/.auth

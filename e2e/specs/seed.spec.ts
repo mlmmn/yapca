@@ -1,7 +1,9 @@
 import { test, expect } from "e2e/test";
 
-test("adds new plant with custom title", async ({ page, now }) => {
+test("adds new plant with custom title", async ({ page, now, plantCleanup }) => {
   const plantName = `Plant ${now}`;
+
+  plantCleanup.track(plantName);
 
   await page.goto("/");
 
