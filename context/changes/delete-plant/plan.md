@@ -227,19 +227,19 @@ No schema change. Existing data unaffected.
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm check`
-- [x] 2.2 Linting passes: `pnpm lint`
-- [x] 2.3 Unit tests pass: `pnpm test`
-- [x] 2.4 Integration tests still pass: `pnpm test:integration`
-- [x] 2.5 Production build succeeds: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm check` — 9428721
+- [x] 2.2 Linting passes: `pnpm lint` — 9428721
+- [x] 2.3 Unit tests pass: `pnpm test` — 9428721
+- [x] 2.4 Integration tests still pass: `pnpm test:integration` — 9428721
+- [x] 2.5 Production build succeeds: `pnpm build` — 9428721
 
 #### Manual
 
-- [ ] 2.6 Edit page shows separated danger zone with ghost destructive trigger
-- [ ] 2.7 Dialog content, focus trap, Escape/Cancel with focus restore
-- [ ] 2.8 Confirm redirects to /plants without the plant and shows the toast
-- [ ] 2.9 Plant with photo: detail URL shows "Plant not found" after delete
-- [ ] 2.10 Pending state blocks dismissal; simulated failure keeps dialog open with inline error
-- [ ] 2.11 Reduced motion makes dialog transitions instant
-- [ ] 2.12 Mobile width usable, touch targets ≥44px
-- [ ] 2.13 Expired session redirects to sign-in with the exact message
+- [x] 2.6 Edit page shows separated danger zone with destructive trigger — 9428721
+- [x] 2.7 Dialog content, focus trap, Escape/Cancel with focus restore — 9428721
+- [x] 2.8 Confirm redirects to /plants without the plant and shows the toast — 9428721
+- [x] 2.9 Plant with photo: detail URL shows "Plant not found" after delete — 9428721
+- [x] 2.10 Pending state blocks dismissal; simulated failure keeps dialog open with inline error — 9428721
+- [x] 2.11 Reduced motion makes dialog transitions instant — 9428721
+- [x] 2.12 Mobile width usable, touch targets ≥44px — 9428721
+- [x] 2.13 Expired session redirects to sign-in with the exact message — 9428721
