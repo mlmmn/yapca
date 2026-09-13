@@ -24,6 +24,18 @@ end;
 $$;
 
 set local role authenticated;
+
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000032","role":"authenticated"}';
+
+do $$
+declare
+  v_other_plant_id constant uuid := '00000000-0000-0000-0000-000000000332';
+begin
+  perform * from public.mark_watered(v_other_plant_id, date '2024-03-01');
+  perform * from public.postpone_plant(v_other_plant_id, date '2024-03-02');
+end;
+$$;
+
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000031","role":"authenticated"}';
 
 do $$
@@ -75,10 +87,16 @@ do $$
 declare
   v_other_plant_id constant uuid := '00000000-0000-0000-0000-000000000332';
   v_other_plant_count int;
+  v_other_event_count int;
 begin
   select count(*) into v_other_plant_count from public.plants where id = v_other_plant_id;
   if v_other_plant_count <> 1 then
     raise exception 'Other account plant should still exist but got % rows', v_other_plant_count;
+  end if;
+
+  select count(*) into v_other_event_count from public.watering_events where plant_id = v_other_plant_id;
+  if v_other_event_count <> 2 then
+    raise exception 'Other account events should remain but got % rows', v_other_event_count;
   end if;
 end;
 $$;

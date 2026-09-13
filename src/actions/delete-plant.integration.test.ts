@@ -70,8 +70,13 @@ describe("server.deletePlant", () => {
     const clientDate = getTodayInTimeZone("UTC");
     const ownerFixture = await getIntegrationUserFixture();
     const attackerFixture = await getIntegrationUserFixture(1);
+    const photoPath = `${ownerFixture.userId}/foreign-delete-preserved-photo.png`;
+
+    await uploadPhotoFixture(ownerFixture, photoPath);
+
     const plant = await createPlantFixture({
       dueOffsetDays: 0,
+      photoPath,
       referenceDay: clientDate,
       userFixture: ownerFixture,
     });
@@ -94,5 +99,6 @@ describe("server.deletePlant", () => {
 
     expect(afterState).toEqual(beforeState);
     expect(afterEvents).toEqual(beforeEvents);
+    await expectPhotoAvailable(ownerFixture, photoPath);
   });
 });
