@@ -227,11 +227,11 @@ No schema change. Existing data unaffected.
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm check`
-- [ ] 2.2 Linting passes: `pnpm lint`
-- [ ] 2.3 Unit tests pass: `pnpm test`
-- [ ] 2.4 Integration tests still pass: `pnpm test:integration`
-- [ ] 2.5 Production build succeeds: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm check`
+- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.3 Unit tests pass: `pnpm test`
+- [x] 2.4 Integration tests still pass: `pnpm test:integration`
+- [x] 2.5 Production build succeeds: `pnpm build`
 
 #### Manual
 

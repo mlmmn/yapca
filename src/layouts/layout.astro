@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { Toaster } from "@/components/ui/sonner";
+import { ToastHost } from "@/components/toast-host";
 
 type Props = {
   title?: string;
@@ -30,7 +30,7 @@ const { title = "yapca" } = Astro.props;
   </head>
   <body>
     <slot />
-    <Toaster client:load />
+    <ToastHost client:load />
   </body>
 </html>
 
