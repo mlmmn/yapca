@@ -31,6 +31,14 @@ export function createEventActionFormData(eventId: string) {
   return formData;
 }
 
+export function createDeletePlantFormData(plantId: string) {
+  const formData = new FormData();
+
+  formData.set("plantId", plantId);
+
+  return formData;
+}
+
 export function createUpdatePlantFormData({
   clientDate,
   dormancyIntervalDays,
