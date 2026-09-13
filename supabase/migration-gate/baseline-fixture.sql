@@ -71,3 +71,28 @@ values
     date '2025-11-15',
     timestamptz '2025-11-13 12:00:00+00'
   );
+
+-- Baselines from 20260801120000_explicit_undo_stack onward already carry the undo
+-- linkage, so no replayed backfill will set it; seed what that backfill would have.
+-- On older baselines the column is absent and the replayed backfill must produce it.
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'plants'
+      and column_name = 'current_watering_event_id'
+  ) then
+    update public.plants
+    set current_watering_event_id = case id
+      when '00000000-0000-0000-0000-000000000911'::uuid then '00000000-0000-0000-0000-000000000921'::uuid
+      when '00000000-0000-0000-0000-000000000912'::uuid then '00000000-0000-0000-0000-000000000922'::uuid
+    end
+    where id in (
+      '00000000-0000-0000-0000-000000000911',
+      '00000000-0000-0000-0000-000000000912'
+    );
+  end if;
+end;
+$$;
