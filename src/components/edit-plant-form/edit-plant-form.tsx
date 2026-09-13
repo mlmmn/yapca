@@ -6,6 +6,7 @@ import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLab
 import { NumberField, NumberFieldGroup, NumberFieldInput, NumberFieldSuffix } from "@/components/ui/number-field";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useBrowserToday } from "@/components/hooks/use-browser-today";
+import { useHydrated } from "@/components/hooks/use-hydrated";
 import { Input } from "@/components/ui/input";
 import { getBrowserToday } from "@/lib/timezone";
 import { buildSchedulePreview, getSaveErrorState, SAVE_ERROR_MESSAGES } from "./utils";
@@ -49,6 +50,7 @@ export default function EditPlantForm({
   const [saveError, setSaveError] = useState<SaveErrorState | null>(null);
   const [announcedPreview, setAnnouncedPreview] = useState("");
   const browserToday = useBrowserToday(today);
+  const hydrated = useHydrated();
   const form = useForm({
     defaultValues: {
       name,
@@ -229,10 +231,11 @@ export default function EditPlantForm({
   }
 
   useEffect(() => {
-    if (window.matchMedia("(min-width: 768px)").matches) {
+    // Controls stay disabled until hydration, and a disabled input cannot take focus.
+    if (hydrated && window.matchMedia("(min-width: 768px)").matches) {
       nameInputRef.current?.focus();
     }
-  }, []);
+  }, [hydrated]);
 
   useEffect(() => {
     return () => {
@@ -249,220 +252,225 @@ export default function EditPlantForm({
   }, [saveError]);
 
   return (
-    <form ref={formRef} className="space-y-6" onSubmit={(event) => void handleFormSubmit(event)}>
-      <FieldGroup>
-        <form.Field name="name">
-          {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
-              <FieldLabel htmlFor={field.name}>Plant name</FieldLabel>
-              <FieldContent>
-                <Input
-                  ref={nameInputRef}
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value);
-                  }}
-                  onBlur={field.handleBlur}
-                  aria-invalid={field.state.meta.errors.length > 0}
-                  aria-describedby={`${field.name}-error`}
-                />
-                <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
-              </FieldContent>
-            </Field>
-          )}
-        </form.Field>
+    <form ref={formRef} onSubmit={(event) => void handleFormSubmit(event)}>
+      <fieldset disabled={!hydrated} className="min-w-0 space-y-6">
+        <FieldGroup>
+          <form.Field name="name">
+            {(field) => (
+              <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
+                <FieldLabel htmlFor={field.name}>Plant name</FieldLabel>
+                <FieldContent>
+                  <Input
+                    ref={nameInputRef}
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onChange={(event) => {
+                      field.handleChange(event.target.value);
+                    }}
+                    onBlur={field.handleBlur}
+                    aria-invalid={field.state.meta.errors.length > 0}
+                    aria-describedby={`${field.name}-error`}
+                  />
+                  <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
 
-        <form.Field name="growingIntervalDays">
-          {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
-              <FieldLabel htmlFor={field.name}>Growing season</FieldLabel>
-              <FieldContent>
-                <NumberField
-                  id={field.name}
-                  name={field.name}
-                  minValue={1}
-                  maxValue={365}
-                  value={field.state.value}
-                  onChange={(value) => {
-                    field.handleChange(value);
-                  }}
-                  onBlur={() => {
-                    field.handleBlur();
-                    handleIntervalBlur();
-                  }}
-                  isInvalid={field.state.meta.errors.length > 0}
-                  aria-describedby={`${field.name}-description ${field.name}-error`}
+          <form.Field name="growingIntervalDays">
+            {(field) => (
+              <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
+                <FieldLabel htmlFor={field.name}>Growing season</FieldLabel>
+                <FieldContent>
+                  <NumberField
+                    id={field.name}
+                    name={field.name}
+                    minValue={1}
+                    maxValue={365}
+                    value={field.state.value}
+                    onChange={(value) => {
+                      field.handleChange(value);
+                    }}
+                    onBlur={() => {
+                      field.handleBlur();
+                      handleIntervalBlur();
+                    }}
+                    isInvalid={field.state.meta.errors.length > 0}
+                    aria-describedby={`${field.name}-description ${field.name}-error`}
+                  >
+                    <NumberFieldGroup>
+                      <NumberFieldInput
+                        aria-invalid={field.state.meta.errors.length > 0}
+                        aria-describedby={`${field.name}-description ${field.name}-error`}
+                      />
+                      <NumberFieldSuffix>days</NumberFieldSuffix>
+                    </NumberFieldGroup>
+                  </NumberField>
+                  <FieldDescription id={`${field.name}-description`}>March–October</FieldDescription>
+                  <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="dormancyIntervalDays">
+            {(field) => (
+              <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
+                <FieldLabel htmlFor={field.name}>Dormancy season</FieldLabel>
+                <FieldContent>
+                  <NumberField
+                    id={field.name}
+                    name={field.name}
+                    minValue={1}
+                    maxValue={365}
+                    value={field.state.value}
+                    onChange={(value) => {
+                      field.handleChange(value);
+                    }}
+                    onBlur={() => {
+                      field.handleBlur();
+                      handleIntervalBlur();
+                    }}
+                    isInvalid={field.state.meta.errors.length > 0}
+                    aria-describedby={`${field.name}-description ${field.name}-error`}
+                  >
+                    <NumberFieldGroup>
+                      <NumberFieldInput
+                        aria-invalid={field.state.meta.errors.length > 0}
+                        aria-describedby={`${field.name}-description ${field.name}-error`}
+                      />
+                      <NumberFieldSuffix>days</NumberFieldSuffix>
+                    </NumberFieldGroup>
+                  </NumberField>
+                  <FieldDescription id={`${field.name}-description`}>November–February</FieldDescription>
+                  <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Subscribe
+            selector={(state) => ({
+              growingIntervalDays: state.values.growingIntervalDays,
+              dormancyIntervalDays: state.values.dormancyIntervalDays,
+            })}
+          >
+            {({
+              growingIntervalDays: currentGrowingIntervalDays,
+              dormancyIntervalDays: currentDormancyIntervalDays,
+            }) => {
+              const previewText = buildSchedulePreview({
+                today: browserToday,
+                oldNextDue: nextDueOn,
+                oldGrowingIntervalDays: growingIntervalDays,
+                oldDormancyIntervalDays: dormancyIntervalDays,
+                newGrowingIntervalDays: currentGrowingIntervalDays,
+                newDormancyIntervalDays: currentDormancyIntervalDays,
+              });
+
+              return (
+                <div
+                  className="border-border focus-visible:ring-ring/50 focus-visible:border-ring border-y py-4 outline-none focus-visible:ring-3"
+                  role="group"
+                  tabIndex={0}
+                  aria-labelledby="schedule-preview-label"
+                  aria-describedby="schedule-preview-value"
                 >
-                  <NumberFieldGroup>
-                    <NumberFieldInput
-                      aria-invalid={field.state.meta.errors.length > 0}
-                      aria-describedby={`${field.name}-description ${field.name}-error`}
-                    />
-                    <NumberFieldSuffix>days</NumberFieldSuffix>
-                  </NumberFieldGroup>
-                </NumberField>
-                <FieldDescription id={`${field.name}-description`}>March–October</FieldDescription>
-                <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
-              </FieldContent>
-            </Field>
-          )}
-        </form.Field>
+                  <p id="schedule-preview-label" className="mb-1 text-sm font-medium">
+                    Schedule preview
+                  </p>
+                  <p id="schedule-preview-value" className="text-muted-foreground text-sm break-words">
+                    {previewText}
+                  </p>
+                </div>
+              );
+            }}
+          </form.Subscribe>
 
-        <form.Field name="dormancyIntervalDays">
-          {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
-              <FieldLabel htmlFor={field.name}>Dormancy season</FieldLabel>
-              <FieldContent>
-                <NumberField
-                  id={field.name}
-                  name={field.name}
-                  minValue={1}
-                  maxValue={365}
-                  value={field.state.value}
-                  onChange={(value) => {
-                    field.handleChange(value);
-                  }}
-                  onBlur={() => {
-                    field.handleBlur();
-                    handleIntervalBlur();
-                  }}
-                  isInvalid={field.state.meta.errors.length > 0}
-                  aria-describedby={`${field.name}-description ${field.name}-error`}
-                >
-                  <NumberFieldGroup>
-                    <NumberFieldInput
-                      aria-invalid={field.state.meta.errors.length > 0}
-                      aria-describedby={`${field.name}-description ${field.name}-error`}
-                    />
-                    <NumberFieldSuffix>days</NumberFieldSuffix>
-                  </NumberFieldGroup>
-                </NumberField>
-                <FieldDescription id={`${field.name}-description`}>November–February</FieldDescription>
-                <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
-              </FieldContent>
-            </Field>
-          )}
-        </form.Field>
+          <p className="sr-only" aria-live="polite" aria-atomic="true">
+            {announcedPreview}
+          </p>
 
-        <form.Subscribe
-          selector={(state) => ({
-            growingIntervalDays: state.values.growingIntervalDays,
-            dormancyIntervalDays: state.values.dormancyIntervalDays,
-          })}
-        >
-          {({ growingIntervalDays: currentGrowingIntervalDays, dormancyIntervalDays: currentDormancyIntervalDays }) => {
-            const previewText = buildSchedulePreview({
-              today: browserToday,
-              oldNextDue: nextDueOn,
-              oldGrowingIntervalDays: growingIntervalDays,
-              oldDormancyIntervalDays: dormancyIntervalDays,
-              newGrowingIntervalDays: currentGrowingIntervalDays,
-              newDormancyIntervalDays: currentDormancyIntervalDays,
-            });
+          <Field data-invalid={photoError !== null || undefined}>
+            <FieldLabel htmlFor="photo">Photo</FieldLabel>
+            <FieldContent>
+              <div className="flex items-center gap-3">
+                <div className="bg-muted text-muted-foreground flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+                  {photoUrlToShow ? (
+                    <img src={photoUrlToShow} alt="" className="size-full object-cover" />
+                  ) : (
+                    <span className="text-xl font-medium">{initial}</span>
+                  )}
+                </div>
+                <div className="flex min-w-0 flex-col gap-2">
+                  <Button type="button" variant="outline" size="sm" onPress={openPhotoPicker} className="min-h-11">
+                    Replace photo
+                  </Button>
+                  {renderPhotoAction()}
+                </div>
+              </div>
+              <input
+                ref={fileInputRef}
+                id="photo"
+                name="photo"
+                type="file"
+                accept={PHOTO_ACCEPT}
+                onChange={handlePhotoChange}
+                tabIndex={-1}
+                className="sr-only"
+                aria-invalid={photoError !== null}
+                aria-describedby="photo-guidance photo-error"
+              />
+              <FieldDescription id="photo-guidance">
+                {photoIntent === "remove" ? "Photo will be removed when you save." : PHOTO_GUIDANCE}
+              </FieldDescription>
+              {photoError && <FieldError id="photo-error">{photoError}</FieldError>}
+            </FieldContent>
+          </Field>
+        </FieldGroup>
+
+        {saveError && (
+          <div
+            ref={saveAlertRef}
+            tabIndex={-1}
+            className="border-border bg-muted space-y-3 rounded-lg border p-3 outline-none"
+            role="alert"
+          >
+            <p className="text-sm">{SAVE_ERROR_MESSAGES[saveError]}</p>
+            {saveError === "conflict" && (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="button" variant="outline" onPress={reloadPlant} className="min-h-11">
+                  Reload plant
+                </Button>
+                <a href={`/plants/${plantId}`} className={cn(buttonVariants({ variant: "ghost" }), "min-h-11")}>
+                  Back to plant
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
+        <form.Subscribe selector={(state) => ({ valid: state.isValid, submitting: state.isSubmitting })}>
+          {({ valid, submitting }) => {
+            const submitReady = valid && !submitting && browserToday !== null;
 
             return (
-              <div
-                className="border-border focus-visible:ring-ring/50 focus-visible:border-ring border-y py-4 outline-none focus-visible:ring-3"
-                role="group"
-                tabIndex={0}
-                aria-labelledby="schedule-preview-label"
-                aria-describedby="schedule-preview-value"
-              >
-                <p id="schedule-preview-label" className="mb-1 text-sm font-medium">
-                  Schedule preview
-                </p>
-                <p id="schedule-preview-value" className="text-muted-foreground text-sm break-words">
-                  {previewText}
-                </p>
+              <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+                <Button type="submit" isDisabled={!submitReady} className="min-h-11 w-full sm:w-fit">
+                  {submitting ? "Saving changes…" : "Save changes"}
+                </Button>
+                <a
+                  href={`/plants/${plantId}`}
+                  className={cn(buttonVariants({ variant: "ghost" }), "min-h-11 w-full sm:w-fit")}
+                >
+                  Cancel
+                </a>
               </div>
             );
           }}
         </form.Subscribe>
-
-        <p className="sr-only" aria-live="polite" aria-atomic="true">
-          {announcedPreview}
-        </p>
-
-        <Field data-invalid={photoError !== null || undefined}>
-          <FieldLabel htmlFor="photo">Photo</FieldLabel>
-          <FieldContent>
-            <div className="flex items-center gap-3">
-              <div className="bg-muted text-muted-foreground flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-                {photoUrlToShow ? (
-                  <img src={photoUrlToShow} alt="" className="size-full object-cover" />
-                ) : (
-                  <span className="text-xl font-medium">{initial}</span>
-                )}
-              </div>
-              <div className="flex min-w-0 flex-col gap-2">
-                <Button type="button" variant="outline" size="sm" onPress={openPhotoPicker} className="min-h-11">
-                  Replace photo
-                </Button>
-                {renderPhotoAction()}
-              </div>
-            </div>
-            <input
-              ref={fileInputRef}
-              id="photo"
-              name="photo"
-              type="file"
-              accept={PHOTO_ACCEPT}
-              onChange={handlePhotoChange}
-              tabIndex={-1}
-              className="sr-only"
-              aria-invalid={photoError !== null}
-              aria-describedby="photo-guidance photo-error"
-            />
-            <FieldDescription id="photo-guidance">
-              {photoIntent === "remove" ? "Photo will be removed when you save." : PHOTO_GUIDANCE}
-            </FieldDescription>
-            {photoError && <FieldError id="photo-error">{photoError}</FieldError>}
-          </FieldContent>
-        </Field>
-      </FieldGroup>
-
-      {saveError && (
-        <div
-          ref={saveAlertRef}
-          tabIndex={-1}
-          className="border-border bg-muted space-y-3 rounded-lg border p-3 outline-none"
-          role="alert"
-        >
-          <p className="text-sm">{SAVE_ERROR_MESSAGES[saveError]}</p>
-          {saveError === "conflict" && (
-            <div className="flex flex-wrap items-center gap-2">
-              <Button type="button" variant="outline" onPress={reloadPlant} className="min-h-11">
-                Reload plant
-              </Button>
-              <a href={`/plants/${plantId}`} className={cn(buttonVariants({ variant: "ghost" }), "min-h-11")}>
-                Back to plant
-              </a>
-            </div>
-          )}
-        </div>
-      )}
-
-      <form.Subscribe selector={(state) => ({ valid: state.isValid, submitting: state.isSubmitting })}>
-        {({ valid, submitting }) => {
-          const submitReady = valid && !submitting && browserToday !== null;
-
-          return (
-            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-              <Button type="submit" isDisabled={!submitReady} className="min-h-11 w-full sm:w-fit">
-                {submitting ? "Saving changes…" : "Save changes"}
-              </Button>
-              <a
-                href={`/plants/${plantId}`}
-                className={cn(buttonVariants({ variant: "ghost" }), "min-h-11 w-full sm:w-fit")}
-              >
-                Cancel
-              </a>
-            </div>
-          );
-        }}
-      </form.Subscribe>
+      </fieldset>
     </form>
   );
 }

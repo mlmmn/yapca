@@ -8,6 +8,7 @@ import { NumberField, NumberFieldGroup, NumberFieldInput, NumberFieldSuffix } fr
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useBrowserToday } from "@/components/hooks/use-browser-today";
+import { useHydrated } from "@/components/hooks/use-hydrated";
 import { CLIENT_DATE_ERROR_MESSAGE, CLIENT_DATE_UNAVAILABLE_MESSAGE, isClientDateRejection } from "@/lib/date";
 import { Input } from "@/components/ui/input";
 import { getSeason, getSeasonLabel, selectSeasonInterval } from "@/lib/season";
@@ -35,6 +36,7 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const browserToday = useBrowserToday(today);
+  const hydrated = useHydrated();
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -130,10 +132,11 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
   }
 
   useEffect(() => {
-    if (window.matchMedia("(min-width: 768px)").matches) {
+    // Controls stay disabled until hydration, and a disabled input cannot take focus.
+    if (hydrated && window.matchMedia("(min-width: 768px)").matches) {
       nameInputRef.current?.focus();
     }
-  }, []);
+  }, [hydrated]);
 
   useEffect(() => {
     return () => {
@@ -145,189 +148,192 @@ export default function AddPlantForm({ today }: AddPlantFormProps) {
 
   return (
     <form
-      className="space-y-6"
       onSubmit={(event) => {
         event.preventDefault();
         event.stopPropagation();
         void form.handleSubmit();
       }}
     >
-      <FieldGroup>
-        <form.Field name="name">
-          {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
-              <FieldLabel htmlFor={field.name}>Plant name</FieldLabel>
-              <FieldContent>
-                <Input
-                  ref={nameInputRef}
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value);
-                  }}
-                  onBlur={field.handleBlur}
-                  aria-invalid={field.state.meta.errors.length > 0}
-                />
-                <FieldError errors={field.state.meta.errors} />
-              </FieldContent>
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="growingIntervalDays">
-          {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
-              <FieldLabel htmlFor={field.name}>Growing season</FieldLabel>
-              <FieldContent>
-                <NumberField
-                  id={field.name}
-                  name={field.name}
-                  minValue={1}
-                  maxValue={365}
-                  value={field.state.value}
-                  onChange={(value) => {
-                    field.handleChange(value);
-                  }}
-                  onBlur={field.handleBlur}
-                  isInvalid={field.state.meta.errors.length > 0}
-                >
-                  <NumberFieldGroup>
-                    <NumberFieldInput />
-                    <NumberFieldSuffix>days</NumberFieldSuffix>
-                  </NumberFieldGroup>
-                </NumberField>
-                <FieldDescription>March–October</FieldDescription>
-                <FieldError errors={field.state.meta.errors} />
-              </FieldContent>
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="dormancyIntervalDays">
-          {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
-              <FieldLabel htmlFor={field.name}>Dormancy season</FieldLabel>
-              <FieldContent>
-                <NumberField
-                  id={field.name}
-                  name={field.name}
-                  minValue={1}
-                  maxValue={365}
-                  value={field.state.value}
-                  onChange={(value) => {
-                    field.handleChange(value);
-                  }}
-                  onBlur={field.handleBlur}
-                  isInvalid={field.state.meta.errors.length > 0}
-                >
-                  <NumberFieldGroup>
-                    <NumberFieldInput />
-                    <NumberFieldSuffix>days</NumberFieldSuffix>
-                  </NumberFieldGroup>
-                </NumberField>
-                <FieldDescription>November–February</FieldDescription>
-                <FieldError errors={field.state.meta.errors} />
-              </FieldContent>
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="firstAppearance">
-          {(field) => (
-            <form.Subscribe
-              selector={(state) => ({
-                growingIntervalDays: state.values.growingIntervalDays,
-                dormancyIntervalDays: state.values.dormancyIntervalDays,
-              })}
-            >
-              {({ growingIntervalDays, dormancyIntervalDays }) => {
-                const growingInterval =
-                  Number.isInteger(growingIntervalDays) && growingIntervalDays > 0 ? growingIntervalDays : 1;
-                const dormancyInterval =
-                  Number.isInteger(dormancyIntervalDays) && dormancyIntervalDays > 0 ? dormancyIntervalDays : 1;
-                const activeInterval =
-                  browserToday === null ? null : selectSeasonInterval(browserToday, growingInterval, dormancyInterval);
-                const activeSeasonLabel = browserToday === null ? null : getSeasonLabel(getSeason(browserToday));
-
-                return (
-                  <Field>
-                    <FieldLabel>When should it first appear?</FieldLabel>
-                    <FieldContent>
-                      <RadioGroup
-                        value={field.state.value}
-                        onChange={(value) => {
-                          field.handleChange(value as "today" | "after");
-                        }}
-                      >
-                        <RadioGroupItem value="today">
-                          <span>Today</span>
-                          <FieldDescription>It needs water now.</FieldDescription>
-                        </RadioGroupItem>
-                        <RadioGroupItem value="after">
-                          <span>
-                            {activeInterval === null ? (
-                              <>After the seasonal interval</>
-                            ) : (
-                              <>
-                                After {activeInterval} day{activeInterval === 1 ? "" : "s"}
-                              </>
-                            )}
-                          </span>
-                          <FieldDescription>
-                            I watered it today{activeSeasonLabel === null ? "" : ` · ${activeSeasonLabel}`}
-                          </FieldDescription>
-                        </RadioGroupItem>
-                      </RadioGroup>
-                    </FieldContent>
-                  </Field>
-                );
-              }}
-            </form.Subscribe>
-          )}
-        </form.Field>
-
-        <Field>
-          <FieldLabel htmlFor="photo">Photo (optional)</FieldLabel>
-          <FieldContent>
-            {photoPreview ? (
-              <div className="flex items-center gap-3">
-                <img
-                  src={photoPreview}
-                  alt=""
-                  className="border-border h-16 w-16 shrink-0 rounded-lg border object-cover"
-                />
-                <div className="flex min-w-0 flex-col gap-1">
-                  <span className="truncate text-sm">{photoFile?.name}</span>
-                  <Button type="button" variant="ghost" size="sm" onPress={handleRemovePhoto} className="w-fit px-0">
-                    Remove photo
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <input
-                ref={fileInputRef}
-                id="photo"
-                name="photo"
-                type="file"
-                accept={PHOTO_ACCEPT}
-                onChange={handlePhotoChange}
-                className="text-muted-foreground file:text-foreground file:bg-secondary w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:px-3 file:py-1.5 file:text-sm file:font-medium"
-              />
+      <fieldset disabled={!hydrated} className="min-w-0 space-y-6">
+        <FieldGroup>
+          <form.Field name="name">
+            {(field) => (
+              <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
+                <FieldLabel htmlFor={field.name}>Plant name</FieldLabel>
+                <FieldContent>
+                  <Input
+                    ref={nameInputRef}
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onChange={(event) => {
+                      field.handleChange(event.target.value);
+                    }}
+                    onBlur={field.handleBlur}
+                    aria-invalid={field.state.meta.errors.length > 0}
+                  />
+                  <FieldError errors={field.state.meta.errors} />
+                </FieldContent>
+              </Field>
             )}
-            <FieldDescription>{PHOTO_GUIDANCE}</FieldDescription>
-            {photoError && <FieldError>{photoError}</FieldError>}
-          </FieldContent>
-        </Field>
-      </FieldGroup>
+          </form.Field>
 
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(submitting) => (
-          <Button type="submit" isDisabled={submitting || browserToday === null} className={cn("w-full sm:w-fit")}>
-            {submitting ? "Saving plant…" : "Save plant"}
-          </Button>
-        )}
-      </form.Subscribe>
+          <form.Field name="growingIntervalDays">
+            {(field) => (
+              <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
+                <FieldLabel htmlFor={field.name}>Growing season</FieldLabel>
+                <FieldContent>
+                  <NumberField
+                    id={field.name}
+                    name={field.name}
+                    minValue={1}
+                    maxValue={365}
+                    value={field.state.value}
+                    onChange={(value) => {
+                      field.handleChange(value);
+                    }}
+                    onBlur={field.handleBlur}
+                    isInvalid={field.state.meta.errors.length > 0}
+                  >
+                    <NumberFieldGroup>
+                      <NumberFieldInput />
+                      <NumberFieldSuffix>days</NumberFieldSuffix>
+                    </NumberFieldGroup>
+                  </NumberField>
+                  <FieldDescription>March–October</FieldDescription>
+                  <FieldError errors={field.state.meta.errors} />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="dormancyIntervalDays">
+            {(field) => (
+              <Field data-invalid={field.state.meta.errors.length > 0 || undefined}>
+                <FieldLabel htmlFor={field.name}>Dormancy season</FieldLabel>
+                <FieldContent>
+                  <NumberField
+                    id={field.name}
+                    name={field.name}
+                    minValue={1}
+                    maxValue={365}
+                    value={field.state.value}
+                    onChange={(value) => {
+                      field.handleChange(value);
+                    }}
+                    onBlur={field.handleBlur}
+                    isInvalid={field.state.meta.errors.length > 0}
+                  >
+                    <NumberFieldGroup>
+                      <NumberFieldInput />
+                      <NumberFieldSuffix>days</NumberFieldSuffix>
+                    </NumberFieldGroup>
+                  </NumberField>
+                  <FieldDescription>November–February</FieldDescription>
+                  <FieldError errors={field.state.meta.errors} />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="firstAppearance">
+            {(field) => (
+              <form.Subscribe
+                selector={(state) => ({
+                  growingIntervalDays: state.values.growingIntervalDays,
+                  dormancyIntervalDays: state.values.dormancyIntervalDays,
+                })}
+              >
+                {({ growingIntervalDays, dormancyIntervalDays }) => {
+                  const growingInterval =
+                    Number.isInteger(growingIntervalDays) && growingIntervalDays > 0 ? growingIntervalDays : 1;
+                  const dormancyInterval =
+                    Number.isInteger(dormancyIntervalDays) && dormancyIntervalDays > 0 ? dormancyIntervalDays : 1;
+                  const activeInterval =
+                    browserToday === null
+                      ? null
+                      : selectSeasonInterval(browserToday, growingInterval, dormancyInterval);
+                  const activeSeasonLabel = browserToday === null ? null : getSeasonLabel(getSeason(browserToday));
+
+                  return (
+                    <Field>
+                      <FieldLabel>When should it first appear?</FieldLabel>
+                      <FieldContent>
+                        <RadioGroup
+                          value={field.state.value}
+                          onChange={(value) => {
+                            field.handleChange(value as "today" | "after");
+                          }}
+                        >
+                          <RadioGroupItem value="today">
+                            <span>Today</span>
+                            <FieldDescription>It needs water now.</FieldDescription>
+                          </RadioGroupItem>
+                          <RadioGroupItem value="after">
+                            <span>
+                              {activeInterval === null ? (
+                                <>After the seasonal interval</>
+                              ) : (
+                                <>
+                                  After {activeInterval} day{activeInterval === 1 ? "" : "s"}
+                                </>
+                              )}
+                            </span>
+                            <FieldDescription>
+                              I watered it today{activeSeasonLabel === null ? "" : ` · ${activeSeasonLabel}`}
+                            </FieldDescription>
+                          </RadioGroupItem>
+                        </RadioGroup>
+                      </FieldContent>
+                    </Field>
+                  );
+                }}
+              </form.Subscribe>
+            )}
+          </form.Field>
+
+          <Field>
+            <FieldLabel htmlFor="photo">Photo (optional)</FieldLabel>
+            <FieldContent>
+              {photoPreview ? (
+                <div className="flex items-center gap-3">
+                  <img
+                    src={photoPreview}
+                    alt=""
+                    className="border-border h-16 w-16 shrink-0 rounded-lg border object-cover"
+                  />
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <span className="truncate text-sm">{photoFile?.name}</span>
+                    <Button type="button" variant="ghost" size="sm" onPress={handleRemovePhoto} className="w-fit px-0">
+                      Remove photo
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <input
+                  ref={fileInputRef}
+                  id="photo"
+                  name="photo"
+                  type="file"
+                  accept={PHOTO_ACCEPT}
+                  onChange={handlePhotoChange}
+                  className="text-muted-foreground file:text-foreground file:bg-secondary w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:px-3 file:py-1.5 file:text-sm file:font-medium"
+                />
+              )}
+              <FieldDescription>{PHOTO_GUIDANCE}</FieldDescription>
+              {photoError && <FieldError>{photoError}</FieldError>}
+            </FieldContent>
+          </Field>
+        </FieldGroup>
+
+        <form.Subscribe selector={(state) => state.isSubmitting}>
+          {(submitting) => (
+            <Button type="submit" isDisabled={submitting || browserToday === null} className={cn("w-full sm:w-fit")}>
+              {submitting ? "Saving plant…" : "Save plant"}
+            </Button>
+          )}
+        </form.Subscribe>
+      </fieldset>
     </form>
   );
 }

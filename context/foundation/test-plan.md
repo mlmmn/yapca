@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-08-02
+> Last updated: 2026-09-13
 
 ## 1. Strategy
 
@@ -140,7 +140,7 @@ The classic test base for this project. AI-native tools (if any) carry a
 | integration substrate | local Supabase stack (`pnpx supabase start`)     | CLI 2.x | Already a devDependency. Requires Docker. The seeded-database harness for §3 Phases 2–4.                                    |
 | HTTP upload boundary | Astro dev on workerd + Vitest                    | Astro 6 / Vitest 4.1.10 | `pnpm test:http` starts a local workerd server and posts real multipart requests to `/_actions/*`; it requires the same local Supabase stack as integration tests and is enforced in CI. checked: 2026-08-02 |
 | API mocking          | none — deliberate                                  | —       | The external boundary here is Supabase, and the local stack is real. Mocking it would test the mock (see §2 Risk #7 anti-pattern). |
-| e2e                  | none — deliberate                                  | —       | No rollout phase claims a browser layer; §7 excludes the UI while the design is unsettled.                                  |
+| e2e                  | Playwright                                         | 1.63    | `pnpm test:e2e`. Desktop Chromium only; needs the local Supabase stack and `.env`, like `pnpm test:http`. Behavioural flows only — no visual or snapshot assertions (see §7). checked: 2026-09-13 |
 | accessibility        | `eslint-plugin-jsx-a11y`                           | 6.10.2  | Already wired into lint. The non-color-only overdue cue is a design constraint tracked in `DESIGN.md`, not an automated assertion. |
 | lint + typecheck     | ESLint 9 + `astro check` / TypeScript              | 9.x / 5.9 | Already wired; `pnpm lint` runs with `--max-warnings=0`, and husky + lint-staged gate commits.                             |
 
@@ -165,6 +165,7 @@ phase lands; before that, the gate is planned.
 | per-account isolation         | CI on PR             | required — enforced           | cross-user data access                                            |
 | HTTP upload boundary          | CI on PR             | required — enforced           | HTTP multipart upload boundary and Worker request-size regressions |
 | migration safety              | CI on PR             | required — enforced           | migrations that drop or orphan existing rows                      |
+| e2e (browser flows)           | CI on PR             | required — enforced           | user flows that break across auth, SSR, hydration, Actions and the database (e.g. a due plant dropped from Today) |
 | manual device photo smoke     | before release       | recommended after §3 Phase 4  | real-phone upload formats no automated test reproduces            |
 | mutation audit (Stryker)      | local only — not in CI | advisory, never blocking     | assertions copied from the implementation under test (tautological tests that can never fail for the right reason) |
 
@@ -328,6 +329,24 @@ references — `20260802120000_narrow_plants_insert_grant.sql` is precisely the
 class of change it cannot detect. Those remain the province of
 `supabase/tests/*.sql` and the integration suite.
 
+### 6.8 Adding an e2e test
+
+Use a browser test only when the risk crosses auth, SSR, hydration, Actions and the
+database together, or exists only in the rendered UI; otherwise prefer §6.2–§6.5.
+Place one scenario per file in `e2e/specs/<scenario>.spec.ts` and import `test` and
+`expect` from `e2e/test`. `e2e/specs/seed.spec.ts` is the exemplar.
+
+Locate with `getByRole` / `getByLabel` / `getByText`, never CSS or XPath; wait for state,
+never `waitForTimeout`. Authentication comes from the `setup` project's `storageState`,
+so tests never sign in through the UI. Name test data with the `now` fixture and register
+every plant you create with `plantCleanup.track(name)` — the fixture deletes it after the
+test as the signed-in user (and refuses a non-local database).
+
+Before asserting that something is *absent*, first wait for a positive sign that the list
+has rendered (e.g. the "Add plant" link). Otherwise the absence check passes while the
+island is still resolving the local date. Confirm a new test goes red when you deliberately
+break the behaviour it protects.
+
 (Filled in as phases land.)
 
 ## 7. What We Deliberately Don't Test
@@ -342,6 +361,10 @@ should respect these unless the underlying assumption changes.
   while the design is still unsettled; a test written now would encode a
   design about to change. Re-evaluate once roadmap slice S-09
   (design-review-and-polish) lands. (Source: interview Q5.)
+  **Ahead of S-09 (2026-09-13):** Playwright behavioural flow tests are
+  allowed — they assert product behaviour through roles and names, not
+  layout, so they survive a restyle. Visual regression and snapshot tests
+  stay excluded until S-09 lands.
 - **Supabase Auth itself** — it is a vendor product; we do not test their
   login. Note this does not exempt Risk #5: our *ownership* checks are ours
   to prove, and that is authorization, not authentication. (Source:
@@ -354,6 +377,7 @@ should respect these unless the underlying assumption changes.
 - 2026-08-02: §3 Phase 5, implementation phase 2 — `test:migrations` now replays new migrations over persistent baseline rows and the required `migrations` CI job reports green-by-skip when no migration changed.
 - 2026-08-02: §3 Phase 5 completed — the `main` ruleset requires `static`, `database`, and `migrations` to pass on an up-to-date branch; enforcement was verified by deliberate failing-gate pull requests.
 - 2026-08-02: §3 Phase 5 implementation review — the HTTP suite's readiness budget is 90s on CI (cold workerd start) and stays 20s locally; the migration gate gained a post-`migration up` applied-set self-check plus untracked-migration and version-format guards, after the review found paths on which it could report success without proving anything.
+- 2026-09-13: Playwright e2e layer added ahead of S-09 — required `e2e` CI job, `e2e/specs/due-plant-leaves-today-list-once-watered.spec.ts` covers the Risk #2 flow (due plant on Today → watered → stays off after reload), verified red against two deliberate breaks; `plantCleanup` fixture and §6.8 cookbook added. Risk #7's client-side submit gap is now cheap to close with the same runner, but is not yet covered.
 - Strategy (§1–§5) last reviewed: 2026-07-31 (Risk #3 edit recalculation wording corrected to the shipped interval-delta rule)
 - Stack versions last verified: 2026-07-27 (Stryker 9.6.1 added to §4/§5)
 - AI-native tool references last verified: 2026-07-25
