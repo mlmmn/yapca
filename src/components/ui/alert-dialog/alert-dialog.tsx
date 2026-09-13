@@ -1,46 +1,37 @@
-import type { ReactNode } from "react";
-import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { cn } from "@/lib/utils";
-
-export type AlertDialogProps = {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  description: ReactNode;
-  cancelLabel?: string;
-  confirmLabel?: string;
-  onConfirm?: () => void;
-  cancelAction?: ReactNode;
-  confirmAction?: ReactNode;
-  children?: ReactNode;
-  isDismissDisabled?: boolean;
-};
+import type { AlertDialogProps } from "./types";
 
 export function AlertDialog({
-  isOpen,
+  open,
   onOpenChange,
   title,
   description,
   children,
-  isDismissDisabled = false,
+  dismissDisabled = false,
 }: AlertDialogProps) {
   return (
     <ModalOverlay
-      isOpen={isOpen}
+      isOpen={open}
       onOpenChange={onOpenChange}
-      isDismissable={!isDismissDisabled}
+      isDismissable={!dismissDisabled}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
     >
       <Modal
         className={cn(
           "border-border bg-background max-w-sm rounded-lg border p-6 shadow-lg",
-          "animate-in fade-in zoom-in-95 duration-200",
-          "prefers-reduced-motion:animate-none",
+          "data-[entering]:animate-in data-[entering]:fade-in data-[entering]:zoom-in-95 data-[entering]:duration-200",
+          "data-[exiting]:animate-out data-[exiting]:fade-out data-[exiting]:zoom-out-95 data-[exiting]:duration-150",
+          "motion-reduce:data-[entering]:animate-none motion-reduce:data-[exiting]:animate-none",
         )}
       >
         <Dialog role="alertdialog" className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <div className="text-muted-foreground text-sm">{description}</div>
+          <Heading slot="title" className="text-lg font-semibold">
+            {title}
+          </Heading>
+          <div slot="description" className="text-muted-foreground text-sm">
+            {description}
+          </div>
           {children}
         </Dialog>
       </Modal>

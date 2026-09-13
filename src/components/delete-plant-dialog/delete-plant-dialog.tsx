@@ -4,32 +4,28 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { useHydrated } from "@/components/hooks/use-hydrated";
 import { setDeletedPlantNotice } from "@/lib/deleted-plant-notice";
-
-type DeletePlantDialogProps = {
-  plantId: string;
-  plantName: string;
-};
+import type { DeletePlantDialogProps } from "./types";
 
 export default function DeletePlantDialog({ plantId, plantName }: DeletePlantDialogProps) {
   const hydrated = useHydrated();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isPending, setIsPending] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleOpenChange = useCallback(
-    (open: boolean) => {
-      if (open) {
-        setIsOpen(true);
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        setOpen(true);
         setError(null);
-      } else if (!isPending) {
-        setIsOpen(false);
+      } else if (!pending) {
+        setOpen(false);
       }
     },
-    [isPending],
+    [pending],
   );
 
   const handleConfirm = useCallback(async () => {
-    setIsPending(true);
+    setPending(true);
     setError(null);
 
     const formData = new FormData();
@@ -65,13 +61,13 @@ export default function DeletePlantDialog({ plantId, plantName }: DeletePlantDia
     } catch {
       setError(`Couldn't delete ${plantName}. Try again.`);
     } finally {
-      setIsPending(false);
+      setPending(false);
     }
   }, [plantId, plantName]);
 
   if (!hydrated) {
     return (
-      <Button variant="destructive" isDisabled>
+      <Button variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive" isDisabled>
         Delete plant
       </Button>
     );
@@ -80,22 +76,26 @@ export default function DeletePlantDialog({ plantId, plantName }: DeletePlantDia
   return (
     <>
       <Button
-        variant="destructive"
+        variant="ghost"
+        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
         onClick={() => {
-          setIsOpen(true);
+          setOpen(true);
         }}
       >
         Delete plant
       </Button>
 
       <AlertDialog
-        isOpen={isOpen}
+        open={open}
         onOpenChange={handleOpenChange}
-        isDismissDisabled={isPending}
+        dismissDisabled={pending}
         title={`Delete ${plantName}?`}
         description={
           <div className="space-y-4">
-            <p>This plant and its entire watering history will be removed permanently. This action cannot be undone.</p>
+            <p>
+              This plant, its photo, and its entire watering history will be removed permanently. This action cannot be
+              undone.
+            </p>
             {error && (
               <div className="text-destructive text-sm" role="alert">
                 {error}
@@ -107,16 +107,23 @@ export default function DeletePlantDialog({ plantId, plantName }: DeletePlantDia
         <div className="flex justify-end gap-2 pt-4">
           <Button
             variant="outline"
+            className="min-h-11"
+            autoFocus
             onPress={() => {
-              setIsOpen(false);
+              setOpen(false);
             }}
-            isDisabled={isPending}
+            isDisabled={pending}
             slot="close"
           >
             Cancel
           </Button>
-          <Button variant="destructive" onPress={handleConfirm} isDisabled={isPending}>
-            {isPending ? "Deleting..." : "Delete plant"}
+          <Button
+            variant="default"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 min-h-11"
+            onPress={handleConfirm}
+            isDisabled={pending}
+          >
+            {pending ? "Deleting..." : "Delete plant"}
           </Button>
         </div>
       </AlertDialog>
