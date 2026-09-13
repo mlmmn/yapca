@@ -213,15 +213,15 @@ No schema change. Existing data unaffected.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm check`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Unit tests pass: `pnpm test`
-- [x] 1.4 Integration tests pass (incl. new delete suite): `pnpm test:integration`
-- [x] 1.5 SQL tests pass (incl. new cascade test): `pnpm test:sql`
+- [x] 1.1 Type checking passes: `pnpm check` — b9955e6
+- [x] 1.2 Linting passes: `pnpm lint` — b9955e6
+- [x] 1.3 Unit tests pass: `pnpm test` — b9955e6
+- [x] 1.4 Integration tests pass (incl. new delete suite): `pnpm test:integration` — b9955e6
+- [x] 1.5 SQL tests pass (incl. new cascade test): `pnpm test:sql` — b9955e6
 
 #### Manual
 
-- [x] 1.6 Deliberate break check: removing photo cleanup / null-result mapping fails the matching test
+- [x] 1.6 Deliberate break check: removing photo cleanup / null-result mapping fails the matching test — b9955e6
 
 ### Phase 2: Delete UI
 
