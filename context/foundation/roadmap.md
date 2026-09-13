@@ -3,7 +3,7 @@ project: "YAPCA (Yet Another Plant Care App)"
 version: 1
 status: draft
 created: 2026-07-19
-updated: 2026-07-25
+updated: 2026-09-13
 archived_at: 2026-07-25T00:00:00Z
 prd_version: 1
 main_goal: quality
@@ -37,7 +37,7 @@ A hobbyist with dozens of houseplants can no longer track watering from memory: 
 | S-04 | postpone-and-undo            | postpone a task 2 days; undo a Watered/Postpone misclick      | S-01, S-02    | FR-012, FR-013          | done     |
 | S-05 | season-aware-intervals       | set growing + dormancy intervals; app auto-applies by date    | S-01          | FR-008, FR-015          | done     |
 | S-06 | edit-plant-and-recalc        | edit name/intervals/photo; interval change recalculates next due | S-01, S-02    | FR-006                  | done     |
-| S-07 | delete-plant                 | delete a plant                                                | S-01          | FR-007                  | proposed |
+| S-07 | delete-plant                 | delete a plant                                                | S-01          | FR-007                  | done |
 | S-08 | user-timezone-dates          | (correctness) see "Due today" mean today where *they* are, on every page | S-02          | FR-009, FR-011, NFR (deterministic math) | done |
 | S-09 | design-review-and-polish     | (quality) have the whole app design/UI/UX-reviewed with impeccable, triaged, and fixed | F-01, S-01–S-04, S-06, S-07, S-08 | quality goal, a11y NFR, DESIGN.md/PRODUCT.md | proposed |
 
@@ -168,7 +168,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Hard delete vs archive (the journal is lost on hard delete) — Owner: user. Block: no. PRD defers this ("archive-vs-delete deferred if it matters"); default to hard delete.
 - **Risk:** Small, standalone CRUD slice depending only on the plant record (S-01). Delete must also clean up the plant's tasks/journal under RLS so no orphaned rows leak across the account boundary.
-- **Status:** proposed
+- **Status:** done
 
 ### S-08: User-timezone date authority
 
@@ -239,3 +239,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-05: user can set two separate watering intervals per plant (growing season and dormancy season), and the app automatically applies the one matching the current calendar date.** — Archived 2026-07-25 → `context/archive/2026-07-23-season-aware-intervals/`. Lesson: —.
 - **S-06: user can edit a plant's name, intervals, and photo, and changing an interval correctly recalculates the plant's next due date.** — Archived 2026-07-25 → `context/archive/2026-07-25-edit-plant-and-recalc/`. Lesson: —.
 - **S-08: (correctness) see "Due today" mean today where *they* are, on every page** — Archived 2026-07-25 → `context/archive/2026-07-24-user-timezone-dates/`. Lesson: —.
+- **S-07: user can delete a plant at any time.** — Archived 2026-09-13 → `context/archive/2026-09-13-delete-plant/`. Lesson: —.

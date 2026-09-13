@@ -318,7 +318,11 @@ exercises a different baseline schema and can contradict CI in both directions.
 Always reproduce with `MIGRATION_GATE_BASE_REF=<the sha from the failing job's env>`.
 In particular, a fixture column that a replayed migration *adds and backfills* must
 be absent from the fixture and asserted only afterwards — that is the gate proving a
-data migration preserved causality, not a broken assertion.
+data migration preserved causality, not a broken assertion. Once that migration is
+itself part of the baseline the backfill no longer runs, so the fixture must seed the
+value the backfill would have produced. Guard such seeding on the column's existence
+(see the `current_watering_event_id` block) so the fixture stays valid for both
+baselines.
 
 Scope limit: the gate proves **row survival** — presence and per-column values in
 `plants`, `watering_events`, and the fixture's `auth.users` row. A dropped or

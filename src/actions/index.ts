@@ -348,4 +348,37 @@ export const server = {
       return data[0];
     },
   }),
+
+  deletePlant: defineAction({
+    accept: "form",
+    input: z.object({ plantId: z.uuid() }),
+    handler: async (input, context) => {
+      const { supabase } = requireSession(context);
+      const { data, error } = await supabase
+        .from("plants")
+        .delete()
+        .eq("id", input.plantId)
+        .select("id, name, photo_path")
+        .maybeSingle();
+
+      if (error) {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to delete plant." });
+      }
+
+      if (!data) {
+        throw new ActionError({ code: "NOT_FOUND", message: "Plant not found." });
+      }
+
+      if (data.photo_path) {
+        const { error: cleanupError } = await supabase.storage.from("plant-photos").remove([data.photo_path]);
+
+        if (cleanupError) {
+          // eslint-disable-next-line no-console -- best-effort photo cleanup must not mask a successful delete
+          console.error("Failed to clean up plant photo after deletion:", cleanupError);
+        }
+      }
+
+      return { id: data.id, name: data.name };
+    },
+  }),
 };
